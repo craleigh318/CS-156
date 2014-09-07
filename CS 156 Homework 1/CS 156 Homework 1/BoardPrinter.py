@@ -21,6 +21,6 @@ def printBoard(boardState):
 def boardSquareTypeToChar(squareType):
     """Changes a square type to a readable character."""
     return {
-        BoardSquareType.wall : '#',
-        BoardSquareType.food : '@',
+        BoardSquareType.wall: '#',
+        BoardSquareType.food: '@',
         }.get(squareType, '.')

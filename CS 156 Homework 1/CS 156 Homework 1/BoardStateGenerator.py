@@ -11,6 +11,6 @@ def generateFromFile(file):
 def charToBoardSquareType(character):
     """Changes a square type to a readable character."""
     return {
-        '#' : BoardSquareType.wall,
-        '@' : BoardSquareType.foodk,
+        '#': BoardSquareType.wall,
+        '@': BoardSquareType.foodk,
         }.get(character, BoardSquareType.empty)
