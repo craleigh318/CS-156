@@ -3,19 +3,19 @@ __author__ = "Christopher Raleigh"
 from BoardSquareType import BoardSquareType
 
 
-def print_board(boardState):
+def print_board(board_state):
     """Prints a board."""
-    board = boardState.board
-    agent = boardState.agent
+    board = board_state.board
+    agent = board_state.agent
     for j in xrange(board.height):
         row = ''
         for i in xrange(board.width):
-            nextChar = None
+            next_char = None
             if (agent.x == i) and (agent.y == j):
-                nextChar = '%'
+                next_char = '%'
             else:
-                nextChar = board_square_type_to_char(board.squares[i][j])
-            row += nextChar
+                next_char = board_square_type_to_char(board.squares[i][j])
+            row += next_char
         print(row)
 
 
