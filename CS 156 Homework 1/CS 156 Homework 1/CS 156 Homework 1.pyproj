@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>10b05575-c080-4eab-b773-589ebc73e8c2</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>CS_156_Homework_1.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>CS 156 Homework 1</Name>
+    <RootNamespace>CS 156 Homework 1</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Board.py" />
+    <Compile Include="BoardStateGenerator.py" />
+    <Compile Include="BoardPrinter.py" />
+    <Compile Include="BoardSquare.py" />
+    <Compile Include="BoardSquareType.py" />
+    <Compile Include="BoardState.py" />
+    <Compile Include="CS_156_Homework_1.py" />
+    <Compile Include="FoodAgent.py" />
+    <Compile Include="FoodAgentAI.py" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+</Project>
