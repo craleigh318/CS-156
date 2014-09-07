@@ -11,30 +11,30 @@ class FoodAgent(object):
         """Moves one square up."""
         if self.y > 0:
             --self.y
-            return true
+            return True
         else:
-            return false
+            return False
 
     def moveDown(self):
         """Moves one square down."""
         if self.y < (self.board.height - 1):
             ++self.y
-            return true
+            return True
         else:
-            return false
+            return False
 
     def moveLeft(self):
         """Moves one square left."""
         if self.x > 0:
             --self.x
-            return true
+            return True
         else:
-            return false
+            return False
 
     def moveRight(self):
         """Moves one square right."""
         if self.x < (self.board.width - 1):
             ++self.x
-            return true
+            return True
         else:
-            return false
+            return False
