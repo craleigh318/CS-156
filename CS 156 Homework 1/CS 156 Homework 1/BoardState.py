@@ -3,6 +3,7 @@ __author__ = "Christopher Raleigh"
 from FoodAgent import FoodAgent
 from BoardSquareType import BoardSquareType
 
+
 class BoardState(object):
     """A board with a food agent."""
 

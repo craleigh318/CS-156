@@ -2,6 +2,7 @@ __author__ = "Christopher Raleigh"
 
 from BoardSquareType import BoardSquareType
 
+
 def printBoard(boardState):
     """Prints a board."""
     board = boardState.board
@@ -15,6 +16,7 @@ def printBoard(boardState):
                 nextChar = boardSquareTypeToChar(board.squares[i][j])
             row += nextChar
         print(row)
+
 
 def boardSquareTypeToChar(squareType):
     """Changes a square type to a readable character."""

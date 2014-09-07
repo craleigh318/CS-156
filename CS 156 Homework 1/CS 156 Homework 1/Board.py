@@ -2,6 +2,7 @@ __author__ = "Christopher Raleigh"
 
 from BoardSquareType import BoardSquareType
 
+
 class Board(object):
     """A rectangular collection of squares."""
     
