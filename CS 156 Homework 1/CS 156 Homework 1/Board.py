@@ -5,7 +5,6 @@ from BoardSquareType import BoardSquareType
 
 class Board(object):
     """A rectangular collection of squares."""
-    
     def __init__(self, width, height):
         self.width = width
         self.height = height
