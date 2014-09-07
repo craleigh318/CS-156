@@ -12,5 +12,5 @@ def char_to_board_square_type(character):
     """Changes a square type to a readable character."""
     return {
         '#': BoardSquareType.wall,
-        '@': BoardSquareType.foodk,
+        '@': BoardSquareType.food,
         }.get(character, BoardSquareType.empty)

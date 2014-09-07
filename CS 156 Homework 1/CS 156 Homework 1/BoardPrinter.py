@@ -19,9 +19,9 @@ def print_board(boardState):
         print(row)
 
 
-def board_square_type_to_char(squareType):
+def board_square_type_to_char(square_type):
     """Changes a square type to a readable character."""
     return {
         BoardSquareType.wall: '#',
         BoardSquareType.food: '@',
-        }.get(squareType, '.')
+        }.get(square_type, '.')

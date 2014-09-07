@@ -11,6 +11,6 @@ class Board(object):
         empty_squares = [BoardSquareType.empty for i in xrange(height)]
         self.squares = [empty_squares for i in xrange(width)]
 
-    def set_square(self, x, y, squareType):
+    def set_square(self, x, y, square_type):
         """Sets the type of a square."""
-        self.squares[x][y] = squareType
+        self.squares[x][y] = square_type
