@@ -3,7 +3,7 @@ __author__ = "Christopher Raleigh"
 from BoardSquareType import BoardSquareType
 
 
-def printBoard(boardState):
+def print_board(boardState):
     """Prints a board."""
     board = boardState.board
     agent = boardState.agent
@@ -13,12 +13,12 @@ def printBoard(boardState):
             if (agent.x == i) and (agent.y == j):
                 nextChar = '%'
             else:
-                nextChar = boardSquareTypeToChar(board.squares[i][j])
+                nextChar = board_square_type_to_char(board.squares[i][j])
             row += nextChar
         print(row)
 
 
-def boardSquareTypeToChar(squareType):
+def board_square_type_to_char(squareType):
     """Changes a square type to a readable character."""
     return {
         BoardSquareType.wall: '#',
