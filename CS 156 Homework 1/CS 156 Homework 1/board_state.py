@@ -1,7 +1,8 @@
 __author__ = "Christopher Raleigh"
 
-from FoodAgent import FoodAgent
-from BoardSquareType import BoardSquareType
+from food_agent import FoodAgent
+from board_square_type import BoardSquareType
+
 
 class BoardState(object):
     """A board with a food agent."""
@@ -10,7 +11,7 @@ class BoardState(object):
         self.board = board
         self.agent = FoodAgent(board, x, y)
 
-    def foodEaten(self):
+    def food_eaten(self):
         """Returns true if the food agent occupies a space with food."""
         agent = self.agent
         return self.board.squares[agent.x][agent.y] is BoardSquareType.food
