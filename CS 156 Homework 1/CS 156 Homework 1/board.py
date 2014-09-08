@@ -1,6 +1,6 @@
 __author__ = "Christopher Raleigh"
 
-from BoardSquareType import BoardSquareType
+from board_square_type import BoardSquareType
 
 
 class Board(object):

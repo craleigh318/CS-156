@@ -1,7 +1,7 @@
 __author__ = "Christopher Raleigh"
 
-from FoodAgent import FoodAgent
-from BoardSquareType import BoardSquareType
+from food_agent import FoodAgent
+from board_square_type import BoardSquareType
 
 
 class BoardState(object):
