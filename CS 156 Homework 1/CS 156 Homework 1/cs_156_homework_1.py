@@ -13,12 +13,12 @@ print('#.%#')
 print('')
 print('For real:')
 
-board1 = Board(4, 2)
-board1.set_square(0, 0, BoardSquareType.food)
-board1.set_square(3, 0, BoardSquareType.wall)
-board1.set_square(0, 1, BoardSquareType.wall)
-board1.set_square(3, 1, BoardSquareType.wall)
-board_state_1 = BoardState(board1, 2, 1)
+board_1 = Board(4, 2)
+board_1.set_square(0, 0, BoardSquareType.food)
+board_1.set_square(3, 0, BoardSquareType.wall)
+board_1.set_square(0, 1, BoardSquareType.wall)
+board_1.set_square(3, 1, BoardSquareType.wall)
+board_state_1 = BoardState(board_1, 2, 1)
 board_printer.print_board(board_state_1)
 
 # Next board will be printed until the agent eats its food.
