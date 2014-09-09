@@ -6,3 +6,4 @@ class BoardSquareType(object):
     empty = 0
     wall = 1
     food = 2
+    agent = 3

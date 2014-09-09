@@ -26,4 +26,5 @@ def char_to_board_square_type(character):
         '.': BoardSquareType.empty,
         '#': BoardSquareType.wall,
         '%': BoardSquareType.food,
+        '@': BoardSquareType.agent
     }.get(character, BoardSquareType.empty)
