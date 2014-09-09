@@ -14,4 +14,4 @@ class BoardState(object):
     def food_eaten(self):
         """Returns true if the food agent occupies a space with food."""
         agent = self.agent
-        return self.board.squares[agent.x][agent.y] is BoardSquareType.food
+        return self.board.squares[agent.x][agent.y] == BoardSquareType.food
