@@ -1,4 +1,4 @@
-__author__ = "Christopher Raleigh"
+__author__ = "Christopher Raleigh and Anthony Ferrero"
 
 
 class BoardSquareType(object):

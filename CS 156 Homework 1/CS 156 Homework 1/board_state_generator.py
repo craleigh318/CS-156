@@ -1,4 +1,4 @@
-__author__ = "Christopher Raleigh"
+__author__ = "Christopher Raleigh and Anthony Ferrero"
 
 from board_square_type import BoardSquareType
 from board import Board
