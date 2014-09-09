@@ -1,5 +1,4 @@
-﻿import board_state_generator
-__author__ = "Christopher Raleigh"
+﻿__author__ = "Christopher Raleigh"
 
 from board import Board
 from board_square_type import BoardSquareType
