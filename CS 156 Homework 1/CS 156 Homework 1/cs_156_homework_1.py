@@ -20,6 +20,7 @@ NUM_SUPPORTED_PROGRAM_ARGS = 2
 EXPECTED_ARG_NUM = NUM_SUPPORTED_PROGRAM_ARGS + 1
 if len(argv) == EXPECTED_ARG_NUM:
     heuristic_name = argv[2]
+    # Might want to replace this with a mapping from heuristic name to lambda.
     heuristic_name_is_valid = \
         heuristic_name == 'manhattan' or \
         heuristic_name == 'euclidean' or \
