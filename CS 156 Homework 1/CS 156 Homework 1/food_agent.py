@@ -27,7 +27,7 @@ class FoodAgent(object):
     def move_left(self):
         """Moves one square left."""
         if self.x > 0:
-            self.x -= x
+            self.x -= 1
             return True
         else:
             return False
