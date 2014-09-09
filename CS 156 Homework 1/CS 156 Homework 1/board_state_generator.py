@@ -6,8 +6,6 @@ from board import Board
 
 def generate_from_file(ascii_board_file_path):
     """Returns a maze from an inputted file."""
-    # TO DO: Someone needs to write this function.
-
     board = None
     with open(ascii_board_file_path, 'r') as ascii_board_file:
         file_lines = ascii_board_file.readlines()
