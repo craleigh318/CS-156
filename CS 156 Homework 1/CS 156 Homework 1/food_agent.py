@@ -1,5 +1,6 @@
 __author__ = "Christopher Raleigh and Anthony Ferrero"
 
+from board_square_type import BoardSquareType
 
 class FoodAgent(object):
     """An agent that moves in the maze to reach food."""
@@ -12,31 +13,37 @@ class FoodAgent(object):
     def move_up(self):
         """Moves one square up."""
         if self.y > 0:
-            self.y -= 1
-            return True
+            return self.move_to(self.x, (self.y - 1))
         else:
             return False
 
     def move_down(self):
         """Moves one square down."""
         if self.y < (self.board.height - 1):
-            self.y += 1
-            return True
+            return self.move_to(self.x, (self.y + 1))
         else:
             return False
 
     def move_left(self):
         """Moves one square left."""
         if self.x > 0:
-            self.x -= 1
-            return True
+            return self.move_to((self.x - 1), self.y)
         else:
             return False
 
     def move_right(self):
         """Moves one square right."""
         if self.x < (self.board.width - 1):
-            self.x += 1
+            return self.move_to((self.x + 1), self.y)
+        else:
+            return False
+
+    def move_to(self, x, y):
+        """Moves to the define coordinates"""
+        target_space = self.board.squares[x][y]
+        if target_space is not BoardSquareType.wall:
+            self.x = x
+            self.y = y
             return True
         else:
             return False
