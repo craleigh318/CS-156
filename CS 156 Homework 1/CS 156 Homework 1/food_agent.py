@@ -3,6 +3,7 @@ __author__ = "Christopher Raleigh and Anthony Ferrero"
 
 class FoodAgent(object):
     """An agent that moves in the maze to reach food."""
+
     def __init__(self, board, x, y):
         self.board = board
         self.x = x

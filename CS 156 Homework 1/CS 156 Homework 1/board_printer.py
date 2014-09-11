@@ -12,7 +12,7 @@ def print_board(board_state):
         for i in xrange(board.width):
             next_char = None
             if (agent.x == i) and (agent.y == j):
-                next_char = '%'
+                next_char = '@'
             else:
                 next_char = board_square_type_to_char(board.squares[i][j])
             row += next_char
@@ -24,5 +24,5 @@ def board_square_type_to_char(square_type):
     return {
         BoardSquareType.empty: '.',
         BoardSquareType.wall: '#',
-        BoardSquareType.food: '@',
-        }.get(square_type, '.')
+        BoardSquareType.food: '%',
+    }.get(square_type, '.')
