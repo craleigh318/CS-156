@@ -3,6 +3,7 @@
 from board import Board
 from board_square_type import BoardSquareType
 from board_state import BoardState
+from food_agent_ai import FoodAgentAI
 import board_printer
 import board_state_generator
 from sys import argv
@@ -47,9 +48,11 @@ if len(argv) == EXPECTED_ARG_NUM:
 
         print('Initial:')
         board_state_2 = board_state_generator.generate_from_file(ascii_board_file_path)
+        current_ai = FoodAgentAI(board_state_2)
         step_counter = 1
         while not board_state_2.food_eaten():
             print('Step ' + step_counter + ':')
+            current_ai.on_food_agent_turn()
             board_printer.print_board(board_state_2)
             ++step_counter
     else:
