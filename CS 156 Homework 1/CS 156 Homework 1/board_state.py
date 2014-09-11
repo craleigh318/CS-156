@@ -1,4 +1,4 @@
-__author__ = "Christopher Raleigh"
+__author__ = "Christopher Raleigh and Anthony Ferrero"
 
 from food_agent import FoodAgent
 from board_square_type import BoardSquareType

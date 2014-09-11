@@ -1,3 +1,5 @@
+__author__ = "Christopher Raleigh and Anthony Ferrero"
+
 class FoodAgentAI(object):
     """An intelligence that controls a food agent"""
 
