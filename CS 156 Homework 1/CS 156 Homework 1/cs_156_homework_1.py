@@ -21,8 +21,8 @@ def print_error(error_message):
 
 NUM_SUPPORTED_PROGRAM_ARGS = 2
 # Python passes in the name of the executed module as the first argument
-EXPECTED_ARG_NUM = NUM_SUPPORTED_PROGRAM_ARGS + 1
-if len(argv) == EXPECTED_ARG_NUM:
+NUM_EXPECTED_ARGS = NUM_SUPPORTED_PROGRAM_ARGS + 1
+if len(argv) == NUM_EXPECTED_ARGS:
     heuristic_map = {
         'manhattan': lambda point_1, point_2: abs(point_1.x - point_2.x) + abs(point_1.y - point_2.y),
         'euclidean': lambda point_1, point_2: sqrt((point_1.x - point_2.x)**2 + (point_1.y - point_2.y)**2),
