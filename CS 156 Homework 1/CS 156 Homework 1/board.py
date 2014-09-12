@@ -11,7 +11,6 @@ class Board(object):
         self.height = height
         self.squares = [[BoardSquareType.empty] * height] * width
 
-    @property
     def set_square(self, x, y, square_type):
         """Sets the type of a square."""
         self.squares[x][y] = square_type
