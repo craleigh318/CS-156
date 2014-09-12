@@ -1,6 +1,7 @@
 ﻿__author__ = "Christopher Raleigh and Anthony Ferrero"
 
 from sys import argv
+from math import sqrt
 
 from board import Board
 from board_square_type import BoardSquareType
@@ -22,15 +23,15 @@ NUM_SUPPORTED_PROGRAM_ARGS = 2
 # Python passes in the name of the executed module as the first argument
 EXPECTED_ARG_NUM = NUM_SUPPORTED_PROGRAM_ARGS + 1
 if len(argv) == EXPECTED_ARG_NUM:
+    heuristic_map = {
+        'manhattan': lambda point_1, point_2: abs(point_1.x - point_2.x) + abs(point_1.y - point_2.y),
+        'euclidean': lambda point_1, point_2: sqrt((point_1.x - point_2.x)**2 + (point_1.y - point_2.y)**2),
+        'made_up': lambda not_used: 'NOT YET IMPLEMENTED'  # Can't have lambdas raise exceptions
+    }
     heuristic_name = argv[2]
-    # Might want to replace this with a mapping from heuristic name to lambda.
-    heuristic_name_is_valid = \
-        heuristic_name == 'manhattan' or \
-        heuristic_name == 'euclidean' or \
-        heuristic_name == 'made_up'
-    if heuristic_name_is_valid:
+    if heuristic_name in heuristic_map:
         ascii_board_file_path = argv[1]
-        # TODO create lambdas for heuristic function and parse ascii board file
+        heuristic = heuristic_map[heuristic_name]
 
         print('Initial:')
         print('@..#')
@@ -50,7 +51,7 @@ if len(argv) == EXPECTED_ARG_NUM:
 
         print('Initial:')
         board_state_2 = board_state_generator.generate_from_file(ascii_board_file_path)
-        current_ai = FoodAgentAI(board_state_2)
+        current_ai = FoodAgentAI(board_state_2, heuristic)
         step_counter = 1
         while not board_state_2.food_eaten():
             print('Step ' + step_counter + ':')
