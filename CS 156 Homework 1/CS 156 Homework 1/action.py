@@ -3,7 +3,7 @@ __author__ = 'Anthony Ferrero'
 
 class Action(object):
     """Represents a singly-linked list of actions."""
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         self._parent = parent
 
     def parent(self):
