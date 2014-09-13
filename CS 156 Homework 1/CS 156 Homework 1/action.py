@@ -12,19 +12,19 @@ class Action(object):
 
 class Up(Action):
     def __init__(self, parent):
-        super.__init(parent)
+        super.__init__(parent)
 
 
 class Down(Action):
     def __init__(self, parent):
-        super.__init(parent)
+        super.__init__(parent)
 
 
 class Right(Action):
     def __init__(self, parent):
-        super.__init(parent)
+        super.__init__(parent)
 
 
 class Left(Action):
     def __init__(self, parent):
-        super.__init(parent)
+        super.__init__(parent)
