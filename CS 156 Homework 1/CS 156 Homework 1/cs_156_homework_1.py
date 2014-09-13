@@ -25,7 +25,7 @@ NUM_EXPECTED_ARGS = NUM_SUPPORTED_PROGRAM_ARGS + 1
 if len(argv) == NUM_EXPECTED_ARGS:
     heuristic_map = {
         'manhattan': lambda point_1, point_2: abs(point_1.x - point_2.x) + abs(point_1.y - point_2.y),
-        'euclidean': lambda point_1, point_2: sqrt((point_1.x - point_2.x)**2 + (point_1.y - point_2.y)**2),
+        'euclidean': lambda point_1, point_2: sqrt((point_1.x - point_2.x) ** 2 + (point_1.y - point_2.y) ** 2),
         'made_up': lambda not_used: 'NOT YET IMPLEMENTED'  # Can't have lambdas raise exceptions
     }
     heuristic_name = argv[2]
@@ -55,11 +55,13 @@ if len(argv) == NUM_EXPECTED_ARGS:
         step_counter = 1
 
         # TODO this loop needs to be moved into a method in FoodAgentAI
-        while not board_state_2.food_eaten():
+        while (not board_state_2.food_eaten()) and (not current_ai.board_is_unsolvable):
             print('Step ' + step_counter + ':')
             current_ai.on_food_agent_turn()
             board_printer.print_board(board_state_2)
             ++step_counter
+        if current_ai.board_is_unsolvable:
+            print('This board is unsolvable.')
     else:
         print_error('Invalid heuristic name "' + heuristic_name + '"')
 else:

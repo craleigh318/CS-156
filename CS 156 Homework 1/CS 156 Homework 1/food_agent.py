@@ -2,6 +2,7 @@ __author__ = "Christopher Raleigh and Anthony Ferrero"
 
 from board_square_type import BoardSquareType
 
+
 class FoodAgent(object):
     """An agent that moves in the maze to reach food."""
 
@@ -39,7 +40,7 @@ class FoodAgent(object):
             return False
 
     def move_to(self, x, y):
-        """Moves to the define coordinates"""
+        """Moves to the defined coordinates"""
         target_space = self.board.squares[x][y]
         if target_space is not BoardSquareType.wall:
             self.x = x

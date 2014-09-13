@@ -7,6 +7,7 @@ class FoodAgentAI(object):
     def __init__(self, board_state, heuristic):
         self.board_state = board_state
         self._heuristic = heuristic
+        self.board_is_unsolvable = False
 
     def on_food_agent_turn(self):
         """Actions for the AI to perform on its agent's turn."""
