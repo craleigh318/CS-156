@@ -53,6 +53,8 @@ if len(argv) == NUM_EXPECTED_ARGS:
         board_state_2 = board_state_generator.generate_from_file(ascii_board_file_path)
         current_ai = FoodAgentAI(board_state_2, heuristic)
         step_counter = 1
+
+        # TODO this loop needs to be moved into a method in FoodAgentAI
         while not board_state_2.food_eaten():
             print('Step ' + step_counter + ':')
             current_ai.on_food_agent_turn()
