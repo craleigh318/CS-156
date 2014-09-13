@@ -40,11 +40,11 @@ if len(argv) == NUM_EXPECTED_ARGS:
         print('For real:')
 
         board_1 = Board(4, 2)
-        board_1.set_square(0, 0, BoardSquareType.food)
+        board_1.set_square(2, 1, BoardSquareType.food)
         board_1.set_square(3, 0, BoardSquareType.wall)
         board_1.set_square(0, 1, BoardSquareType.wall)
         board_1.set_square(3, 1, BoardSquareType.wall)
-        board_state_1 = BoardState(board_1, 2, 1)
+        board_state_1 = BoardState(board_1, 0, 0)
         board_printer.print_board(board_state_1)
 
         # Next board will be printed until the agent eats its food.
@@ -55,13 +55,15 @@ if len(argv) == NUM_EXPECTED_ARGS:
         step_counter = 1
 
         # TODO this loop needs to be moved into a method in FoodAgentAI
-        while (not board_state_2.food_eaten()) and (not current_ai.board_is_unsolvable):
+        while not board_state_2.food_eaten():
             print('Step ' + step_counter + ':')
             current_ai.on_food_agent_turn()
+            if current_ai.board_is_unsolvable:
+                print('This board is unsolvable.')
+                break
             board_printer.print_board(board_state_2)
             ++step_counter
-        if current_ai.board_is_unsolvable:
-            print('This board is unsolvable.')
+
     else:
         print_error('Invalid heuristic name "' + heuristic_name + '"')
 else:
