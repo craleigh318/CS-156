@@ -1,4 +1,4 @@
-__author__ = 'Christopher Raleigh and Anthony Ferrero'
+__author__ = "Christopher Raleigh and Anthony Ferrero"
 
 
 class Action(object):
