@@ -1,4 +1,4 @@
-__author__ = 'Anthony Ferrero'
+__author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 
 class Node(object):
