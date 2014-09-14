@@ -15,15 +15,7 @@ class FoodAgentAI(object):
     def on_food_agent_turn(self):
         """Actions for the AI to perform on its agent's turn."""
         direction = self.recommend_direction()
-        if direction == Direction.up:
-            self.board_state.agent.move_up()
-        elif direction == Direction.down:
-            self.board_state.agent.move_down()
-        elif direction == Direction.left:
-            self.board_state.agent.move_left()
-        elif direction == Direction.right:
-            self.board_state.agent.move_right()
-
+        self.board_state.agent.move(direction)
 
     def recommend_direction(self):
         """Returns a direction that will lead to a solution."""

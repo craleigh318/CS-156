@@ -1,6 +1,7 @@
 __author__ = "Christopher Raleigh and Anthony Ferrero"
 
 from board_square_type import BoardSquareType
+from direction import Direction
 
 
 class FoodAgent(object):
@@ -11,40 +12,38 @@ class FoodAgent(object):
         self.x = x
         self.y = y
 
-    def move_up(self):
-        """Moves one square up."""
-        if self.y > 0:
-            return self.move_to(self.x, (self.y - 1))
+    def can_move(self, direction):
+        """Can move in the specified direction."""
+        target_x = self.x
+        target_y = self.y
+        if direction == Direction.up:
+            target_y -= 1
+        elif direction == Direction.down:
+            target_y += 1
+        elif direction == Direction.left:
+            target_x -= 1
+        elif direction == Direction.right:
+            target_x += 1
         else:
             return False
+        if (target_x < 0) or (target_y < 0):
+            return False
+        max_x = self.board.width - 1
+        max_y = self.board.height - 1
+        if (target_x > max_x) or (target_y > max_y):
+            return False
+        return True
 
-    def move_down(self):
-        """Moves one square down."""
-        if self.y < (self.board.height - 1):
-            return self.move_to(self.x, (self.y + 1))
-        else:
-            return False
-
-    def move_left(self):
-        """Moves one square left."""
-        if self.x > 0:
-            return self.move_to((self.x - 1), self.y)
-        else:
-            return False
-
-    def move_right(self):
-        """Moves one square right."""
-        if self.x < (self.board.width - 1):
-            return self.move_to((self.x + 1), self.y)
-        else:
-            return False
-
-    def move_to(self, x, y):
-        """Moves to the defined coordinates"""
-        target_space = self.board.squares[x][y]
-        if target_space is not BoardSquareType.wall:
-            self.x = x
-            self.y = y
-            return True
-        else:
-            return False
+    def move(self, direction):
+        """Moves one square in the specified direction"""
+        ret = self.can_move(direction)
+        if ret:
+            if (direction == Direction.up):
+                self.y -= 1
+            elif (direction == Direction.down):
+                self.y += 1
+            elif (direction == Direction.left):
+                self.x -= 1
+            elif (direction == Direction.right):
+                self.x += 1
+        return ret
