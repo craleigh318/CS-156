@@ -18,7 +18,7 @@ class NodePriorityQueue(object):
     def __init__(self, start_node):
         self._internal_list = []
         # For easily checking for membership and accessing agent location priority
-        # Maps agent location to its associated Priority object
+        # Maps node agent location (so we don't need to implement __hash__ for Node) to its associated Priority object
         self._priority_map = {}
         self.push(start_node)
 
@@ -28,24 +28,24 @@ class NodePriorityQueue(object):
     def __contains__(self, node):
         """Only checks to see if a node is in this queue, not the tuple of (priority, node)
            as might be expected."""
-        return node in self._priority_map
+        return node.get_agent_location() in self._priority_map
 
     def push(self, node):
         """Adds a node to the priority queue with a priority equal to its cost."""
         priority = self.Priority(node.get_cost())
         heapq.heappush(self._internal_list, (priority, node))
-        self._priority_map[node] = priority
+        self._priority_map[node.get_agent_location()] = priority
 
     def pop(self):
         """Returns a node on the board with the least cost."""
-        ignored_cost, popped_location = heapq.heappop(self._internal_list)
-        del self._priority_map[popped_location]
-        return popped_location
+        ignored_cost, popped_node = heapq.heappop(self._internal_list)
+        del self._priority_map[popped_node.node.get_agent_location()]
+        return popped_node
 
     def set_priority(self, node, new_cost):
         """Replaces a node's priority with a new one."""
-        self._priority_map[node].value = new_cost
+        self._priority_map[node.get_agent_location()].value = new_cost
         heapq.heapify(self._internal_list)
 
     def get_priority(self, node):
-        return self._priority_map[node].value
+        return self._priority_map[node.get_agent_location()].value
