@@ -56,7 +56,7 @@ if len(argv) == NUM_EXPECTED_ARGS:
 
         # TODO this loop needs to be moved into a method in FoodAgentAI
         while not board_state_2.food_eaten():
-            print('Step ' + step_counter + ':')
+            print('Step ' + str(step_counter) + ':')
             current_ai.on_food_agent_turn()
             if current_ai.board_is_unsolvable:
                 print('This board is unsolvable.')
