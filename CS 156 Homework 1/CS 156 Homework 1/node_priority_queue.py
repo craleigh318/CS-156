@@ -4,16 +4,48 @@ import heapq
 
 
 class NodePriorityQueue(object):
+    """A priority queue for nodes used in the A* algorithm."""
 
-    def __init__(self, start_agent_location):
+    class Priority(object):
+        """Allows the priority of a node to change without the priority queue needing to know where
+           it is in its internal list."""
+        def __init__(self, value):
+            self.value = value
+
+        def __cmp__(self, other):
+            return isinstance(other, type(self)) and self.value == other.value
+
+    def __init__(self, start_node):
         self._internal_list = []
-        self.push(start_agent_location)
+        # For easily checking for membership and accessing agent location priority
+        # Maps agent location to its associated Priority object
+        self._priority_map = {}
+        self.push(start_node)
 
     def __len__(self):
         return len(self._internal_list)
 
-    def push(self, agent_location, cost):
-        heapq.heappush(self._internal_list, (cost, agent_location))
+    def __contains__(self, node):
+        """Only checks to see if a node is in this queue, not the tuple of (priority, node)
+           as might be expected."""
+        return node in self._priority_map
+
+    def push(self, node):
+        """Adds a node to the priority queue with a priority equal to its cost."""
+        priority = self.Priority(node.get_cost())
+        heapq.heappush(self._internal_list, (priority, node))
+        self._priority_map[node] = priority
 
     def pop(self):
-        return heapq.heappop(self._internal_list)
+        """Returns a node on the board with the least cost."""
+        ignored_cost, popped_location = heapq.heappop(self._internal_list)
+        del self._priority_map[popped_location]
+        return popped_location
+
+    def set_priority(self, node, new_cost):
+        """Replaces a node's priority with a new one."""
+        self._priority_map[node].value = new_cost
+        heapq.heapify(self._internal_list)
+
+    def get_priority(self, node):
+        return self._priority_map[node].value
