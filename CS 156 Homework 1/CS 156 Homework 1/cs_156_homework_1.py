@@ -33,25 +33,12 @@ if len(argv) == NUM_EXPECTED_ARGS:
         ascii_board_file_path = argv[1]
         heuristic = heuristic_map[heuristic_name]
 
-        print('Initial:')
-        print('@..#')
-        print('#.%#')
-        print('')
-        print('For real:')
-
-        board_1 = Board(4, 2)
-        board_1.set_square(2, 1, BoardSquareType.food)
-        board_1.set_square(3, 0, BoardSquareType.wall)
-        board_1.set_square(0, 1, BoardSquareType.wall)
-        board_1.set_square(3, 1, BoardSquareType.wall)
-        board_state_1 = BoardState(board_1, 0, 0)
-        board_printer.print_board(board_state_1)
-
-        # Next board will be printed until the agent eats its food.
+        # Board will be printed until the agent eats its food.
 
         print('Initial:')
         board_state_2 = board_state_generator.generate_from_file(ascii_board_file_path)
         current_ai = FoodAgentAI(board_state_2, heuristic)
+        board_printer.print_board(board_state_2)
         step_counter = 1
 
         # TODO this loop needs to be moved into a method in FoodAgentAI
@@ -62,7 +49,7 @@ if len(argv) == NUM_EXPECTED_ARGS:
                 print('This board is unsolvable.')
                 break
             board_printer.print_board(board_state_2)
-            ++step_counter
+            step_counter += 1
 
     else:
         print_error('Invalid heuristic name "' + heuristic_name + '"')

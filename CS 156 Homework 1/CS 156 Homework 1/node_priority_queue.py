@@ -9,6 +9,7 @@ class NodePriorityQueue(object):
     class Priority(object):
         """Allows the priority of a node to change without the priority queue needing to know where
            it is in its internal list."""
+
         def __init__(self, value):
             self.value = value
 
