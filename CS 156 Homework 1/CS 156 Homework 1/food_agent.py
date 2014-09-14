@@ -28,9 +28,12 @@ class FoodAgent(object):
             return False
         if (target_x < 0) or (target_y < 0):
             return False
-        max_x = self.board.width - 1
-        max_y = self.board.height - 1
+        board = self.board
+        max_x = board.width - 1
+        max_y = board.height - 1
         if (target_x > max_x) or (target_y > max_y):
+            return False
+        if board.squares[target_x][target_y] == BoardSquareType.wall:
             return False
         return True
 

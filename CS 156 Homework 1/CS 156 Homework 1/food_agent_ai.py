@@ -20,3 +20,14 @@ class FoodAgentAI(object):
     def recommend_direction(self):
         """Returns a direction that will lead to a solution."""
         return self.solution_list.pop()
+
+    def possible_actions(self):
+        """Returns a list of directions that can be taken."""
+        directions_list = [Direction.right, Direction.left, Direction.down, Direction.up]
+        possible_directions = []
+        agent = self.board_state.agent
+        while directions_list:
+            next_direction = directions_list.pop()
+            if agent.can_move(next_direction):
+                possible_directions.append(next_direction)
+        return possible_directions
