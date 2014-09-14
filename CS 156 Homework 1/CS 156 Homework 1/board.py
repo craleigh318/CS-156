@@ -9,7 +9,8 @@ class Board(object):
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.squares = [[BoardSquareType.empty for i in xrange(height)] for i in xrange(width)]
+        self.squares = [[BoardSquareType.empty for i in xrange(height)]
+                        for i in xrange(width)]
 
     def set_square(self, x, y, square_type):
         """Sets the type of a square."""
