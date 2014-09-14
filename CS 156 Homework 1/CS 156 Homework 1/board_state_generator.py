@@ -7,14 +7,12 @@ from board_state import BoardState
 
 def generate_from_file(ascii_board_file_path):
     """Returns a maze from an inputted file."""
-    board = None
-    board_state = None
-    agent_x = None
-    agent_y = None
+    agent_x = 0
+    agent_y = 0
     with open(ascii_board_file_path, 'r') as ascii_board_file:
         file_lines = ascii_board_file.readlines()
-        board_width = len(file_lines[0])
-        board_height = len(ascii_board_file.readlines())
+        board_width = len(file_lines[0]) - 1
+        board_height = len(file_lines)
         board = Board(width=board_width, height=board_height)
         for j in xrange(board_height):
             for i in xrange(board_width):
