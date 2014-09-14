@@ -10,11 +10,11 @@ class Node(object):
         self._cost = cost
         self._parent = parent
 
+    def get_agent_location(self):
+        return self._agent_location
+
     def get_cost(self):
         return self._cost
-
-    def get_action(self):
-        return self._action
 
     def get_parent(self):
         return self._parent
