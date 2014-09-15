@@ -41,14 +41,16 @@ if len(argv) == NUM_EXPECTED_ARGS:
         else:
             # Make sure agent starts where it began from originally.
             board_state_2.reset_agent_position()
+            current_ai.movement_path_list.remove(None)  # Ignore agent start position node.
             print(current_ai.movement_path_list)
-            '''
-            # Don't forget to print 'Initial:' for first position.
+            print('Initial:')
+            board_printer.print_board(board_state_2)
+
             solution_step_nums = xrange(len(current_ai.movement_path_list))
             for step_number in solution_step_nums:
+                board_state_2.agent.move(current_ai.movement_path_list[step_number])
                 print('Step ' + str(step_number + 1) + ':')
                 board_printer.print_board(board_state_2)
-                board_state_2.agent.move(current_ai.movement_path_list[step_number])'''
     else:
         print_error('Invalid heuristic name "' + heuristic_name + '"')
 else:
