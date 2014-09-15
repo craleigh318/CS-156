@@ -42,13 +42,13 @@ class FoodAgent(object):
         """Moves one square in the specified direction"""
         ret = self.can_move(direction)
         if ret:
-            if (direction == Direction.up):
+            if direction == Direction.up:
                 self.y -= 1
-            elif (direction == Direction.down):
+            elif direction == Direction.down:
                 self.y += 1
-            elif (direction == Direction.left):
+            elif direction == Direction.left:
                 self.x -= 1
-            elif (direction == Direction.right):
+            elif direction == Direction.right:
                 self.x += 1
         return ret
 
