@@ -3,9 +3,6 @@
 from sys import argv
 from math import sqrt
 
-from board import Board
-from board_square_type import BoardSquareType
-from board_state import BoardState
 from food_agent_ai import FoodAgentAI
 import board_printer
 import board_state_generator
@@ -40,6 +37,7 @@ if len(argv) == NUM_EXPECTED_ARGS:
         current_ai = FoodAgentAI(board_state_2, heuristic)
         board_printer.print_board(board_state_2)
         step_counter = 1
+        current_ai.solution(None)
 
         # TODO this loop needs to be moved into a method in FoodAgentAI
         while not board_state_2.food_eaten():
