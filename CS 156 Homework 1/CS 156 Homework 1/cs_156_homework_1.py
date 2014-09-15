@@ -24,7 +24,7 @@ if len(argv) == NUM_EXPECTED_ARGS:
         'manhattan': lambda p1, p2: abs(p1.x - p2.x) + abs(p1.y - p2.y),
         'euclidean': lambda p1, p2: sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2),
         # Can't have lambdas raise exceptions
-        'made_up': lambda not_used: 'NOT YET IMPLEMENTED'
+        'made_up': lambda p1, p2:  sqrt(abs((p1.x - p2.x) * (p1.y - p2.y)))
     }
     heuristic_name = argv[2]
     if heuristic_name in heuristic_map:
