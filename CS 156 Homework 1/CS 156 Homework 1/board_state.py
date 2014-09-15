@@ -20,4 +20,3 @@ class BoardState(object):
 
     def reset_agent_position(self):
         self.agent.set_location(self.agent_start_location)
-
