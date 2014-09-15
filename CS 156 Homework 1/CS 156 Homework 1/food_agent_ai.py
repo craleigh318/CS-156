@@ -21,19 +21,12 @@ class FoodAgentAI(object):
 
     def solution(self, tree):
         """Returns the path that the agent should take in the form of a list."""
-        solution_list = self.movement_path_list
-        if tree is None:
-            # This only works for Test 1.
-            # Other tests will require a tree.
-            solution_list.append(Direction.down)
-            solution_list.append(Direction.right)
-            solution_list.append(Direction.right)
-        else:
-            current_node = tree
-            while current_node is not None:
-                solution_list.append(current_node.get_direction())
-                current_node = current_node.get_parent()
-            return list(reversed(solution_list))
+        solution_list = []
+        current_node = tree
+        while current_node is not None:
+            solution_list.append(current_node.get_direction())
+            current_node = current_node.get_parent()
+        return list(reversed(solution_list))
 
     def recommend_direction(self):
         """Returns a direction that will lead to a solution."""
