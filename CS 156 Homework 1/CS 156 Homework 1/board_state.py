@@ -1,6 +1,6 @@
 __author__ = "Christopher Raleigh and Anthony Ferrero"
 
-from food_agent import FoodAgent
+from food_agent_class import FoodAgent
 from board_square_type import BoardSquareType
 from board_square import BoardSquare
 

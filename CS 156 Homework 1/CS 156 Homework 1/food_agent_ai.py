@@ -85,7 +85,7 @@ class FoodAgentAI(object):
                         not child_in_frontier:
                     frontier.push(child)
                 elif child_in_frontier and \
-                        frontier.get_priority(child) > child.get_cost():
+                                frontier.get_priority(child) > child.get_cost():
                     frontier.set_priority(
                         node=child,
                         new_cost=child.get_cost()

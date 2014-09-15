@@ -1,61 +1,59 @@
-__author__ = "Christopher Raleigh and Anthony Ferrero"
+﻿__author__ = "Christopher Raleigh and Anthony Ferrero"
 
-from board_square_type import BoardSquareType
-from direction import Direction
-from board_square import BoardSquare
+from sys import argv
+from math import sqrt
+
+from food_agent_ai import FoodAgentAI
+import board_printer
+import board_state_generator
 
 
-class FoodAgent(object):
-    """An agent that moves in the maze to reach food."""
+def print_error(error_message):
+    print('')
+    print(error_message)
+    print('')
+    print('Usage: cs_156_homework_1.py [file name] [heuristic name]')
+    print('\t[heuristic name] -> manhattan|euclidean|made_up')
 
-    def __init__(self, board, x, y):
-        self.board = board
-        self.x = x
-        self.y = y
 
-    def can_move(self, direction):
-        """Can move in the specified direction."""
-        target_x = self.x
-        target_y = self.y
-        if direction == Direction.up:
-            target_y -= 1
-        elif direction == Direction.down:
-            target_y += 1
-        elif direction == Direction.left:
-            target_x -= 1
-        elif direction == Direction.right:
-            target_x += 1
+NUM_SUPPORTED_PROGRAM_ARGS = 2
+# Python passes in the name of the executed module as the first argument
+NUM_EXPECTED_ARGS = NUM_SUPPORTED_PROGRAM_ARGS + 1
+if len(argv) == NUM_EXPECTED_ARGS:
+    heuristic_map = {
+        'manhattan': lambda p1, p2: abs(p1.x - p2.x) + abs(p1.y - p2.y),
+        'euclidean': lambda p1, p2: sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2),
+        'made_up': lambda p1, p2: sqrt(abs((p1.x - p2.x) * (p1.y - p2.y)))
+    }
+    heuristic_name = argv[2]
+    if heuristic_name in heuristic_map:
+        ascii_board_file_path = argv[1]
+        heuristic = heuristic_map[heuristic_name]
+
+        board_state_2 = \
+            board_state_generator.generate_from_file(ascii_board_file_path)
+        current_ai = FoodAgentAI(board_state_2, heuristic)
+
+        current_ai.find_path()
+        if current_ai.board_is_unsolvable:
+            print('This board is unsolvable')
         else:
-            return False
-        if (target_x < 0) or (target_y < 0):
-            return False
-        board = self.board
-        max_x = board.width - 1
-        max_y = board.height - 1
-        if (target_x > max_x) or (target_y > max_y):
-            return False
-        if board.squares[target_x][target_y] == BoardSquareType.wall:
-            return False
-        return True
+            # Make sure agent starts where it began from originally.
+            board_state_2.reset_agent_position()
+            # Ignore agent start position node.
+            current_ai.movement_path_list.remove(None)
+            print('Initial:')
+            board_printer.print_board(board_state_2)
 
-    def move(self, direction):
-        """Moves one square in the specified direction"""
-        ret = self.can_move(direction)
-        if ret:
-            if direction == Direction.up:
-                self.y -= 1
-            elif direction == Direction.down:
-                self.y += 1
-            elif direction == Direction.left:
-                self.x -= 1
-            elif direction == Direction.right:
-                self.x += 1
-        return ret
-
-    # For convenience
-    def get_location(self):
-        return BoardSquare(self.x, self.y)
-
-    def set_location(self, board_square_location):
-        self.x = board_square_location.x
-        self.y = board_square_location.y
+            solution_step_nums = xrange(len(current_ai.movement_path_list))
+            for step_number in solution_step_nums:
+                print('')
+                step_direction = current_ai.movement_path_list[step_number]
+                board_state_2.agent.move(step_direction)
+                print('Step ' + str(step_number + 1) + ':')
+                board_printer.print_board(board_state_2)
+            print('Problem Solved! I had some noodles!')
+    else:
+        print_error('Invalid heuristic name "' + heuristic_name + '"')
+else:
+    print_error('You must enter two arguments.')
