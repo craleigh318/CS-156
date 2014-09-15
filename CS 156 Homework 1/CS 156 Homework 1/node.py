@@ -5,7 +5,7 @@ class Node(object):
     """Represents a tree of nodes. Used for searching with A*."""
 
     def __init__(
-            self, 
+            self,
             agent_location,
             direction,
             cost,
