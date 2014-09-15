@@ -21,6 +21,8 @@ class FoodAgentAI(object):
         """Returns the path that the agent should take in the form of a list."""
         solution_list = self.solution_list
         if tree is None:
+            # This only works for Test 1.
+            # Other tests will require a tree.
             solution_list.append(Direction.down)
             solution_list.append(Direction.right)
             solution_list.append(Direction.right)
