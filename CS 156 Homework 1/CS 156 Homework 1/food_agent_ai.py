@@ -60,18 +60,17 @@ class FoodAgentAI(object):
         explored_locations = set()
 
         while True:
-
             no_solution = len(frontier_nodes) == 0
             if no_solution:
                 self.board_is_unsolvable = True
-                break;
+                break
 
             current_node = frontier_nodes.pop()
             # Not using move(), because A* can switch between considering completely different paths at any time.
             self.board_state.agent.set_location(current_node.get_agent_location())
             if self.board_state.food_eaten():
                 self.movement_path_list = self.solution(current_node)
-                break;
+                break
 
             explored_locations.add(current_node.get_agent_location())
             for direction in self.possible_actions():
