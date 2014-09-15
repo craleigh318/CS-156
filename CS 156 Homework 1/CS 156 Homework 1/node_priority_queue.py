@@ -40,7 +40,7 @@ class NodePriorityQueue(object):
     def pop(self):
         """Returns a node on the board with the least cost."""
         ignored_cost, popped_node = heapq.heappop(self._internal_list)
-        del self._priority_map[popped_node.node.get_agent_location()]
+        del self._priority_map[popped_node.get_agent_location()]
         return popped_node
 
     def set_priority(self, node, new_cost):
