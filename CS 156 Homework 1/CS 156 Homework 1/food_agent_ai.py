@@ -19,7 +19,8 @@ class FoodAgentAI(object):
         direction = self.recommend_direction()
         self.board_state.agent.move(direction)
 
-    def solution(self, tree):
+    @staticmethod
+    def solution(tree):
         """Returns the path that the agent should take in the form of a list."""
         solution_list = []
         current_node = tree
