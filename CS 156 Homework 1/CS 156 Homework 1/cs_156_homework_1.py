@@ -44,7 +44,8 @@ if len(argv) == NUM_EXPECTED_ARGS:
             current_ai.movement_path_list.remove(None)  # Ignore agent start position node.
             print('Initial:')
             board_printer.print_board(board_state_2)
-
+            print('')
+            
             solution_step_nums = xrange(len(current_ai.movement_path_list))
             for step_number in solution_step_nums:
                 board_state_2.agent.move(current_ai.movement_path_list[step_number])
