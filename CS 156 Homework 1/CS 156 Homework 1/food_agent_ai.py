@@ -19,9 +19,16 @@ class FoodAgentAI(object):
 
     def solution(self, tree):
         """Returns the path that the agent should take in the form of a list."""
-        self.solution_list.append(Direction.down)
-        self.solution_list.append(Direction.right)
-        self.solution_list.append(Direction.right)
+        solution_list = self.solution_list
+        if tree is None:
+            solution_list.append(Direction.down)
+            solution_list.append(Direction.right)
+            solution_list.append(Direction.right)
+        else:
+            current_node = tree
+            while current_node is not None:
+                solution_list.append(current_node.get_agent_location())
+                current_node = current_node.get_parent()
 
     def recommend_direction(self):
         """Returns a direction that will lead to a solution."""
