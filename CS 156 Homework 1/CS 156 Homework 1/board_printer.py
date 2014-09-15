@@ -10,7 +10,6 @@ def print_board(board_state):
     for j in xrange(board.height):
         row = ''
         for i in xrange(board.width):
-            next_char = None
             if (agent.x == i) and (agent.y == j):
                 next_char = '@'
             else:
