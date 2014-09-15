@@ -9,7 +9,8 @@ class BoardSquare(object):
         self.y = y
 
     def __eq__(self, other):
-        return isinstance(other, type(self)) and self.x == other.x and self.y == other.y
+        return isinstance(other, type(self)) and \
+            self.x == other.x and self.y == other.y
 
     def __hash__(self):
         return hash(self.x) ^ hash(self.y) ^ hash((self.x, self.y))

@@ -21,16 +21,18 @@ NUM_SUPPORTED_PROGRAM_ARGS = 2
 NUM_EXPECTED_ARGS = NUM_SUPPORTED_PROGRAM_ARGS + 1
 if len(argv) == NUM_EXPECTED_ARGS:
     heuristic_map = {
-        'manhattan': lambda point_1, point_2: abs(point_1.x - point_2.x) + abs(point_1.y - point_2.y),
-        'euclidean': lambda point_1, point_2: sqrt((point_1.x - point_2.x) ** 2 + (point_1.y - point_2.y) ** 2),
-        'made_up': lambda not_used: 'NOT YET IMPLEMENTED'  # Can't have lambdas raise exceptions
+        'manhattan': lambda p1, p2: abs(p1.x - p2.x) + abs(p1.y - p2.y),
+        'euclidean': lambda p1, p2: sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2),
+        # Can't have lambdas raise exceptions
+        'made_up': lambda not_used: 'NOT YET IMPLEMENTED'
     }
     heuristic_name = argv[2]
     if heuristic_name in heuristic_map:
         ascii_board_file_path = argv[1]
         heuristic = heuristic_map[heuristic_name]
 
-        board_state_2 = board_state_generator.generate_from_file(ascii_board_file_path)
+        board_state_2 = \
+            board_state_generator.generate_from_file(ascii_board_file_path)
         current_ai = FoodAgentAI(board_state_2, heuristic)
 
         current_ai.find_path()
@@ -39,14 +41,16 @@ if len(argv) == NUM_EXPECTED_ARGS:
         else:
             # Make sure agent starts where it began from originally.
             board_state_2.reset_agent_position()
-            current_ai.movement_path_list.remove(None)  # Ignore agent start position node.
+            # Ignore agent start position node.
+            current_ai.movement_path_list.remove(None)
             print('Initial:')
             board_printer.print_board(board_state_2)
             print('')
 
             solution_step_nums = xrange(len(current_ai.movement_path_list))
             for step_number in solution_step_nums:
-                board_state_2.agent.move(current_ai.movement_path_list[step_number])
+                step_direction = current_ai.movement_path_list[step_number]
+                board_state_2.agent.move(step_direction)
                 print('Step ' + str(step_number + 1) + ':')
                 board_printer.print_board(board_state_2)
                 print('')

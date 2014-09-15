@@ -21,7 +21,8 @@ class FoodAgentAI(object):
 
     @staticmethod
     def solution(tree):
-        """Returns the path that the agent should take in the form of a list."""
+        """Returns a list of directions the agent should move to
+           get to the food via an optimal path."""
         solution_list = []
         current_node = tree
         while current_node is not None:
@@ -35,7 +36,8 @@ class FoodAgentAI(object):
 
     def possible_actions(self):
         """Returns a list of directions that can be taken."""
-        directions_list = [Direction.right, Direction.left, Direction.down, Direction.up]
+        directions_list = \
+            [Direction.right, Direction.left, Direction.down, Direction.up]
         possible_directions = []
         agent = self.board_state.agent
         while directions_list:
@@ -45,24 +47,27 @@ class FoodAgentAI(object):
         return possible_directions
 
     def find_path(self):
-        """Uses A* to find a path from the agent's current position to the food on the board."""
+        """Uses A* to find a path from the agent's current position to the food
+           on the board."""
         start_node_cost = 0
         start_node = Node(agent_location=self.board_state.agent.get_location(),
                           direction=None,
                           path_cost=start_node_cost,
                           cost=start_node_cost)
-        frontier_nodes = NodePriorityQueue(start_node)
+        frontier = NodePriorityQueue(start_node)
         explored_locations = set()
 
+        agent = self.board_state.agent
         while True:
-            no_solution = len(frontier_nodes) == 0
+            no_solution = len(frontier) == 0
             if no_solution:
                 self.board_is_unsolvable = True
                 break
 
-            current_node = frontier_nodes.pop()
-            # Not using move(), because A* can switch between considering completely different paths at any time.
-            self.board_state.agent.set_location(current_node.get_agent_location())
+            current_node = frontier.pop()
+            '''Not using move(), because A* can switch between considering
+            completely different paths at any time.'''
+            agent.set_location(current_node.get_agent_location())
             if self.board_state.food_eaten():
                 self.movement_path_list = self.solution(current_node)
                 break
@@ -70,21 +75,29 @@ class FoodAgentAI(object):
             explored_locations.add(current_node.get_agent_location())
             for direction in self.possible_actions():
                 # Must try to move from the position of current_node repeatedly
-                # TODO going to fix this. I don't think we should be using FoodAgent due to the fact that it's so messy.
-                self.board_state.agent.set_location(current_node.get_agent_location())
-                self.board_state.agent.move(direction)
+                agent.set_location(current_node.get_agent_location())
+                agent.move(direction)
 
-                child_node = self._make_child_node(current_node, direction)
-                child_in_frontier = child_node in frontier_nodes
-                if child_node.get_agent_location() not in explored_locations and not child_in_frontier:
-                    frontier_nodes.push(child_node)
-                elif child_in_frontier and frontier_nodes.get_priority(child_node) > child_node.get_cost():
-                    frontier_nodes.set_priority(child_node, child_node.get_cost())
+                child = self._make_child_node(current_node, direction)
+                child_in_frontier = child in frontier
+
+                if child.get_agent_location() not in explored_locations and \
+                        not child_in_frontier:
+                    frontier.push(child)
+                elif child_in_frontier and \
+                        frontier.get_priority(child) > child.get_cost():
+                    frontier.set_priority(
+                        node=child,
+                        new_cost=child.get_cost()
+                    )
 
     def _make_child_node(self, current_node, direction):
+        """Creates a child node of current_node."""
         child_node_path_cost = current_node.get_path_cost() + 1
-        heuristic_value = self._heuristic(self.board_state.agent.get_location(),
-                                          self.board_state.board.get_food_location())
+        heuristic_value = self._heuristic(
+            self.board_state.agent.get_location(),
+            self.board_state.board.get_food_location()
+        )
         child_node_cost = child_node_path_cost + heuristic_value
         return Node(agent_location=self.board_state.agent.get_location(),
                     direction=direction,

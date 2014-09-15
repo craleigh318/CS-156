@@ -2,10 +2,15 @@ __author__ = "Christopher Raleigh and Anthony Ferrero"
 
 
 class Node(object):
-    """Represents a tree of nodes, used for searching. Note: we don't need to explicitly keep track of the action used
-    to generate each node; tracking the location of the agent when each node is explored is enough."""
+    """Represents a tree of nodes. Used for searching with A*."""
 
-    def __init__(self, agent_location, direction, cost, path_cost, parent=None):
+    def __init__(
+            self, 
+            agent_location,
+            direction,
+            cost,
+            path_cost,
+            parent=None):
         self._agent_location = agent_location
         self._direction = direction
         self._path_cost = path_cost
