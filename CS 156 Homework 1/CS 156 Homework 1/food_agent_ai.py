@@ -73,6 +73,7 @@ class FoodAgentAI(object):
                 # TODO going to fix this. I don't think we should be using FoodAgent due to the fact that it's so messy.
                 self.board_state.agent.set_location(current_node.get_agent_location())
                 self.board_state.agent.move(direction)
+
                 child_node = self._make_child_node(current_node, direction)
                 child_in_frontier = child_node in frontier_nodes
                 if child_node.get_agent_location() not in explored_locations and not child_in_frontier:
