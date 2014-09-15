@@ -74,6 +74,10 @@ class FoodAgentAI(object):
 
             explored_locations.add(current_node.get_agent_location())
             for direction in self.possible_actions():
+                # Must try to move from the position of current_node repeatedly
+                # TODO going to fix this. I don't think we should be using FoodAgent due to the fact that it's so messy.
+                self.board_state.agent.set_location(current_node.get_agent_location())
+                self.board_state.agent.move(direction)
                 child_node = self._make_child_node(current_node, direction)
                 child_in_frontier = child_node in frontier_nodes
                 if child_node.get_agent_location() not in explored_locations and not child_in_frontier:
@@ -83,7 +87,6 @@ class FoodAgentAI(object):
 
     def _make_child_node(self, current_node, direction):
         child_node_path_cost = current_node.get_path_cost() + 1
-        self.board_state.agent.move(direction)
         heuristic_value = self._heuristic(self.board_state.agent.get_location(),
                                           self.board_state.board.get_food_location())
         child_node_cost = child_node_path_cost + heuristic_value
