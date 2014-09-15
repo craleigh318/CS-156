@@ -1,6 +1,8 @@
 __author__ = "Christopher Raleigh and Anthony Ferrero"
 
 from direction import Direction
+from node_priority_queue import NodePriorityQueue
+from node import Node
 
 
 class FoodAgentAI(object):
@@ -31,3 +33,32 @@ class FoodAgentAI(object):
             if agent.can_move(next_direction):
                 possible_directions.append(next_direction)
         return possible_directions
+
+    def find_path(self):
+
+        start_node = Node(self.board_state.agent.get_location())
+        frontier_nodes = NodePriorityQueue(start_node)
+        explored_locations = set()
+
+        searching_for_solution = True
+        while searching_for_solution:
+
+            no_solution = len(frontier_nodes) == 0
+            if no_solution:
+                self.board_is_unsolvable = False
+                searching_for_solution = False
+
+            current_node = frontier_nodes.pop()
+            self.board_state.agent.set_location(current_node.get_agent_location())
+            if self.board_state.food_eaten():
+                self.solution_list = self.solution(current_node)
+                searching_for_solution = False
+
+            explored_locations += current_node.get_agent_location()
+            for direction in self.possible_actions():
+                child_node_path_cost = current_node.get_path_cost() + 1
+                self.board_state.agent.move(direction)
+                heuristic_value = self._heuristic(self.board_state.agent.get_location(),
+                                                  self.board_state.board.get_food_location())
+                child_node_cost = child_node_path_cost + heuristic_value
+                

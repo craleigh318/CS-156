@@ -2,8 +2,11 @@ __author__ = "Christopher Raleigh and Anthony Ferrero"
 
 
 class BoardSquare(object):
-    """Represents an object in a space of a board."""
+    """Represents the location of a square on the board."""
 
-    # Using a strange name here because "type" is a built-in identifier
-    def __init__(self, typ):
-        self.type = typ
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other):
+        return isinstance(other, type(self)) and self.x == other.x and self.y == other.y

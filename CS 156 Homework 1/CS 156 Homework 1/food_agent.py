@@ -2,6 +2,7 @@ __author__ = "Christopher Raleigh and Anthony Ferrero"
 
 from board_square_type import BoardSquareType
 from direction import Direction
+from board_square import BoardSquare
 
 
 class FoodAgent(object):
@@ -50,3 +51,11 @@ class FoodAgent(object):
             elif (direction == Direction.right):
                 self.x += 1
         return ret
+
+    # For convenience
+    def get_location(self):
+        return BoardSquare(self.x, self.y)
+
+    def set_location(self, board_square_location):
+        self.x = board_square_location.x
+        self.y = board_square_location.y
