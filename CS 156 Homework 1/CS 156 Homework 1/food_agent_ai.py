@@ -45,6 +45,7 @@ class FoodAgentAI(object):
         return possible_directions
 
     def find_path(self):
+        """Uses A* to find a path from the agent's current position to the food on the board."""
         start_node_cost = 0
         start_node = Node(agent_location=self.board_state.agent.get_location(),
                           direction=None,
