@@ -45,15 +45,15 @@ if len(argv) == NUM_EXPECTED_ARGS:
             current_ai.movement_path_list.remove(None)
             print('Initial:')
             board_printer.print_board(board_state_2)
-            print('')
 
             solution_step_nums = xrange(len(current_ai.movement_path_list))
             for step_number in solution_step_nums:
+                print('')
                 step_direction = current_ai.movement_path_list[step_number]
                 board_state_2.agent.move(step_direction)
                 print('Step ' + str(step_number + 1) + ':')
                 board_printer.print_board(board_state_2)
-                print('')
+            print('Problem Solved! I had some noodles!')
     else:
         print_error('Invalid heuristic name "' + heuristic_name + '"')
 else:
