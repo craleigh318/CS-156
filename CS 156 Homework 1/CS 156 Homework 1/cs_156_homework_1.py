@@ -30,8 +30,6 @@ if len(argv) == NUM_EXPECTED_ARGS:
         ascii_board_file_path = argv[1]
         heuristic = heuristic_map[heuristic_name]
 
-        # Board will be printed until the agent eats its food.
-
         board_state_2 = board_state_generator.generate_from_file(ascii_board_file_path)
         current_ai = FoodAgentAI(board_state_2, heuristic)
 
@@ -45,7 +43,7 @@ if len(argv) == NUM_EXPECTED_ARGS:
             print('Initial:')
             board_printer.print_board(board_state_2)
             print('')
-            
+
             solution_step_nums = xrange(len(current_ai.movement_path_list))
             for step_number in solution_step_nums:
                 board_state_2.agent.move(current_ai.movement_path_list[step_number])
