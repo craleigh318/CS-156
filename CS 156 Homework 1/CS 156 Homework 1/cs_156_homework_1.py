@@ -42,7 +42,6 @@ if len(argv) == NUM_EXPECTED_ARGS:
             # Make sure agent starts where it began from originally.
             board_state_2.reset_agent_position()
             current_ai.movement_path_list.remove(None)  # Ignore agent start position node.
-            print(current_ai.movement_path_list)
             print('Initial:')
             board_printer.print_board(board_state_2)
 
