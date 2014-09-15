@@ -12,7 +12,7 @@ class FoodAgentAI(object):
         self.board_state = board_state
         self._heuristic = heuristic
         self.board_is_unsolvable = False
-        self.solution_list = []
+        self.movement_path_list = []
 
     def on_food_agent_turn(self):
         """Actions for the AI to perform on its agent's turn."""
@@ -21,7 +21,7 @@ class FoodAgentAI(object):
 
     def solution(self, tree):
         """Returns the path that the agent should take in the form of a list."""
-        solution_list = self.solution_list
+        solution_list = self.movement_path_list
         if tree is None:
             # This only works for Test 1.
             # Other tests will require a tree.
@@ -31,12 +31,13 @@ class FoodAgentAI(object):
         else:
             current_node = tree
             while current_node is not None:
-                solution_list.append(current_node.get_agent_location())
+                solution_list.append(current_node.get_direction())
                 current_node = current_node.get_parent()
+            return list(reversed(solution_list))
 
     def recommend_direction(self):
         """Returns a direction that will lead to a solution."""
-        return self.solution_list.pop()
+        return self.movement_path_list.pop()
 
     def possible_actions(self):
         """Returns a list of directions that can be taken."""
@@ -50,8 +51,11 @@ class FoodAgentAI(object):
         return possible_directions
 
     def find_path(self):
-
-        start_node = Node(self.board_state.agent.get_location())
+        start_node_cost = 0
+        start_node = Node(agent_location=self.board_state.agent.get_location(),
+                          direction=None,
+                          path_cost=start_node_cost,
+                          cost=start_node_cost)
         frontier_nodes = NodePriorityQueue(start_node)
         explored_locations = set()
 
@@ -64,16 +68,29 @@ class FoodAgentAI(object):
                 searching_for_solution = False
 
             current_node = frontier_nodes.pop()
+            # Not using move(), because A* can switch between considering completely different paths at any time.
             self.board_state.agent.set_location(current_node.get_agent_location())
             if self.board_state.food_eaten():
-                self.solution_list = self.solution(current_node)
+                self.movement_path_list = self.solution(current_node)
                 searching_for_solution = False
 
-            explored_locations += current_node.get_agent_location()
+            explored_locations.add(current_node.get_agent_location())
             for direction in self.possible_actions():
-                child_node_path_cost = current_node.get_path_cost() + 1
-                self.board_state.agent.move(direction)
-                heuristic_value = self._heuristic(self.board_state.agent.get_location(),
-                                                  self.board_state.board.get_food_location())
-                child_node_cost = child_node_path_cost + heuristic_value
-                
+                child_node = self._make_child_node(current_node, direction)
+                child_in_frontier = child_node in frontier_nodes
+                if child_node.get_agent_location() not in explored_locations and not child_in_frontier:
+                    frontier_nodes.push(child_node)
+                elif child_in_frontier and frontier_nodes.get_priority(child_node) > child_node.get_cost():
+                    frontier_nodes.set_priority(child_node, child_node.get_cost())
+
+    def _make_child_node(self, current_node, direction):
+        child_node_path_cost = current_node.get_path_cost() + 1
+        self.board_state.agent.move(direction)
+        heuristic_value = self._heuristic(self.board_state.agent.get_location(),
+                                          self.board_state.board.get_food_location())
+        child_node_cost = child_node_path_cost + heuristic_value
+        return Node(agent_location=self.board_state.agent.get_location(),
+                    direction=direction,
+                    cost=child_node_cost,
+                    path_cost=child_node_path_cost,
+                    parent=current_node)
