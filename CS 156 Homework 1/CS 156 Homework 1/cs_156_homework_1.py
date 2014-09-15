@@ -32,23 +32,23 @@ if len(argv) == NUM_EXPECTED_ARGS:
 
         # Board will be printed until the agent eats its food.
 
-        print('Initial:')
         board_state_2 = board_state_generator.generate_from_file(ascii_board_file_path)
         current_ai = FoodAgentAI(board_state_2, heuristic)
-        board_printer.print_board(board_state_2)
-        step_counter = 1
-        current_ai.solution(None)
 
-        # TODO this loop needs to be moved into a method in FoodAgentAI
-        while not board_state_2.food_eaten():
-            print('Step ' + str(step_counter) + ':')
-            current_ai.on_food_agent_turn()
-            if current_ai.board_is_unsolvable:
-                print('This board is unsolvable.')
-                break
-            board_printer.print_board(board_state_2)
-            step_counter += 1
-
+        current_ai.find_path()
+        if current_ai.board_is_unsolvable:
+            print('This board is unsolvable')
+        else:
+            # Make sure agent starts where it began from originally.
+            board_state_2.reset_agent_position()
+            print(current_ai.movement_path_list)
+            '''
+            # Don't forget to print 'Initial:' for first position.
+            solution_step_nums = xrange(len(current_ai.movement_path_list))
+            for step_number in solution_step_nums:
+                print('Step ' + str(step_number + 1) + ':')
+                board_printer.print_board(board_state_2)
+                board_state_2.agent.move(current_ai.movement_path_list[step_number])'''
     else:
         print_error('Invalid heuristic name "' + heuristic_name + '"')
 else:
