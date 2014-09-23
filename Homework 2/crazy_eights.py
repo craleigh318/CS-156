@@ -13,8 +13,18 @@ class CrazyEight(object):
         pass
 
 
-class Suite(object):
+class Suit(object):
     """A collection of 13 cards."""
+
+    @staticmethod
+    def get_suit(deck_card):
+        suit = deck_card / Deck.num_suits()
+        return suit
+
+    @staticmethod
+    def get_suit_card(deck_card):
+        suit_card = deck_card % Deck.num_suits()
+        return suit_card
 
     @staticmethod
     def num_cards():
@@ -77,6 +87,16 @@ class Deck(object):
     """The collection of all 52 cards."""
 
     @staticmethod
+    def get_deck_card(suit_card, suit):
+        deck_card = suit * Suit.num_cards()
+        deck_card += suit_card
+        return deck_card
+
+    @staticmethod
+    def num_suits():
+        return 4
+
+    @staticmethod
     def spades():
         return 0
 
@@ -91,11 +111,6 @@ class Deck(object):
     @staticmethod
     def clubs():
         return 3
-
-    def get_card(self, card, suit):
-        ret = suit * Suite.num_cards()
-        ret += card
-        return ret
 
 
 class Player(object):
