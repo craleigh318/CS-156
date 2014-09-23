@@ -113,10 +113,12 @@ class PlayerList(object):
     def get_player(self, index):
         return self.__players[index]
 
-    def get_human(self):
+    @property
+    def human(self):
         return self.__players[self.__human_index]
 
-    def get_ai(self):
+    @property
+    def ai(self):
         if self.__human_index == 0:
             ai_index = 1
         else:
