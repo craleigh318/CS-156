@@ -13,22 +13,45 @@ class CrazyEight(object):
         pass
 
 
-class Suit(object):
-    """A collection of 13 cards."""
+class Card(object):
+    """A playing card."""
 
-    @staticmethod
-    def get_suit(deck_card):
-        suit = deck_card / Deck.num_suits()
+    def __init__(self, deck_index):
+        self.__deck_index = deck_index
+
+    @property
+    def deck_index(self):
+        return self.__deck_index
+
+    @property
+    def suit(self):
+        suit = self.__deck_index / Deck.num_suits()
         return suit
 
-    @staticmethod
-    def get_suit_card(deck_card):
-        suit_card = deck_card % Deck.num_suits()
-        return suit_card
+    @property
+    def rank(self):
+        rank = self.__deck_index % Deck.num_suits()
+        return rank
+
+
+class CardTypes(object):
+    """Suits and ranks of cards."""
 
     @staticmethod
-    def num_cards():
-        return 13
+    def spades():
+        return 0
+
+    @staticmethod
+    def hearts():
+        return 1
+
+    @staticmethod
+    def diamonds():
+        return 2
+
+    @staticmethod
+    def clubs():
+        return 3
 
     @staticmethod
     def ace():
@@ -83,39 +106,64 @@ class Suit(object):
         return 12
 
 
+class Suit(object):
+    """A collection of 13 cards."""
+
+
 class Deck(object):
     """The collection of all 52 cards."""
 
     @staticmethod
-    def get_deck_card(suit_card, suit):
-        deck_card = suit * Suit.num_cards()
-        deck_card += suit_card
-        return deck_card
+    def num_cards():
+        return 52
 
     @staticmethod
     def num_suits():
         return 4
 
-    @staticmethod
-    def spades():
-        return 0
+    def __init__(self):
+        self.__cards = []
+        max_index = Deck.num_cards() - 1
+        for index in xrange(0, max_index):
+            self.__cards.append(Card(index))
 
-    @staticmethod
-    def hearts():
-        return 1
+    def add_card(self, card):
+        index = card.deck_index
+        if self.__cards[index] is None:
+            self.__cards[index] = card
+            return True
+        else:
+            return False
 
-    @staticmethod
-    def diamonds():
-        return 2
-
-    @staticmethod
-    def clubs():
-        return 3
+    def give_card(self, card, recipient):
+        received = recipient.add_card(card)
+        if received:
+            index = card.deck_index
+            self.__cards[index] = None
+        return received
 
 
 class Player(object):
     """An actor in the game."""
-    pass
+
+    @staticmethod
+    def max_num_cards():
+        return 8
+
+    def __init__(self):
+        self.__cards = []
+
+    def add_card(self, card):
+        can_add = (len(self.__cards) < Player.max_num_cards())
+        if can_add:
+            self.__cards.append(card)
+        return can_add
+
+    def give_card(self, card, recipient):
+        received = recipient.add_card(card)
+        if received:
+            self.__cards.remove(card)
+        return received
 
 
 class PlayerList(object):
