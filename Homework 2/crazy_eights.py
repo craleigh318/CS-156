@@ -106,10 +106,6 @@ class CardTypes(object):
         return 12
 
 
-class Suit(object):
-    """A collection of 13 cards."""
-
-
 class Deck(object):
     """The collection of all 52 cards."""
 
@@ -146,23 +142,19 @@ class Deck(object):
 class Player(object):
     """An actor in the game."""
 
-    @staticmethod
-    def max_num_cards():
-        return 8
-
     def __init__(self):
-        self.__cards = []
+        self.__hand = []
 
     def add_card(self, card):
-        can_add = (len(self.__cards) < Player.max_num_cards())
+        can_add = (self.__hand.count(card) <= 0)
         if can_add:
-            self.__cards.append(card)
+            self.__hand.append(card)
         return can_add
 
     def give_card(self, card, recipient):
         received = recipient.add_card(card)
         if received:
-            self.__cards.remove(card)
+            self.__hand.remove(card)
         return received
 
 
