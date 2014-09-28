@@ -13,27 +13,6 @@ class CrazyEight(object):
         pass
 
 
-class Card(object):
-    """A playing card."""
-
-    def __init__(self, deck_index):
-        self.__deck_index = deck_index
-
-    @property
-    def deck_index(self):
-        return self.__deck_index
-
-    @property
-    def suit(self):
-        suit = self.__deck_index / Deck.num_suits()
-        return suit
-
-    @property
-    def rank(self):
-        rank = self.__deck_index % Deck.num_suits()
-        return rank
-
-
 class CardTypes(object):
     """Suits and ranks of cards."""
 
@@ -110,18 +89,18 @@ class Hand(object):
     """An actor in the game."""
 
     def __init__(self):
-        self.__hand = []
+        self.__cards = []
 
     def add_card(self, card):
-        can_add = (self.__hand.count(card) <= 0)
+        can_add = (self.__cards.count(card) <= 0)
         if can_add:
-            self.__hand.append(card)
+            self.__cards.append(card)
         return can_add
 
     def give_card(self, card, recipient):
         received = recipient.add_card(card)
         if received:
-            self.__hand.remove(card)
+            self.__cards.remove(card)
         return received
 
 
@@ -140,7 +119,7 @@ class Deck(object):
         self.__cards = []
         max_index = Deck.num_cards() - 1
         for index in xrange(0, max_index):
-            self.__cards.append(Card(index))
+            self.__cards.append(index)
 
     def add_card(self, card):
         index = card.deck_index
@@ -161,10 +140,10 @@ class Deck(object):
 class State(object):
     """Stores the deck, opponent's hand, and partial state."""
 
-    def __init__(self, deck, hand, partial_state):
-        self.__deck = deck
-        self.__hand = hand
-        self.__partial_state = partial_state
+    def __init__(self):
+        self.__deck = Deck()
+        self.__hand = Hand()
+        self.__partial_state = PartialState()
 
     @property
     def deck(self):
@@ -178,15 +157,20 @@ class State(object):
     def partial_state(self):
         return self.__partial_state
 
+    def next_turn(self, move):
+        self.__partial_state.history.append(move)
+        temp = self.__hand
+        self.__hand = self.__partial_state.hand
+        self.__partial_state.hand = temp
+
 
 class PartialState(object):
     """Stores the face-up card, the suit, the hand, and the history."""
 
-    def __init__(self, face_up_card, suit, hand, history):
-        self.__face_up_card = face_up_card
-        self.__suit = suit
-        self.__hand = hand
-        self.__history = history
+    def __init__(self):
+        self.__face_up_card = None
+        self.__hand = Hand()
+        self.__history = []
 
     @property
     def face_up_card(self):
@@ -194,11 +178,16 @@ class PartialState(object):
 
     @property
     def suit(self):
-        return self.__suit
+        suit = self.__face_up_card / Deck.num_suits()
+        return suit
 
     @property
     def hand(self):
         return self.__hand
+
+    @hand.setter
+    def hand(self, value):
+        self.__hand = value
 
     @property
     def history(self):
@@ -208,10 +197,9 @@ class PartialState(object):
 class Move(object):
     """An action taken by a player."""
 
-    def __init__(self, player_num, face_up_card, suit, number_of_cards):
+    def __init__(self, player_num, face_up_card, number_of_cards):
         self.__player_num = player_num
         self.__face_up_card = face_up_card
-        self.__suit = suit
         self.__number_of_cards = number_of_cards
 
     @property
@@ -224,31 +212,9 @@ class Move(object):
 
     @property
     def suit(self):
-        return self.__suit
+        suit = self.__face_up_card / Deck.num_suits()
+        return suit
 
     @property
     def number_of_cards(self):
         return self.__number_of_cards
-
-
-class PlayerList(object):
-    """Contains information for both players."""
-
-    def __init__(self, human_index):
-        self.__players = [Hand(), Hand()]
-        self.__human_index = human_index
-
-    def get_player(self, index):
-        return self.__players[index]
-
-    @property
-    def human(self):
-        return self.__players[self.__human_index]
-
-    @property
-    def ai(self):
-        if self.__human_index == 0:
-            ai_index = 1
-        else:
-            ai_index = 0
-        return self.__players[ai_index]
