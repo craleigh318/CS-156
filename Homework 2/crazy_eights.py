@@ -1,5 +1,10 @@
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
+import driver
+
+first_player = driver.get_first_player()
+current_state = State()
+
 
 class CrazyEight(object):
     """Contains methods for AI actions."""
@@ -158,17 +163,18 @@ class State(object):
         return self.__partial_state
 
     def next_turn(self, move):
-        self.__partial_state.history.append(move)
+        self.__partial_state.add_move(move)
         temp = self.__hand
         self.__hand = self.__partial_state.hand
         self.__partial_state.hand = temp
 
 
 class PartialState(object):
-    """Stores the face-up card, the suit, the hand, and the history."""
+    """Stores information available to the current player."""
 
     def __init__(self):
         self.__face_up_card = None
+        self.__suit = None
         self.__hand = Hand()
         self.__history = []
 
@@ -178,8 +184,7 @@ class PartialState(object):
 
     @property
     def suit(self):
-        suit = self.__face_up_card / Deck.num_suits()
-        return suit
+        return self.__suit
 
     @property
     def hand(self):
@@ -189,9 +194,8 @@ class PartialState(object):
     def hand(self, value):
         self.__hand = value
 
-    @property
-    def history(self):
-        return self.__history
+    def add_move(self, move):
+        self.__history.append(move)
 
 
 class Move(object):
