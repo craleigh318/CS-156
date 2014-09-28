@@ -11,4 +11,12 @@ def get_first_player():
     str_input = sys.stdin.read()
     int_input = int(str_input)
     first_player = int_input - 1
-    return first_player
+    return
+
+
+def move(partial_state):
+    """Gets a tuple from the player's input."""
+    print("Enter input as a tuple:")
+    str_input = sys.stdin.read()
+    tpl_input = tuple(str_input)
+    return tpl_input
