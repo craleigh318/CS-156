@@ -2,9 +2,6 @@ __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 import driver
 
-first_player = driver.get_first_player()
-current_state = State()
-
 
 class CrazyEight(object):
     """Contains methods for AI actions."""
@@ -16,6 +13,27 @@ class CrazyEight(object):
     @staticmethod
     def move_perfect_knowledge(state):
         pass
+
+
+class Card(object):
+    """A playing card."""
+
+    def __init__(self, deck_index):
+        self.__deck_index = deck_index
+
+    @property
+    def deck_index(self):
+        return self.__deck_index
+
+    @property
+    def suit(self):
+        suit = self.__deck_index / Deck.num_suits()
+        return suit
+
+    @property
+    def rank(self):
+        rank = self.__deck_index % Deck.num_suits()
+        return rank
 
 
 class CardTypes(object):
@@ -124,7 +142,7 @@ class Deck(object):
         self.__cards = []
         max_index = Deck.num_cards() - 1
         for index in xrange(0, max_index):
-            self.__cards.append(index)
+            self.__cards.append(Card(index))
 
     def add_card(self, card):
         index = card.deck_index
@@ -222,3 +240,7 @@ class Move(object):
     @property
     def number_of_cards(self):
         return self.__number_of_cards
+
+
+first_player = driver.get_first_player()
+current_state = State()
