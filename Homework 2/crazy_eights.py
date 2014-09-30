@@ -280,15 +280,15 @@ class AIPlayer(object):
 
 
 def perform_move(state, move):
+    # Draw cards.
+    for i in xrange(0, move.number_of_cards):
+        drawn_card = state.deck.draw_card()
+        state.partial_state.hand.add_card(drawn_card)
     # Move face-up card.
     state.partial_state.hand.remove_card(move.face_up_card)
     state.partial_state.face_up_card = move.face_up_card
     # Set suit.
     state.partial_state.suit = move.suit
-    # Draw cards.
-    for i in xrange(0, move.number_of_cards):
-        drawn_card = state.deck.draw_card()
-        state.partial_state.hand.add_card(drawn_card)
     # Add this move to history.
     state.next_turn(move)
 
