@@ -27,15 +27,18 @@ class Card(object):
 
     @property
     def deck_index(self):
+        """The card's number in the deck, from 0 to 51."""
         return self.__deck_index
 
     @property
     def suit(self):
+        """The card's suit, from 0 to 3."""
         suit = self.__deck_index / Deck.suit_size()
         return suit
 
     @property
     def rank(self):
+        """The card's number in the suit, from 0 to 12."""
         rank = self.__deck_index % Deck.suit_size()
         return rank
 
@@ -45,14 +48,15 @@ class CardNames(object):
 
     @staticmethod
     def full_name(card):
+        """The full name of the card."""
         name = CardNames.rank(card.rank)
         name += ' of '
         name += CardNames.suit(card.suit)
-
         return name
 
     @staticmethod
     def suit(integer):
+        """The name of the card's suit."""
         return {
             0: 'Spades',
             1: 'Hearts',
@@ -62,6 +66,7 @@ class CardNames(object):
 
     @staticmethod
     def rank(integer):
+        """The name of the card's rank."""
         return {
             0: 'Ace',
             1: 'Two',
@@ -84,6 +89,7 @@ class Hand(object):
 
     @staticmethod
     def initial_num_cards():
+        """The number of cards with which a player starts."""
         return 8
 
     def __init__(self):
@@ -91,6 +97,7 @@ class Hand(object):
 
     @property
     def cards(self):
+        """A tuple showing all of the cards in the hand."""
         cards = tuple(self.__cards)
         return cards
 
@@ -107,22 +114,25 @@ class Deck(object):
     """The collection of all 52 cards."""
 
     @staticmethod
-    def num_cards():
+    def deck_size():
+        """The initial number of cards in a deck."""
         return 52
 
     @staticmethod
     def suit_size():
+        """The number of cards in a suit."""
         return 13
 
     def __init__(self):
         self.__cards = []
-        max_index = Deck.num_cards()
+        max_index = Deck.deck_size()
         for index in xrange(0, max_index):
             self.__cards.append(Card(index))
         random.shuffle(self.__cards)
 
     @property
     def cards(self):
+        """A tuple showing all of the cards in the deck."""
         cards = tuple(self.__cards)
         return cards
 
@@ -146,14 +156,17 @@ class State(object):
 
     @property
     def deck(self):
+        """The current deck of cards."""
         return self.__deck
 
     @property
     def hand(self):
+        """The hand of the inactive player."""
         return self.__hand
 
     @property
     def partial_state(self):
+        """Information that the active player can access."""
         return self.__partial_state
 
     def next_turn(self, move):
@@ -165,7 +178,7 @@ class State(object):
 
 
 class PartialState(object):
-    """Stores information available to the current player."""
+    """Stores information available to the active player."""
 
     def __init__(self, face_up_card):
         self.__face_up_card = face_up_card
@@ -175,6 +188,7 @@ class PartialState(object):
 
     @property
     def face_up_card(self):
+        """The card that the active player must follow."""
         return self.__face_up_card
 
     @face_up_card.setter
@@ -183,6 +197,7 @@ class PartialState(object):
 
     @property
     def suit(self):
+        """The suit that the active player must match."""
         return self.__suit
 
     @suit.setter
@@ -191,6 +206,7 @@ class PartialState(object):
 
     @property
     def hand(self):
+        """The hand of the active player."""
         return self.__hand
 
     @hand.setter
@@ -219,18 +235,22 @@ class Move(object):
 
     @property
     def player_num(self):
+        """Returns 0 if the human made this move.  Returns 1 if the AI did."""
         return self.__player_num
 
     @property
     def face_up_card(self):
+        """The card that was placed face-up in this move."""
         return self.__face_up_card
 
     @property
     def suit(self):
+        """The suit that must be matched in the next turn."""
         return self.__suit
 
     @property
     def number_of_cards(self):
+        """The number of cards that the active player drew in this turn."""
         return self.__number_of_cards
 
 
@@ -273,6 +293,7 @@ def game_is_over(state):
 
 
 def game_loop(state, current_player, next_player):
+    """Cycles through player turns until the game is over."""
     player_move = current_player.move(state.partial_state)
     perform_move(state, player_move)
     # Loop while game is not over.  Switch players.
@@ -281,6 +302,7 @@ def game_loop(state, current_player, next_player):
 
 
 def start_game():
+    """Initializes game objects."""
     human_choice = driver.get_first_player()
     if human_choice == 1:
         player_1 = HumanPlayer
