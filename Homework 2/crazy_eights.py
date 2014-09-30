@@ -176,6 +176,11 @@ class State(object):
         self.__hand = self.__partial_state.hand
         self.__partial_state.hand = temp
 
+    def game_ended(self):
+        """Returns true if the game ended.  The game ends if the deck or either hand is empty."""
+        ended = not (self.__deck.cards and self.__hand.cards and self.__partial_state.hand.cards)
+        return ended
+
 
 class PartialState(object):
     """Stores information available to the active player."""
@@ -288,16 +293,12 @@ def perform_move(state, move):
     state.next_turn(move)
 
 
-def game_is_over(state):
-    pass
-
-
 def game_loop(state, current_player, next_player):
     """Cycles through player turns until the game is over."""
     player_move = current_player.move(state.partial_state)
     perform_move(state, player_move)
     # Loop while game is not over.  Switch players.
-    if not game_is_over(state):
+    if not state.game_ended():
         game_loop(state, next_player, current_player)
 
 
