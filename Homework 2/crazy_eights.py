@@ -11,13 +11,11 @@ class CrazyEight(object):
     @staticmethod
     def move(partial_state):
         """Returns a move by the AI with partial knowledge."""
-
         pass
 
     @staticmethod
     def move_perfect_knowledge(state):
         """Returns a move by the AI with full knowledge."""
-
         pass
 
 
@@ -33,89 +31,60 @@ class Card(object):
 
     @property
     def suit(self):
-        suit = self.__deck_index / Deck.num_suits()
+        suit = self.__deck_index / Deck.suit_size()
         return suit
 
     @property
     def rank(self):
-        rank = self.__deck_index % Deck.num_suits()
+        rank = self.__deck_index % Deck.suit_size()
         return rank
 
 
-class CardTypes(object):
+class CardNames(object):
     """Suits and ranks of cards."""
 
     @staticmethod
-    def spades():
-        return 0
+    def full_name(card):
+        name = CardNames.rank(card.rank)
+        name += ' of '
+        name += CardNames.suit(card.suit)
+
+        return name
 
     @staticmethod
-    def hearts():
-        return 1
+    def suit(integer):
+        return {
+            0: 'Spades',
+            1: 'Hearts',
+            2: 'Diamonds',
+            3: 'Clubs'
+        }.get(integer)
 
     @staticmethod
-    def diamonds():
-        return 2
-
-    @staticmethod
-    def clubs():
-        return 3
-
-    @staticmethod
-    def ace():
-        return 0
-
-    @staticmethod
-    def two():
-        return 1
-
-    @staticmethod
-    def three():
-        return 2
-
-    @staticmethod
-    def four():
-        return 3
-
-    @staticmethod
-    def five():
-        return 4
-
-    @staticmethod
-    def six():
-        return 5
-
-    @staticmethod
-    def seven():
-        return 6
-
-    @staticmethod
-    def eight():
-        return 7
-
-    @staticmethod
-    def nine():
-        return 8
-
-    @staticmethod
-    def ten():
-        return 9
-
-    @staticmethod
-    def jack():
-        return 10
-
-    @staticmethod
-    def queen():
-        return 11
-
-    @staticmethod
-    def king():
-        return 12
+    def rank(integer):
+        return {
+            0: 'Ace',
+            1: 'Two',
+            2: 'Three',
+            3: 'Four',
+            4: 'Five',
+            5: 'Six',
+            6: 'Seven',
+            7: 'Eight',
+            8: 'Nine',
+            9: 'Ten',
+            10: 'Jack',
+            11: 'Queen',
+            12: 'King'
+        }.get(integer)
 
 
 class Hand(object):
     """A collection of cards that a player is holding."""
+
+    @staticmethod
+    def initial_num_cards():
+        return 8
 
     def __init__(self):
         self.__cards = []
@@ -127,12 +96,10 @@ class Hand(object):
 
     def add_card(self, card):
         """Adds the card to the hand."""
-
         self.__cards.append(card)
 
     def remove_card(self, card):
         """Removes the card from the hand."""
-
         self.__cards.remove(card)
 
 
@@ -144,12 +111,12 @@ class Deck(object):
         return 52
 
     @staticmethod
-    def num_suits():
-        return 4
+    def suit_size():
+        return 13
 
     def __init__(self):
         self.__cards = []
-        max_index = Deck.num_cards() - 1
+        max_index = Deck.num_cards()
         for index in xrange(0, max_index):
             self.__cards.append(Card(index))
         random.shuffle(self.__cards)
@@ -161,7 +128,6 @@ class Deck(object):
 
     def draw_card(self):
         """Removes and returns the card from the top."""
-
         top_card = self.__cards.pop()
         return top_card
 
@@ -174,6 +140,9 @@ class State(object):
         self.__hand = Hand()
         face_up_card = self.__deck.draw_card()
         self.__partial_state = PartialState(face_up_card)
+        for i in xrange(0, Hand.initial_num_cards()):
+            self.__hand.add_card(self.__deck.draw_card())
+            self.__partial_state.hand.add_card(self.__deck.draw_card())
 
     @property
     def deck(self):
@@ -189,7 +158,6 @@ class State(object):
 
     def next_turn(self, move):
         """Adds the move to the game's move history.  Swaps the next player into the partial state."""
-
         self.__partial_state.add_move(move)
         temp = self.__hand
         self.__hand = self.__partial_state.hand
@@ -231,7 +199,6 @@ class PartialState(object):
 
     def add_move(self, move):
         """Adds the move to the game's move history."""
-
         self.__history.append(move)
 
 
@@ -241,7 +208,6 @@ class Move(object):
     @staticmethod
     def from_tuple(tuple_source):
         """Return a new move from a tuple."""
-
         new_move = Move(tuple_source[0], tuple_source[1], tuple_source[2], tuple_source[3])
         return new_move
 
@@ -307,7 +273,8 @@ def game_is_over(state):
 
 
 def game_loop(state, current_player, next_player):
-    perform_move(state, current_player.move(state.partial_state))
+    player_move = current_player.move(state.partial_state)
+    perform_move(state, player_move)
     # Loop while game is not over.  Switch players.
     if not game_is_over(state):
         game_loop(state, next_player, current_player)
@@ -327,4 +294,15 @@ def start_game():
     game_loop(current_state, player_1, player_2)
 
 
-start_game()
+def test_method():
+    state = State()
+    print('Face-up card:')
+    print(state.partial_state.face_up_card.deck_index)
+    print('Cards in hand:')
+    for card in state.hand.cards:
+        print(CardNames.full_name(card))
+        # perform_move(state, Move.from_tuple((1, 7, 0, 0)))
+
+
+test_method()
+# start_game()
