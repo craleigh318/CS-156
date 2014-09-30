@@ -10,8 +10,7 @@ def get_first_player():
     print ('[1] for first, [2] for second')
     str_input = sys.stdin.read()
     int_input = int(str_input)
-    first_player = int_input - 1
-    return
+    return int_input
 
 
 def move(partial_state):

@@ -241,7 +241,7 @@ class Move(object):
     @staticmethod
     def from_tuple(tuple_source):
         """Return a new move from a tuple."""
-        
+
         new_move = Move(tuple_source[0], tuple_source[1], tuple_source[2], tuple_source[3])
         return new_move
 
@@ -268,6 +268,26 @@ class Move(object):
         return self.__number_of_cards
 
 
+class HumanPlayer(object):
+    @staticmethod
+    def move(partial_state):
+        return driver.move(partial_state)
+
+    @staticmethod
+    def move_perfect_knowledge(state):
+        return driver.move(state.partial_state)
+
+
+class AIPlayer(object):
+    @staticmethod
+    def move(partial_state):
+        return CrazyEight.move(partial_state)
+
+    @staticmethod
+    def move_perfect_knowledge(state):
+        return CrazyEight.move_perfect_knowledge(state)
+
+
 def perform_move(state, move):
     # Move face-up card.
     state.partial_state.hand.remove_card(move.face_up_card)
@@ -286,21 +306,25 @@ def game_is_over(state):
     pass
 
 
-def game_loop(state, player):
-    # Human turn.
-    if player == 0:
-        perform_move(state, driver.move(state.partial_state))
-        next_player = 1
-    # AI turn.
-    else:
-        perform_move(state, CrazyEight.move(state.partial_state))
-
-        next_player = 0
-    # Loop while game is not over.
+def game_loop(state, current_player, next_player):
+    perform_move(state, current_player.move(state.partial_state))
+    # Loop while game is not over.  Switch players.
     if not game_is_over(state):
-        game_loop(state, next_player)
+        game_loop(state, next_player, current_player)
 
 
-first_player = driver.get_first_player()
-current_state = State()
-game_loop(current_state, first_player)
+def start_game():
+    human_choice = driver.get_first_player()
+    if human_choice == 1:
+        player_1 = HumanPlayer
+        player_2 = AIPlayer
+    elif human_choice == 2:
+        player_1 = AIPlayer
+        player_2 = HumanPlayer
+    else:
+        return
+    current_state = State()
+    game_loop(current_state, player_1, player_2)
+
+
+start_game()
