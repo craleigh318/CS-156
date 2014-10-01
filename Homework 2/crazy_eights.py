@@ -92,8 +92,8 @@ class Hand(object):
         """The number of cards with which a player starts."""
         return 8
 
-    def __init__(self):
-        self.__cards = []
+    def __init__(self, initial_hand=[]):
+        self.__cards = list(initial_hand)
 
     @property
     def cards(self):
@@ -123,18 +123,27 @@ class Deck(object):
         """The number of cards in a suit."""
         return 13
 
-    def __init__(self):
-        self.__cards = []
-        max_index = Deck.deck_size()
-        for index in xrange(0, max_index):
-            self.__cards.append(Card(index))
-        random.shuffle(self.__cards)
+    def __init__(self, initial_deck=None):
+        if initial_deck is None:
+            self.__cards = Deck.__shuffled_deck()
+        else:
+            self.__cards = list(initial_deck)
 
     @property
     def cards(self):
         """A tuple showing all of the cards in the deck."""
         cards = tuple(self.__cards)
         return cards
+
+    @staticmethod
+    def __shuffled_deck():
+        """Returns a filled and shuffled deck."""
+        deck = []
+        max_index = Deck.deck_size()
+        for index in xrange(0, max_index):
+            deck.append(Card(index))
+        random.shuffle(deck)
+        return deck
 
     def draw_card(self):
         """Removes and returns the card from the top."""
@@ -145,14 +154,13 @@ class Deck(object):
 class State(object):
     """Stores the deck, opponent's hand, and partial state."""
 
-    def __init__(self):
-        self.__deck = Deck()
-        self.__hand = Hand()
-        face_up_card = self.__deck.draw_card()
-        self.__partial_state = PartialState(face_up_card)
-        for i in xrange(0, Hand.initial_num_cards()):
-            self.__hand.add_card(self.__deck.draw_card())
-            self.__partial_state.hand.add_card(self.__deck.draw_card())
+    def __init__(self, deck=Deck(), hand=Hand(), partial_state=None):
+        self.__deck = deck
+        self.__hand = hand
+        if partial_state is None:
+            self.__randomize_partial_state()
+        else:
+            self.__partial_state = partial_state
 
     @property
     def deck(self):
@@ -168,6 +176,23 @@ class State(object):
     def partial_state(self):
         """Information that the active player can access."""
         return self.__partial_state
+
+    @staticmethod
+    def from_tuple(tpl_param):
+        """Return a new state from a tuple."""
+        deck = Deck(tpl_param[0])
+        hand = Hand(tpl_param[1])
+        partial_state = PartialState.from_tuple(tpl_param[2])
+        new_state = State(deck, hand, partial_state)
+        return new_state
+
+    def __randomize_partial_state(self):
+        """Fills both hands and places a face-up card."""
+        face_up_card = self.__deck.draw_card()
+        self.__partial_state = PartialState(face_up_card)
+        for i in xrange(0, Hand.initial_num_cards()):
+            self.__hand.add_card(self.__deck.draw_card())
+            self.__partial_state.hand.add_card(self.__deck.draw_card())
 
     def next_turn(self, move):
         """Adds the move to the game's move history.  Swaps the next player into the partial state."""
@@ -185,11 +210,14 @@ class State(object):
 class PartialState(object):
     """Stores information available to the active player."""
 
-    def __init__(self, face_up_card):
+    def __init__(self, face_up_card, suit=None, hand=Hand(), history=[]):
         self.__face_up_card = face_up_card
-        self.__suit = face_up_card.suit
-        self.__hand = Hand()
-        self.__history = []
+        if suit is None:
+            self.__suit = face_up_card.suit
+        else:
+            self.__suit = suit
+        self.__hand = hand
+        self.__history = list(history)
 
     @property
     def face_up_card(self):
@@ -218,6 +246,21 @@ class PartialState(object):
     def hand(self, value):
         self.__hand = value
 
+    @property
+    def history(self):
+        """A list of moves made during this game."""
+        return self.__history
+
+    @staticmethod
+    def from_tuple(tpl_param):
+        """Return a new partial state from a tuple."""
+        face_up_card = Card(tpl_param[0])
+        suit = tpl_param[1]
+        hand = Hand(tpl_param[2])
+        history = tpl_param[3]
+        new_partial_state = PartialState(face_up_card, suit, hand, history)
+        return new_partial_state
+
     def add_move(self, move):
         """Adds the move to the game's move history."""
         self.__history.append(move)
@@ -227,9 +270,9 @@ class Move(object):
     """An action taken by a player."""
 
     @staticmethod
-    def from_tuple(tuple_source):
+    def from_tuple(tpl_param):
         """Return a new move from a tuple."""
-        new_move = Move(tuple_source[0], tuple_source[1], tuple_source[2], tuple_source[3])
+        new_move = Move(tpl_param[0], tpl_param[1], tpl_param[2], tpl_param[3])
         return new_move
 
     def __init__(self, player_num, face_up_card, suit, number_of_cards):
