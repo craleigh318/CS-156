@@ -367,19 +367,5 @@ def start_game():
     game_loop(current_state, player_1, player_2)
 
 
-def test_method():
-    state = State.from_tuple(([], [9, 10, 11, 12, 13, 14, 15, 16], (0, 0, [1, 2, 3, 4, 5, 6, 7, 8], [])))
-    print('Face-up card:')
-    print(CardNames.full_name(state.partial_state.face_up_card))
-    print('')
-    print('Cards in hand:')
-    for card in state.partial_state.hand.cards:
-        print(CardNames.full_name(card))
-    print('')
-    print('Opponent in hand:')
-    for card in state.hand.cards:
-        print(CardNames.full_name(card))
-
-
-test_method()
-# start_game()
+if __name__ == '__main__':
+    start_game()
