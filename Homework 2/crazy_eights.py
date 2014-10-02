@@ -11,12 +11,12 @@ class CrazyEight(object):
     @staticmethod
     def move(partial_state):
         """Returns a move by the AI with partial knowledge."""
-        pass
+        partial_state_object = PartialState.from_tuple(partial_state)
 
     @staticmethod
     def move_perfect_knowledge(state):
         """Returns a move by the AI with full knowledge."""
-        pass
+        state_object = State.from_tuple(state)
 
 
 class Card(object):
@@ -97,8 +97,8 @@ class Hand(object):
 
     @property
     def cards(self):
-        """A tuple showing all of the cards in the hand."""
-        cards = tuple(self.__cards)
+        """A copy of the list of all of the cards in the hand."""
+        cards = list(self.__cards)
         return cards
 
     def add_card(self, card):
@@ -131,8 +131,8 @@ class Deck(object):
 
     @property
     def cards(self):
-        """A tuple showing all of the cards in the deck."""
-        cards = tuple(self.__cards)
+        """A copy of the list of the cards in the deck."""
+        cards = list(self.__cards)
         return cards
 
     @staticmethod
@@ -181,7 +181,9 @@ class State(object):
     def from_tuple(tpl_param):
         """Return a new state from a tuple."""
         deck = Deck(tpl_param[0])
-        hand = Hand(tpl_param[1])
+        hand = Hand()
+        for num in tpl_param[1]:
+            hand.add_card(Card(num))
         partial_state = PartialState.from_tuple(tpl_param[2])
         new_state = State(deck, hand, partial_state)
         return new_state
@@ -248,16 +250,21 @@ class PartialState(object):
 
     @property
     def history(self):
-        """A list of moves made during this game."""
-        return self.__history
+        """A copy of the list of moves made during this game."""
+        history = list(self.__history)
+        return history
 
     @staticmethod
     def from_tuple(tpl_param):
         """Return a new partial state from a tuple."""
         face_up_card = Card(tpl_param[0])
         suit = tpl_param[1]
-        hand = Hand(tpl_param[2])
-        history = tpl_param[3]
+        hand = Hand()
+        for num in tpl_param[2]:
+            hand.add_card(Card(num))
+        history = []
+        for move in tpl_param[3]:
+            history.append(Move.from_tuple(move))
         new_partial_state = PartialState(face_up_card, suit, hand, history)
         return new_partial_state
 
@@ -361,13 +368,17 @@ def start_game():
 
 
 def test_method():
-    state = State()
+    state = State.from_tuple(([], [9, 10, 11, 12, 13, 14, 15, 16], (0, 0, [1, 2, 3, 4, 5, 6, 7, 8], [])))
     print('Face-up card:')
-    print(state.partial_state.face_up_card.deck_index)
+    print(CardNames.full_name(state.partial_state.face_up_card))
+    print('')
     print('Cards in hand:')
+    for card in state.partial_state.hand.cards:
+        print(CardNames.full_name(card))
+    print('')
+    print('Opponent in hand:')
     for card in state.hand.cards:
         print(CardNames.full_name(card))
-        # perform_move(state, Move.from_tuple((1, 7, 0, 0)))
 
 
 test_method()
