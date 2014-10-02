@@ -17,6 +17,32 @@ class CrazyEight(object):
     def move_perfect_knowledge(state):
         """Returns a move by the AI with full knowledge."""
         state_object = State.from_tuple(state)
+        
+    @staticmethod
+    def __legal_moves(hand_cards, history):
+        last_move = history[-1]
+        current_player_num = last_move.player_num ^ 1
+        draw_value = 0
+
+        if last_move.face_up_card == Card.two:
+            legal_moves = [Move(current_player_num, draw_value, draw_value, last_move.number_of_cards + 2)]
+        elif last_move.face_up_card == Card.queen:
+            legal_moves = [Move(current_player_num, draw_value, draw_value, 5)]
+        else:
+            # Find relevant move (i.e., move that contains rank and suit of the face-up card)
+            relevant_move = last_move
+            move_index = -2
+            while relevant_move.number_of_cards > 0:
+                relevant_move = history[move_index]
+                move_index -= 1
+
+            def legal_card(card):
+                return card.rank == relevant_move.face_up_card or card.rank == relevant_move.suit
+            legal_moves = [c for c in hand_cards if legal_card(c)]
+            draw_move = Move(current_player_num, draw_value, draw_value, 1)
+            legal_moves.push(draw_move)
+
+        return legal_moves
 
 
 class Card(object):
@@ -41,6 +67,10 @@ class Card(object):
         """The card's number in the suit, from 0 to 12."""
         rank = self.__deck_index % Deck.suit_size()
         return rank
+
+    two = 1
+    jack = 10
+    queen = 11
 
 
 class CardNames(object):
