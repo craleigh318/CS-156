@@ -17,6 +17,8 @@ class CrazyEight(object):
     def move_perfect_knowledge(state):
         """Returns a move by the AI with full knowledge."""
         state_object = State.from_tuple(state)
+
+
         
     @staticmethod
     def __legal_moves(hand_cards, history):
@@ -37,7 +39,7 @@ class CrazyEight(object):
                 move_index -= 1
 
             def legal_card(card):
-                return card.rank == relevant_move.face_up_card or card.rank == relevant_move.suit
+                return card.rank == relevant_move.face_up_card or card.suit == relevant_move.suit
             legal_moves = [c for c in hand_cards if legal_card(c)]
             draw_move = Move(current_player_num, draw_value, draw_value, 1)
             legal_moves.push(draw_move)
