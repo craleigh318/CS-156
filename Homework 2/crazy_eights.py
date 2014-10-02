@@ -19,12 +19,6 @@ class CrazyEight(object):
         state_object = State.from_tuple(state)
 
 
-        
-    @staticmethod
-    def __legal_moves(hand_cards, history):
-
-
-
 class Card(object):
     """A playing card."""
 
