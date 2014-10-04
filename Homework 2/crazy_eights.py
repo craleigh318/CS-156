@@ -282,7 +282,7 @@ class State(object):
                     if this_player.find_best_value(value, that_player.best_value) == value:
                         return value
                     else:
-                        this_player.best_value(this_player.find_best_value(that_value, value))
+                        this_player.best_value = this_player.find_best_value(this_player.best_value, value)
                 return value
 
     def best_move(self):
