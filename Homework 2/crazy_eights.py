@@ -263,7 +263,7 @@ class State(object):
         hand_no_eights = [card for card in self.__hand.cards if card.rank != Card.rank_eight]
         legal_moves += \
             [last_card_play.next_play(card.rank, card.suit)
-                for card in hand_no_eights if last_card_play.can_precede(card)]
+             for card in hand_no_eights if last_card_play.can_precede(card)]
 
         return legal_moves
 
@@ -272,18 +272,18 @@ class State(object):
         pass
 
     def __alpha_beta_search(self, this_player, that_player, depth_counter):
-            if self.game_ended() or depth_counter == 0:
-                return self.__heuristic()
-            else:
-                value = this_player.infinity_value
-                for move in self.__legal_moves():
-                    that_value = self.__move_result(move).alpha_beta_search(that_player, this_player, depth_counter - 1)
-                    value = this_player.find_best_value(that_value, value)
-                    if this_player.find_best_value(value, that_player.best_value) == value:
-                        return value
-                    else:
-                        this_player.best_value = this_player.find_best_value(this_player.best_value, value)
-                return value
+        if self.game_ended() or depth_counter == 0:
+            return self.__heuristic()
+        else:
+            value = this_player.infinity_value
+            for move in self.__legal_moves():
+                that_value = self.__move_result(move).alpha_beta_search(that_player, this_player, depth_counter - 1)
+                value = this_player.find_best_value(that_value, value)
+                if this_player.find_best_value(value, that_player.best_value) == value:
+                    return value
+                else:
+                    this_player.best_value = this_player.find_best_value(this_player.best_value, value)
+            return value
 
     def best_move(self):
         ai_player = MinimaxPlayer(lambda a, b: max(a, b), float("-inf"))
@@ -293,25 +293,25 @@ class State(object):
 
 
 class MinimaxPlayer(object):
-        def __init__(self, comparison_function, infinity_value):
-            self.__comparison_function = comparison_function
-            self.__infinity_value = infinity_value
-            self.__best_value = infinity_value
+    def __init__(self, comparison_function, infinity_value):
+        self.__comparison_function = comparison_function
+        self.__infinity_value = infinity_value
+        self.__best_value = infinity_value
 
-        @property
-        def infinity_value(self):
-            return self.__infinity_value
+    @property
+    def infinity_value(self):
+        return self.__infinity_value
 
-        @property
-        def best_value(self):
-            return self.__best_value
+    @property
+    def best_value(self):
+        return self.__best_value
 
-        @best_value.setter
-        def best_value(self, new_best_value):
-            self.__best_value = new_best_value
+    @best_value.setter
+    def best_value(self, new_best_value):
+        self.__best_value = new_best_value
 
-        def find_best_value(self, this_value, that_value):
-            return self.__comparison_function(this_value, that_value)
+    def find_best_value(self, this_value, that_value):
+        return self.__comparison_function(this_value, that_value)
 
 
 class PartialState(object):

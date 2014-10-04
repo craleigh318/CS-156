@@ -15,8 +15,12 @@ class MyTestCase(unittest.TestCase):
         for card in state.partial_state.hand.cards:
             print(crazy_eights.CardNames.full_name(card))
         print('')
-        print('Opponent in hand:')
+        print('Opponent\'s hand:')
         for card in state.hand.cards:
+            print(crazy_eights.CardNames.full_name(card))
+        print('')
+        print('Cards in Deck:')
+        for card in state.deck.cards:
             print(crazy_eights.CardNames.full_name(card))
 
 
