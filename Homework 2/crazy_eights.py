@@ -1,13 +1,12 @@
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
+import copy
 import random
 
 
 class CrazyEight(object):
     """Contains methods for AI actions."""
 
-    # TODO: remember to remove ANY 8 card from the AI's hand when it chooses to play an 8 (it may not have one
-    # of the suit it chose to play, since it can make the 8 count as having any suit it wants).
     @staticmethod
     def move(partial_state):
         """Returns a move by the AI with partial knowledge."""
@@ -21,6 +20,15 @@ class CrazyEight(object):
 
 class Card(object):
     """A playing card."""
+
+    rank_two = 1
+    rank_eight = 8
+    rank_queen = 11
+
+    @staticmethod
+    def deck_index(rank, suit):
+        suit_placement = suit * Card.suit_size()
+        return suit_placement + rank
 
     @staticmethod
     def num_suits():
@@ -51,10 +59,6 @@ class Card(object):
         """The card's number in the suit, from 0 to 12."""
         rank = self.__deck_index % Card.suit_size()
         return rank
-
-    rank_two = 1
-    rank_eight = 8
-    rank_queen = 11
 
 
 class CardNames(object):
@@ -216,6 +220,26 @@ class State(object):
         """Returns true if the game ended.  The game ends if the deck or either hand is empty."""
         ended = not (self.__deck.cards and self.__hand.cards and self.__partial_state.hand.cards)
         return ended
+
+    def move_result(self, move):
+        """Returns the State that results from making a move."""
+        self_copy = copy.deepcopy(self)
+
+        if move.is_card_draw:
+            for ind in xrange(0, move.number_of_cards):
+                self_copy.hand.add_card(self_copy.deck.draw_card())
+        else:
+            # All 8 cards are treated equally by the rules of Crazy Eights, so if we're playing an 8 then we just
+            # look for one in our hand and play it rather than trying to play any particular one.
+            if move.face_up_card == Card.rank_eight:
+                eight_card = next(card for card in self_copy.hand.cards if card.rank == Card.rank_eight)
+                self_copy.hand.remove_card(eight_card)
+            else:
+                move_card_deck_index = Card.deck_index(move.face_up_card, move.suit)
+                move_card = Card(move_card_deck_index)
+                self_copy.hand.remove_card(move_card)
+
+        return self_copy
 
 
 class PartialState(object):
