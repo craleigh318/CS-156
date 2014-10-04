@@ -286,6 +286,7 @@ class PartialState(object):
     @property
     def legal_moves(self):
         last_non_draw_ind = -1
+        # We assume that the human player goes first, so there is always a move in the move-history list.
         while self.__history[last_non_draw_ind].is_card_draw:
             last_non_draw_ind -= 1
         last_card_play = self.__history[last_non_draw_ind]
