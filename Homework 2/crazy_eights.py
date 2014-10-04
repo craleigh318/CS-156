@@ -24,6 +24,16 @@ class CrazyEight(object):
 class Card(object):
     """A playing card."""
 
+    @staticmethod
+    def num_suits():
+        """The number of suits a card can have."""
+        return 4
+
+    @staticmethod
+    def suit_size():
+        """The number of cards in a suit."""
+        return 13
+
     def __init__(self, deck_index):
         self.__deck_index = deck_index
 
@@ -35,13 +45,13 @@ class Card(object):
     @property
     def suit(self):
         """The card's suit, from 0 to 3."""
-        suit = self.__deck_index / Deck.suit_size()
+        suit = self.__deck_index / Card.suit_size()
         return suit
 
     @property
     def rank(self):
         """The card's number in the suit, from 0 to 12."""
-        rank = self.__deck_index % Deck.suit_size()
+        rank = self.__deck_index % Card.suit_size()
         return rank
 
     rank_two = 1
@@ -123,16 +133,6 @@ class Deck(object):
     def deck_size():
         """The initial number of cards in a deck."""
         return 52
-
-    @staticmethod
-    def num_suits():
-        """The number of suits in the deck."""
-        return 4
-
-    @staticmethod
-    def suit_size():
-        """The number of cards in a suit."""
-        return 13
 
     def __init__(self, initial_deck=None):
         if initial_deck is None:
@@ -296,7 +296,7 @@ class PartialState(object):
         # to be the same from the perspective of the game's rules.
         eight_in_hand = any((card.rank == Card.rank_eight) for card in self.__hand.cards)
         if eight_in_hand:
-            legal_moves = [last_card_play.next_play(Card.rank_eight, suit) for suit in xrange(0, Deck.num_suits())]
+            legal_moves = [last_card_play.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
         hand_no_eights = [card for card in self.__hand.cards if card.rank != Card.rank_eight]
         legal_moves += \
             [last_card_play.next_play(card.rank, card.suit)
