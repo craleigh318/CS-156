@@ -9,7 +9,7 @@ class CrazyEight(object):
     """Contains methods for AI actions."""
 
     # TODO: remember to remove ANY 8 card from the AI's hand when it chooses to play an 8 (it may not have one
-    # of the suit it chose to play, since it can make the 8 have any suit it wants).
+    # of the suit it chose to play, since it can make the 8 count as having any suit it wants).
     @staticmethod
     def move(partial_state):
         """Returns a move by the AI with partial knowledge."""
