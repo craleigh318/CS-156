@@ -43,7 +43,7 @@ class Card(object):
         return rank
 
     two = 1
-    jack = 10
+    eight = 8
     queen = 11
 
 
@@ -121,6 +121,11 @@ class Deck(object):
     def deck_size():
         """The initial number of cards in a deck."""
         return 52
+
+    @staticmethod
+    def num_suits():
+        """The number of suits in the deck."""
+        return 4
 
     @staticmethod
     def suit_size():
@@ -278,27 +283,19 @@ class PartialState(object):
 
     @property
     def legal_moves(self):
-        last_move = self.__history[-1]
-        current_player_num = last_move.player_num ^ 1
-        draw_value = 0
+        last_non_draw_ind = -1
+        while self.__history[last_non_draw_ind].is_card_draw:
+            last_non_draw_ind -= 1
+        last_card_play = self.__history[last_non_draw_ind]
 
-        if last_move.face_up_card == Card.two:
-            legal_moves = [Move(current_player_num, draw_value, draw_value, last_move.number_of_cards + 2)]
-        elif last_move.face_up_card == Card.queen:
-            legal_moves = [Move(current_player_num, draw_value, draw_value, 5)]
-        else:
-            # Find relevant move (i.e., move that contains rank and suit of the face-up card)
-            relevant_move = last_move
-            move_index = -2
-            while relevant_move.number_of_cards > 0:
-                relevant_move = self.__history[move_index]
-                move_index -= 1
-
-            def legal_card(card):
-                return card.rank == relevant_move.face_up_card or card.suit == relevant_move.suit
-            legal_moves = [c for c in self.__hand.cards if legal_card(c)]
-            draw_move = Move(current_player_num, draw_value, draw_value, 1)
-            legal_moves.push(draw_move)
+        legal_moves = \
+            [last_card_play.next_play(card.rank, card.suit)
+                for card in self.__hand.cards if last_card_play.can_precede(card)]
+        # We need only consider if a single eight is in the AI's hand, since all 4 eights are considered
+        # to be the same from the perspective of the game's rules.
+        eight_in_hand = any((card.rank == Card.eight) for card in self.__hand.cards)
+        if eight_in_hand:
+            legal_moves += [last_card_play.next_play(Card.eight, suit) for suit in xrange(0, Deck.num_suits())]
 
         return legal_moves
 
@@ -317,6 +314,30 @@ class Move(object):
         self.__face_up_card = face_up_card
         self.__suit = suit
         self.__number_of_cards = number_of_cards
+
+    @staticmethod
+    def draw(player_num, number_of_cards):
+        draw_placeholder = 0
+        return Move(player_num, draw_placeholder, draw_placeholder, number_of_cards)
+
+    @staticmethod
+    def play(player_num, face_up_card, suit):
+        return Move(player_num, face_up_card, suit)
+
+    def next_draw(self):
+        if self.__face_up_card == Card.two:
+            num_of_cards_to_draw = 2
+        elif self.__face_up_card == Card.queen:
+            num_of_cards_to_draw = 5
+        else:
+            num_of_cards_to_draw = 1
+        return Move.draw(self.__next_player_num(), num_of_cards_to_draw)
+
+    def next_play(self, face_up_card, suit):
+        return Move.play(self.__next_player_num(), face_up_card, suit)
+
+    def __next_player_num(self):
+        return self.__player_num ^ 1
 
     @property
     def player_num(self):
@@ -337,6 +358,24 @@ class Move(object):
     def number_of_cards(self):
         """The number of cards that the active player drew in this turn."""
         return self.__number_of_cards
+
+    @property
+    def is_card_draw(self):
+        return self.__number_of_cards > 0
+
+    @property
+    def can_precede(self, next_move_card_candidate):
+        if next_move_card_candidate.rank == Card.eight:
+            value = True
+        elif self.__face_up_card == next_move_card_candidate.rank:
+            value = True
+        elif self.__face_up_card == Card.two:
+            value = False
+        elif self.__suit == next_move_card_candidate.suit:
+            value = True
+        else:
+            value = False
+        return value
 
 
 class HumanPlayer(object):
