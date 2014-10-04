@@ -44,9 +44,9 @@ class Card(object):
         rank = self.__deck_index % Deck.suit_size()
         return rank
 
-    two = 1
-    eight = 8
-    queen = 11
+    rank_two = 1
+    rank_eight = 8
+    rank_queen = 11
 
 
 class CardNames(object):
@@ -294,10 +294,10 @@ class PartialState(object):
 
         # We need only consider if a single eight is in the AI's hand, since all 4 eights are considered
         # to be the same from the perspective of the game's rules.
-        eight_in_hand = any((card.rank == Card.eight) for card in self.__hand.cards)
+        eight_in_hand = any((card.rank == Card.rank_eight) for card in self.__hand.cards)
         if eight_in_hand:
-            legal_moves = [last_card_play.next_play(Card.eight, suit) for suit in xrange(0, Deck.num_suits())]
-        hand_no_eights = [card for card in self.__hand.cards if card.rank != Card.eight]
+            legal_moves = [last_card_play.next_play(Card.rank_eight, suit) for suit in xrange(0, Deck.num_suits())]
+        hand_no_eights = [card for card in self.__hand.cards if card.rank != Card.rank_eight]
         legal_moves += \
             [last_card_play.next_play(card.rank, card.suit)
                 for card in hand_no_eights if last_card_play.can_precede(card)]
@@ -333,9 +333,9 @@ class Move(object):
 
     def next_draw(self):
         """Return a new Move representing a card-draw performed immediately after the current Move."""
-        if self.__face_up_card == Card.two:
+        if self.__face_up_card == Card.rank_two:
             num_of_cards_to_draw = 2
-        elif self.__face_up_card == Card.queen:
+        elif self.__face_up_card == Card.rank_queen:
             num_of_cards_to_draw = 5
         else:
             num_of_cards_to_draw = 1
@@ -377,11 +377,11 @@ class Move(object):
     @property
     def can_precede(self, next_move_card_candidate):
         """Return True if next_move_card_candidate can be played after this Move, otherwise return False."""
-        if next_move_card_candidate.rank == Card.eight:
+        if next_move_card_candidate.rank == Card.rank_eight:
             value = True
         elif self.__face_up_card == next_move_card_candidate.rank:
             value = True
-        elif self.__face_up_card == Card.two:
+        elif self.__face_up_card == Card.rank_two:
             value = False
         elif self.__suit == next_move_card_candidate.suit:
             value = True
