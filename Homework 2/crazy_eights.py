@@ -134,6 +134,16 @@ class Deck(object):
         """The initial number of cards in a deck."""
         return 52
 
+    @staticmethod
+    def __shuffled_deck():
+        """Returns a filled and shuffled deck."""
+        deck = []
+        max_index = Deck.deck_size()
+        for index in xrange(0, max_index):
+            deck.append(Card(index))
+        random.shuffle(deck)
+        return deck
+
     def __init__(self, initial_deck=None):
         if initial_deck is None:
             self.__cards = Deck.__shuffled_deck()
@@ -146,16 +156,6 @@ class Deck(object):
         cards = list(self.__cards)
         return cards
 
-    @staticmethod
-    def __shuffled_deck():
-        """Returns a filled and shuffled deck."""
-        deck = []
-        max_index = Deck.deck_size()
-        for index in xrange(0, max_index):
-            deck.append(Card(index))
-        random.shuffle(deck)
-        return deck
-
     def draw_card(self):
         """Removes and returns the card from the top."""
         top_card = self.__cards.pop()
@@ -164,6 +164,17 @@ class Deck(object):
 
 class State(object):
     """Stores the deck, opponent's hand, and partial state."""
+
+    @staticmethod
+    def from_tuple(tpl_param):
+        """Return a new state from a tuple."""
+        deck = Deck(tpl_param[0])
+        hand = Hand()
+        for num in tpl_param[1]:
+            hand.add_card(Card(num))
+        partial_state = PartialState.from_tuple(tpl_param[2])
+        new_state = State(deck, hand, partial_state)
+        return new_state
 
     def __init__(self, deck=Deck(), hand=Hand(), partial_state=None):
         self.__deck = deck
@@ -188,17 +199,6 @@ class State(object):
         """Information that the active player can access."""
         return self.__partial_state
 
-    @staticmethod
-    def from_tuple(tpl_param):
-        """Return a new state from a tuple."""
-        deck = Deck(tpl_param[0])
-        hand = Hand()
-        for num in tpl_param[1]:
-            hand.add_card(Card(num))
-        partial_state = PartialState.from_tuple(tpl_param[2])
-        new_state = State(deck, hand, partial_state)
-        return new_state
-
     def __randomize_partial_state(self):
         """Fills both hands and places a face-up card."""
         face_up_card = self.__deck.draw_card()
@@ -222,6 +222,20 @@ class State(object):
 
 class PartialState(object):
     """Stores information available to the active player."""
+
+    @staticmethod
+    def from_tuple(tpl_param):
+        """Return a new partial state from a tuple."""
+        face_up_card = Card(tpl_param[0])
+        suit = tpl_param[1]
+        hand = Hand()
+        for num in tpl_param[2]:
+            hand.add_card(Card(num))
+        history = []
+        for move in tpl_param[3]:
+            history.append(Move.from_tuple(move))
+        new_partial_state = PartialState(face_up_card, suit, hand, history)
+        return new_partial_state
 
     def __init__(self, face_up_card, suit=None, hand=Hand(), history=[]):
         self.__face_up_card = face_up_card
@@ -265,20 +279,6 @@ class PartialState(object):
         history = list(self.__history)
         return history
 
-    @staticmethod
-    def from_tuple(tpl_param):
-        """Return a new partial state from a tuple."""
-        face_up_card = Card(tpl_param[0])
-        suit = tpl_param[1]
-        hand = Hand()
-        for num in tpl_param[2]:
-            hand.add_card(Card(num))
-        history = []
-        for move in tpl_param[3]:
-            history.append(Move.from_tuple(move))
-        new_partial_state = PartialState(face_up_card, suit, hand, history)
-        return new_partial_state
-
     def add_move(self, move):
         """Adds the move to the game's move history."""
         self.__history.append(move)
@@ -314,12 +314,6 @@ class Move(object):
         new_move = Move(tpl_param[0], tpl_param[1], tpl_param[2], tpl_param[3])
         return new_move
 
-    def __init__(self, player_num, face_up_card, suit, number_of_cards):
-        self.__player_num = player_num
-        self.__face_up_card = face_up_card
-        self.__suit = suit
-        self.__number_of_cards = number_of_cards
-
     @staticmethod
     def draw(player_num, number_of_cards):
         """Return a Move representing a card-draw."""
@@ -330,6 +324,12 @@ class Move(object):
     def play(player_num, face_up_card, suit):
         """Return a Move representing a card-play."""
         return Move(player_num, face_up_card, suit)
+
+    def __init__(self, player_num, face_up_card, suit, number_of_cards):
+        self.__player_num = player_num
+        self.__face_up_card = face_up_card
+        self.__suit = suit
+        self.__number_of_cards = number_of_cards
 
     def next_draw(self):
         """Return a new Move representing a card-draw performed immediately after the current Move."""
