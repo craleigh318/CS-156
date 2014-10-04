@@ -288,14 +288,15 @@ class PartialState(object):
             last_non_draw_ind -= 1
         last_card_play = self.__history[last_non_draw_ind]
 
-        legal_moves = \
-            [last_card_play.next_play(card.rank, card.suit)
-                for card in self.__hand.cards if last_card_play.can_precede(card)]
         # We need only consider if a single eight is in the AI's hand, since all 4 eights are considered
         # to be the same from the perspective of the game's rules.
         eight_in_hand = any((card.rank == Card.eight) for card in self.__hand.cards)
         if eight_in_hand:
-            legal_moves += [last_card_play.next_play(Card.eight, suit) for suit in xrange(0, Deck.num_suits())]
+            legal_moves = [last_card_play.next_play(Card.eight, suit) for suit in xrange(0, Deck.num_suits())]
+        hand_no_eights = [card for card in self.__hand.cards if card.rank != Card.eight]
+        legal_moves += \
+            [last_card_play.next_play(card.rank, card.suit)
+                for card in hand_no_eights if last_card_play.can_precede(card)]
 
         return legal_moves
 
