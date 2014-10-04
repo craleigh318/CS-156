@@ -285,6 +285,7 @@ class PartialState(object):
 
     @property
     def legal_moves(self):
+        """Return a list of Moves that can be performed by the AI in this partial state."""
         last_non_draw_ind = -1
         # We assume that the human player goes first, so there is always a move in the move-history list.
         while self.__history[last_non_draw_ind].is_card_draw:
@@ -321,14 +322,17 @@ class Move(object):
 
     @staticmethod
     def draw(player_num, number_of_cards):
+        """Return a Move representing a card-draw."""
         draw_placeholder = 0
         return Move(player_num, draw_placeholder, draw_placeholder, number_of_cards)
 
     @staticmethod
     def play(player_num, face_up_card, suit):
+        """Return a Move representing a card-play."""
         return Move(player_num, face_up_card, suit)
 
     def next_draw(self):
+        """Return a new Move representing a card-draw performed immediately after the current Move."""
         if self.__face_up_card == Card.two:
             num_of_cards_to_draw = 2
         elif self.__face_up_card == Card.queen:
@@ -338,9 +342,11 @@ class Move(object):
         return Move.draw(self.__next_player_num(), num_of_cards_to_draw)
 
     def next_play(self, face_up_card, suit):
+        """Return a new Move representing a card-play performed immediately after the current Move."""
         return Move.play(self.__next_player_num(), face_up_card, suit)
 
     def __next_player_num(self):
+        """Return the ID number (0 or 1) of the player who is to make a move after this Move."""
         return self.__player_num ^ 1
 
     @property
@@ -365,10 +371,12 @@ class Move(object):
 
     @property
     def is_card_draw(self):
+        """Return True if this Move represents a card-draw, otherwise return False."""
         return self.__number_of_cards > 0
 
     @property
     def can_precede(self, next_move_card_candidate):
+        """Return True if next_move_card_candidate can be played after this Move, otherwise return False."""
         if next_move_card_candidate.rank == Card.eight:
             value = True
         elif self.__face_up_card == next_move_card_candidate.rank:
