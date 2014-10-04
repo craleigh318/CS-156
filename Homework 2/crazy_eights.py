@@ -1,3 +1,5 @@
+import driver
+
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 import copy
@@ -461,3 +463,7 @@ class Move(object):
         else:
             value = False
         return value
+
+
+if __name__ == '__main__':
+    driver.start_game()
