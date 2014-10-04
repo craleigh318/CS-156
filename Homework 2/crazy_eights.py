@@ -16,6 +16,7 @@ class CrazyEight(object):
     def move_perfect_knowledge(state):
         """Returns a move by the AI with full knowledge."""
         state_object = State.from_tuple(state)
+        return state_object.best_move()
 
 
 class Card(object):
@@ -113,6 +114,9 @@ class Hand(object):
     def __init__(self, initial_hand=[]):
         self.__cards = list(initial_hand)
 
+    def __len__(self):
+        return len(self.cards)
+
     @property
     def cards(self):
         """A copy of the list of all of the cards in the hand."""
@@ -132,7 +136,7 @@ class Deck(object):
     """The collection of all 52 cards."""
 
     @staticmethod
-    def deck_size():
+    def max_deck_size():
         """The initial number of cards in a deck."""
         return 52
 
@@ -140,8 +144,7 @@ class Deck(object):
     def __shuffled_deck():
         """Returns a filled and shuffled deck."""
         deck = []
-        max_index = Deck.deck_size()
-        for index in xrange(0, max_index):
+        for index in xrange(0, Deck.max_deck_size()):
             deck.append(Card(index))
         random.shuffle(deck)
         return deck
@@ -151,6 +154,9 @@ class Deck(object):
             self.__cards = Deck.__shuffled_deck()
         else:
             self.__cards = list(initial_deck)
+
+    def __len__(self):
+        return len(self.__cards)
 
     @property
     def cards(self):
@@ -221,7 +227,7 @@ class State(object):
         ended = not (self.__deck.cards and self.__hand.cards and self.__partial_state.hand.cards)
         return ended
 
-    def move_result(self, move):
+    def __move_result(self, move):
         """Returns the State that results from making a move."""
         self_copy = copy.deepcopy(self)
 
@@ -240,6 +246,72 @@ class State(object):
                 self_copy.hand.remove_card(move_card)
 
         return self_copy
+
+    def __legal_moves(self):
+        """Return a list of Moves that can be performed by the AI in this state."""
+        last_non_draw_ind = -1
+        # We assume that the human player goes first, so there is always a move in the move-history list.
+        while self.__history[last_non_draw_ind].is_card_draw:
+            last_non_draw_ind -= 1
+        last_card_play = self.__history[last_non_draw_ind]
+
+        # We need only consider if a single eight is in the AI's hand, since all 4 eights are considered
+        # to be the same from the perspective of the game's rules.
+        eight_in_hand = any((card.rank == Card.rank_eight) for card in self.__hand.cards)
+        if eight_in_hand:
+            legal_moves = [last_card_play.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
+        hand_no_eights = [card for card in self.__hand.cards if card.rank != Card.rank_eight]
+        legal_moves += \
+            [last_card_play.next_play(card.rank, card.suit)
+                for card in hand_no_eights if last_card_play.can_precede(card)]
+
+        return legal_moves
+
+    # TODO come up with a good heuristic
+    def __heuristic(self):
+        pass
+
+    def __alpha_beta_search(self, this_player, that_player, depth_counter):
+            if self.game_ended() or depth_counter == 0:
+                return self.__heuristic()
+            else:
+                value = this_player.infinity_value
+                for move in self.__legal_moves():
+                    that_value = self.__move_result(move).alpha_beta_search(that_player, this_player, depth_counter - 1)
+                    value = this_player.find_best_value(that_value, value)
+                    if this_player.find_best_value(value, that_player.best_value) == value:
+                        return value
+                    else:
+                        this_player.best_value(this_player.find_best_value(that_value, value))
+                return value
+
+    def best_move(self):
+        ai_player = MinimaxPlayer(lambda a, b: max(a, b), float("-inf"))
+        human_player = MinimaxPlayer(lambda a, b: min(a, b), float("inf"))
+        max_depth = 10  # TODO mess with this value, or find a better way to find a cutoff point
+        return self.__alpha_beta_search(ai_player, human_player, max_depth)
+
+
+class MinimaxPlayer(object):
+        def __init__(self, comparison_function, infinity_value):
+            self.__comparison_function = comparison_function
+            self.__infinity_value = infinity_value
+            self.__best_value = infinity_value
+
+        @property
+        def infinity_value(self):
+            return self.__infinity_value
+
+        @property
+        def best_value(self):
+            return self.__best_value
+
+        @best_value.setter
+        def best_value(self, new_best_value):
+            self.__best_value = new_best_value
+
+        def find_best_value(self, this_value, that_value):
+            return self.__comparison_function(this_value, that_value)
 
 
 class PartialState(object):
@@ -304,27 +376,6 @@ class PartialState(object):
     def add_move(self, move):
         """Adds the move to the game's move history."""
         self.__history.append(move)
-
-    @property
-    def legal_moves(self):
-        """Return a list of Moves that can be performed by the AI in this partial state."""
-        last_non_draw_ind = -1
-        # We assume that the human player goes first, so there is always a move in the move-history list.
-        while self.__history[last_non_draw_ind].is_card_draw:
-            last_non_draw_ind -= 1
-        last_card_play = self.__history[last_non_draw_ind]
-
-        # We need only consider if a single eight is in the AI's hand, since all 4 eights are considered
-        # to be the same from the perspective of the game's rules.
-        eight_in_hand = any((card.rank == Card.rank_eight) for card in self.__hand.cards)
-        if eight_in_hand:
-            legal_moves = [last_card_play.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
-        hand_no_eights = [card for card in self.__hand.cards if card.rank != Card.rank_eight]
-        legal_moves += \
-            [last_card_play.next_play(card.rank, card.suit)
-                for card in hand_no_eights if last_card_play.can_precede(card)]
-
-        return legal_moves
 
 
 class Move(object):
