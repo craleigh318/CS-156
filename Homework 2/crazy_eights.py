@@ -396,7 +396,7 @@ class Move(object):
     @staticmethod
     def play(player_num, face_up_card, suit):
         """Return a Move representing a card-play."""
-        return Move(player_num, face_up_card, suit)
+        return Move(player_num, face_up_card, suit, 0)
 
     def __init__(self, player_num, face_up_card, suit, number_of_cards):
         self.__player_num = player_num
