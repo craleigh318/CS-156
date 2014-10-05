@@ -4,7 +4,7 @@ __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 import copy
 import random
-
+from collections import Counter
 
 class CrazyEight(object):
     """Contains methods for AI actions."""
@@ -20,12 +20,12 @@ class CrazyEight(object):
         state_object = State.from_tuple(state)
         return state_object.best_move()
 
-
 class Card(object):
     """A playing card."""
 
     rank_two = 1
     rank_eight = 8
+    rank_jack = 10
     rank_queen = 11
 
     @staticmethod
@@ -229,91 +229,142 @@ class State(object):
         ended = not (self.__deck.cards and self.__hand.cards and self.__partial_state.hand.cards)
         return ended
 
-    def __move_result(self, move):
+    def __move_result(self, player_hand, move):
         """Returns the State that results from making a move."""
         self_copy = copy.deepcopy(self)
+        player_hand_copy = copy.deepcopy(player_hand)
 
         if move.is_card_draw:
             for ind in xrange(0, move.number_of_cards):
-                self_copy.hand.add_card(self_copy.deck.draw_card())
+                player_hand_copy.add_card(self_copy.deck.draw_card())
         else:
             # All 8 cards are treated equally by the rules of Crazy Eights, so if we're playing an 8 then we just
             # look for one in our hand and play it rather than trying to play any particular one.
             if move.face_up_card == Card.rank_eight:
-                eight_card = next(card for card in self_copy.hand.cards if card.rank == Card.rank_eight)
-                self_copy.hand.remove_card(eight_card)
+                played_card = next(card for card in player_hand_copy.cards if card.rank == Card.rank_eight)
             else:
                 move_card_deck_index = Card.deck_index(move.face_up_card, move.suit)
-                move_card = Card(move_card_deck_index)
-                self_copy.hand.remove_card(move_card)
+                played_card = Card(move_card_deck_index)
+            player_hand_copy.remove_card(played_card)
 
-        return self_copy
+        self_copy.partial_state.history.append(move)
+        return self_copy, player_hand_copy
 
-    def __legal_moves(self):
+    def __min_move_result(self, move):
+        result_state, result_hand = self.__move_result(self.partial_state.hand, move)
+        result_state.partial_state.hand = result_hand
+        return result_state
+
+    def __max_move_result(self, move):
+        result_state, result_hand = self.__move_result(self.hand, move)
+        result_state.__hand = result_hand
+        return result_state
+
+    def __legal_moves(self, player_hand):
         """Return a list of Moves that can be performed by the AI in this state."""
-        last_non_draw_ind = -1
-        # We assume that the human player goes first, so there is always a move in the move-history list.
-        while self.__history[last_non_draw_ind].is_card_draw:
-            last_non_draw_ind -= 1
-        last_card_play = self.__history[last_non_draw_ind]
 
+        last_card_play = self.partial_state.last_card_play()
         # We need only consider if a single eight is in the AI's hand, since all 4 eights are considered
         # to be the same from the perspective of the game's rules.
         eight_in_hand = any((card.rank == Card.rank_eight) for card in self.__hand.cards)
         if eight_in_hand:
             legal_moves = [last_card_play.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
-        hand_no_eights = [card for card in self.__hand.cards if card.rank != Card.rank_eight]
+        hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
         legal_moves += \
             [last_card_play.next_play(card.rank, card.suit)
              for card in hand_no_eights if last_card_play.can_precede(card)]
 
         return legal_moves
 
-    # TODO come up with a good heuristic
-    def __heuristic(self):
-        pass
+    def __evaluation(self):
+        num_of_legal_moves = len(self.__legal_moves(self.hand))
+        weight_of_legal_move = 1.25
+        evaluation = num_of_legal_moves * weight_of_legal_move
 
-    def __alpha_beta_search(self, this_player, that_player, depth_counter):
-        if self.game_ended() or depth_counter == 0:
-            return self.__heuristic()
-        else:
-            value = this_player.infinity_value
-            for move in self.__legal_moves():
-                that_value = self.__move_result(move).alpha_beta_search(that_player, this_player, depth_counter - 1)
-                value = this_player.find_best_value(that_value, value)
-                if this_player.find_best_value(value, that_player.best_value) == value:
-                    return value
+        last_card_play = self.partial_state.last_card_play
+        last_played_card = Card(Card.deck_index(last_card_play.face_up_card, last_card_play.suit))
+
+        def next_play_weight(card):
+            suit_weight = 0
+            rank_weight = 0
+            # It's less likely that the face up card will remain the same rank as the game continues than it is likely
+            # that it will remain the same suit.
+            if card.suit == last_played_card.suit:
+                suit_weight = 2
+            if card.rank == last_played_card.rank:
+                rank_weight = 0.5
+            return suit_weight + rank_weight
+
+        def count_card_ranks(cards):
+            return Counter([card.rank for card in cards])
+        our_cards = self.hand.cards
+        enemy_cards = self.partial_state.hand.cards
+        enemy_hand_rank_counts = count_card_ranks(enemy_cards)
+        our_hand_rank_counts = count_card_ranks(our_cards)
+
+        def card_rank_weight(rank):
+            if rank == Card.two:
+                # These weights will be counted twice, so their true contribution is weight * 2
+                if our_hand_rank_counts[rank] > enemy_hand_rank_counts[rank]:
+                    return 1.5
                 else:
-                    this_player.best_value = this_player.find_best_value(this_player.best_value, value)
-            return value
+                    return -1.5
+            elif rank == Card.eight:
+                # These weights will be counted twice, so their true contribution is weight * 2
+                if our_hand_rank_counts[rank] > enemy_hand_rank_counts[rank]:
+                    return 1.5
+                else:
+                    return 1.5
+            elif rank == Card.rank_queen:
+                return 4
+            elif rank == Card.rank_jack:
+                return 2
+            else:
+                return 1
+
+        def total_card_weight(card):
+            return next_play_weight(card) + card_rank_weight(card.rank)
+
+        def hand_value(cards):
+            return sum([total_card_weight(card) for card in cards])
+
+        evaluation += hand_value(our_cards) - hand_value(enemy_cards)
+        return evaluation
+
+    def __max_value(self, alpha, beta, depth_counter):
+        if self.game_ended() or depth_counter == 0:
+            return self.__evaluation(), None
+        else:
+            wanted_value = float("-inf")
+            for move in self.__legal_moves(self.hand):
+                min_value = self.__max_move_result().__min_value(alpha, beta)
+                if min_value >= wanted_value:
+                    wanted_value = min_value
+                    wanted_move = move
+                if wanted_value >= beta:
+                    return wanted_value, None
+                alpha = max(alpha, wanted_value)
+
+            return wanted_value, wanted_move
+
+    def __min_value(self, alpha, beta, depth_counter):
+        if self.game_ended() or depth_counter == 0:
+            return self.__evaluation()
+        else:
+            wanted_value = float("inf")
+            for move in self.__legal_moves(self.partial_state.hand):
+                max_value, _ = self.__min_move_result(move).__max_value(alpha, beta)
+                wanted_value = min(wanted_value, max_value)
+                if wanted_value <= alpha:
+                    return wanted_value
+                beta = min(beta, wanted_value)
+
+            return wanted_value
 
     def best_move(self):
-        ai_player = MinimaxPlayer(lambda a, b: max(a, b), float("-inf"))
-        human_player = MinimaxPlayer(lambda a, b: min(a, b), float("inf"))
         max_depth = 10  # TODO mess with this value, or find a better way to find a cutoff point
-        return self.__alpha_beta_search(ai_player, human_player, max_depth)
-
-
-class MinimaxPlayer(object):
-    def __init__(self, comparison_function, infinity_value):
-        self.__comparison_function = comparison_function
-        self.__infinity_value = infinity_value
-        self.__best_value = infinity_value
-
-    @property
-    def infinity_value(self):
-        return self.__infinity_value
-
-    @property
-    def best_value(self):
-        return self.__best_value
-
-    @best_value.setter
-    def best_value(self, new_best_value):
-        self.__best_value = new_best_value
-
-    def find_best_value(self, this_value, that_value):
-        return self.__comparison_function(this_value, that_value)
+        _, best_move = self.__max_value(float("-inf"), float("inf"), max_depth)
+        return best_move
 
 
 class PartialState(object):
@@ -378,6 +429,14 @@ class PartialState(object):
     def add_move(self, move):
         """Adds the move to the game's move history."""
         self.__history.append(move)
+
+    def last_card_play(self):
+        last_non_draw_ind = -1
+        # We assume that the human player goes first, so there is always a move in the move-history list.
+        while self.__history[last_non_draw_ind].is_card_draw:
+            last_non_draw_ind -= 1
+        last_card_play = self.__history[last_non_draw_ind]
+        return last_card_play
 
 
 class Move(object):
