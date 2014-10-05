@@ -79,7 +79,7 @@ class CardNames(object):
         """The full name of the card, plus the deck index."""
         name = CardNames.full_name(card)
         name += ' (#'
-        name += str(card.make_deck_index)
+        name += str(card.deck_index)
         name += ')'
         return name
 
