@@ -10,6 +10,8 @@ from collections import Counter
 class CrazyEight(object):
     """Contains methods for AI actions."""
 
+    depth_limit = 8
+
     @staticmethod
     def move(partial_state):
         """Returns a move by the AI with partial knowledge."""
@@ -19,7 +21,7 @@ class CrazyEight(object):
     def move_perfect_knowledge(state):
         """Returns a move by the AI with full knowledge."""
         state_object = State.from_tuple(state)
-        return state_object.best_move()
+        return state_object.best_move(CrazyEight.depth_limit)
 
 
 class Card(object):
@@ -31,7 +33,7 @@ class Card(object):
     rank_queen = 11
 
     @staticmethod
-    def deck_index(rank, suit):
+    def make_deck_index(rank, suit):
         suit_placement = suit * Card.suit_size()
         return suit_placement + rank
 
@@ -47,6 +49,9 @@ class Card(object):
 
     def __init__(self, deck_index):
         self.__deck_index = deck_index
+
+    def __eq__(self, other):
+        return self.rank == other.rank and self.suit == other.suit
 
     @property
     def deck_index(self):
@@ -74,7 +79,7 @@ class CardNames(object):
         """The full name of the card, plus the deck index."""
         name = CardNames.full_name(card)
         name += ' (#'
-        name += str(card.deck_index)
+        name += str(card.make_deck_index)
         name += ')'
         return name
 
@@ -186,6 +191,8 @@ class Deck(object):
 class State(object):
     """Stores the deck, opponent's hand, and partial state."""
 
+    depth_limit = Hand.initial_num_cards()
+
     @staticmethod
     def from_tuple(tpl_param):
         """Return a new state from a tuple."""
@@ -254,9 +261,11 @@ class State(object):
             if move.face_up_card == Card.rank_eight:
                 played_card = next(card for card in player_hand_copy.cards if card.rank == Card.rank_eight)
             else:
-                move_card_deck_index = Card.deck_index(move.face_up_card, move.suit)
+                move_card_deck_index = Card.make_deck_index(move.face_up_card, move.suit)
                 played_card = Card(move_card_deck_index)
             player_hand_copy.remove_card(played_card)
+            self_copy.partial_state.face_up_card = played_card.rank
+            self_copy.partial_state.suit = played_card.suit
 
         self_copy.partial_state.history.append(move)
         return self_copy, player_hand_copy
@@ -274,16 +283,18 @@ class State(object):
     def __legal_moves(self, player_hand):
         """Return a list of Moves that can be performed by the AI in this state."""
 
-        last_card_play = self.partial_state.last_card_play()
+        last_move = self.partial_state.history[-1]
         # We need only consider if a single eight is in the AI's hand, since all 4 eights are considered
         # to be the same from the perspective of the game's rules.
         eight_in_hand = any((card.rank == Card.rank_eight) for card in self.__hand.cards)
+        legal_moves = []
         if eight_in_hand:
-            legal_moves = [last_card_play.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
+            legal_moves += [last_move.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
         hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
         legal_moves += \
-            [last_card_play.next_play(card.rank, card.suit)
-             for card in hand_no_eights if last_card_play.can_precede(card)]
+            [last_move.next_play(card.rank, card.suit)
+             for card in hand_no_eights if self.partial_state.can_play(card)]
+        legal_moves.append(last_move.next_draw(self.partial_state.face_up_card))
 
         return legal_moves
 
@@ -292,8 +303,7 @@ class State(object):
         weight_of_legal_move = 1.25
         evaluation = num_of_legal_moves * weight_of_legal_move
 
-        last_card_play = self.partial_state.last_card_play
-        last_played_card = Card(Card.deck_index(last_card_play.face_up_card, last_card_play.suit))
+        last_played_card = Card(Card.make_deck_index(self.partial_state.face_up_card, self.partial_state.suit))
 
         def next_play_weight(card):
             suit_weight = 0
@@ -314,13 +324,13 @@ class State(object):
         our_hand_rank_counts = count_card_ranks(our_cards)
 
         def card_rank_weight(rank):
-            if rank == Card.two:
+            if rank == Card.rank_two:
                 # These weights will be counted twice, so their true contribution is weight * 2
                 if our_hand_rank_counts[rank] > enemy_hand_rank_counts[rank]:
                     return 1.5
                 else:
                     return -1.5
-            elif rank == Card.eight:
+            elif rank == Card.rank_eight:
                 # These weights will be counted twice, so their true contribution is weight * 2
                 if our_hand_rank_counts[rank] > enemy_hand_rank_counts[rank]:
                     return 1.5
@@ -348,7 +358,7 @@ class State(object):
         else:
             wanted_value = float("-inf")
             for move in self.__legal_moves(self.hand):
-                min_value = self.__max_move_result().__min_value(alpha, beta)
+                min_value = self.__max_move_result(move).__min_value(alpha, beta, depth_counter - 1)
                 if min_value >= wanted_value:
                     wanted_value = min_value
                     wanted_move = move
@@ -364,7 +374,7 @@ class State(object):
         else:
             wanted_value = float("inf")
             for move in self.__legal_moves(self.partial_state.hand):
-                max_value, _ = self.__min_move_result(move).__max_value(alpha, beta)
+                max_value, _ = self.__min_move_result(move).__max_value(alpha, beta, depth_counter - 1)
                 wanted_value = min(wanted_value, max_value)
                 if wanted_value <= alpha:
                     return wanted_value
@@ -372,9 +382,9 @@ class State(object):
 
             return wanted_value
 
-    def best_move(self):
-        max_depth = 10  # TODO mess with this value, or find a better way to find a cutoff point
-        _, best_move = self.__max_value(float("-inf"), float("inf"), max_depth)
+    # TODO Runs too slow. A single run with a depth limit > 4 takes over 1 second.
+    def best_move(self, depth_limit):
+        _, best_move = self.__max_value(float("-inf"), float("inf"), depth_limit)
         return best_move
 
 
@@ -441,13 +451,19 @@ class PartialState(object):
         """Adds the move to the game's move history."""
         self.__history.append(move)
 
-    def last_card_play(self):
-        last_non_draw_ind = -1
-        # We assume that the human player goes first, so there is always a move in the move-history list.
-        while self.__history[last_non_draw_ind].is_card_draw:
-            last_non_draw_ind -= 1
-        last_card_play = self.__history[last_non_draw_ind]
-        return last_card_play
+    def can_play(self, card):
+        """Return True if card can be played in this state, otherwise return False."""
+        if card.rank == Card.rank_eight:
+            value = True
+        elif self.__face_up_card == card.rank:
+            value = True
+        elif self.__face_up_card == Card.rank_two:
+            value = False
+        elif self.__suit == card.suit:
+            value = True
+        else:
+            value = False
+        return value
 
 
 class Move(object):
@@ -476,11 +492,11 @@ class Move(object):
         self.__suit = suit
         self.__number_of_cards = number_of_cards
 
-    def next_draw(self):
+    def next_draw(self, face_up_card_rank):
         """Return a new Move representing a card-draw performed immediately after the current Move."""
-        if self.__face_up_card == Card.rank_two:
+        if face_up_card_rank == Card.rank_two:
             num_of_cards_to_draw = 2
-        elif self.__face_up_card == Card.rank_queen:
+        elif face_up_card_rank == Card.rank_queen:
             num_of_cards_to_draw = 5
         else:
             num_of_cards_to_draw = 1
@@ -519,21 +535,8 @@ class Move(object):
         """Return True if this Move represents a card-draw, otherwise return False."""
         return self.__number_of_cards > 0
 
-    @property
-    def can_precede(self, next_move_card_candidate):
-        """Return True if next_move_card_candidate can be played after this Move, otherwise return False."""
-        if next_move_card_candidate.rank == Card.rank_eight:
-            value = True
-        elif self.__face_up_card == next_move_card_candidate.rank:
-            value = True
-        elif self.__face_up_card == Card.rank_two:
-            value = False
-        elif self.__suit == next_move_card_candidate.suit:
-            value = True
-        else:
-            value = False
-        return value
-
+    def to_tuple(self):
+        return self.__player_num, self.__face_up_card, self.__suit, self.__number_of_cards
 
 if __name__ == '__main__':
     driver.start_game()
