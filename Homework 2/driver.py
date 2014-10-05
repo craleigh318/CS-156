@@ -20,7 +20,7 @@ class HumanPlayer(object):
         number_of_cards = 0
         move = (0, face_up_card, suit, number_of_cards)
         move = list_actions(move)
-        return Move.from_tuple(move)
+        return move
 
     @staticmethod
     def move_perfect_knowledge(state):
@@ -67,7 +67,7 @@ def list_actions(move):
         face_up_card = int(args[1])
     elif args[0] is 'suit':
         suit = int(args[1])
-    new_move = (player_num, face_up_card, suit, number_of_cards)
+    new_move = Move(player_num, Card(face_up_card), suit, number_of_cards)
     return new_move
 
 
