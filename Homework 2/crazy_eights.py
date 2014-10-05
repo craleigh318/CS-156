@@ -6,6 +6,7 @@ import copy
 import random
 from collections import Counter
 
+
 class CrazyEight(object):
     """Contains methods for AI actions."""
 
