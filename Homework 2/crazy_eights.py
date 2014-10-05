@@ -68,6 +68,15 @@ class CardNames(object):
     """Suits and ranks of cards."""
 
     @staticmethod
+    def full_name_and_deck_value(card):
+        """The full name of the card, plus the deck index."""
+        name = CardNames.full_name(card)
+        name += ' (#'
+        name += str(card.deck_index)
+        name += ')'
+        return name
+
+    @staticmethod
     def full_name(card):
         """The full name of the card."""
         name = CardNames.rank(card.rank)

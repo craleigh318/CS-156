@@ -12,13 +12,7 @@ class HumanPlayer(object):
     @staticmethod
     def move(partial_state):
         """Gets a tuple from the player's input."""
-        print('Face-up card:')
-        print(CardNames.full_name(partial_state.face_up_card))
-        print('')
-        print('Cards in hand:')
-        for card in partial_state.hand.cards:
-            print(CardNames.full_name(card))
-        print('')
+        print_partial_state(partial_state)
         # Get user input.
         print("Enter input as a tuple:")
         str_input = raw_input()
@@ -38,6 +32,22 @@ class AIPlayer(object):
     @staticmethod
     def move_perfect_knowledge(state):
         return CrazyEight.move_perfect_knowledge(state)
+
+
+def print_partial_state(partial_state):
+    """Prints, in console, the face-up card and the player's cards."""
+    print('Face-up card:')
+    print(CardNames.full_name_and_deck_value(partial_state.face_up_card))
+    print('')
+    print('Cards in hand:')
+    for card in partial_state.hand.cards:
+        print(CardNames.full_name_and_deck_value(card))
+    print('')
+
+
+def list_actions(partial_state):
+    """Lists possible actions for human to take."""
+    pass
 
 
 def perform_move(state, move):
