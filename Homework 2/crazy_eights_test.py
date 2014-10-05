@@ -7,21 +7,7 @@ import crazy_eights
 
 class MyTestCase(unittest.TestCase):
     def test_something(self):
-        state = crazy_eights.State()
-        print('Face-up card:')
-        print(crazy_eights.CardNames.full_name(state.partial_state.face_up_card))
-        print('')
-        print('Cards in hand:')
-        for card in state.partial_state.hand.cards:
-            print(crazy_eights.CardNames.full_name(card))
-        print('')
-        print('Opponent\'s hand:')
-        for card in state.hand.cards:
-            print(crazy_eights.CardNames.full_name(card))
-        print('')
-        print('Cards in Deck:')
-        for card in state.deck.cards:
-            print(crazy_eights.CardNames.full_name(card))
+        pass
 
 
 class StateTest(unittest.TestCase):
@@ -45,6 +31,24 @@ class StateTest(unittest.TestCase):
         depth_limit = 4
         expected = (1, 3, 0, 0)
         self.assertEqual(expected, state.best_move(depth_limit).to_tuple())
+
+    def test_random_state(self):
+        state = crazy_eights.State()
+        print('Face-up card:')
+        print(crazy_eights.CardNames.full_name(state.partial_state.face_up_card))
+        print('')
+        print('Cards in hand:')
+        for card in state.partial_state.hand.cards:
+            print(crazy_eights.CardNames.full_name(card))
+        print('')
+        print('Opponent\'s hand:')
+        for card in state.hand.cards:
+            print(crazy_eights.CardNames.full_name(card))
+        print('')
+        print('Cards in Deck:')
+        for card in state.deck.cards:
+            print(crazy_eights.CardNames.full_name(card))
+
 
 if __name__ == '__main__':
     unittest.main()

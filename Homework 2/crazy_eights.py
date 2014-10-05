@@ -318,6 +318,7 @@ class State(object):
 
         def count_card_ranks(cards):
             return Counter([card.rank for card in cards])
+
         our_cards = self.hand.cards
         enemy_cards = self.partial_state.hand.cards
         enemy_hand_rank_counts = count_card_ranks(enemy_cards)
@@ -537,6 +538,7 @@ class Move(object):
 
     def to_tuple(self):
         return self.__player_num, self.__face_up_card, self.__suit, self.__number_of_cards
+
 
 if __name__ == '__main__':
     driver.start_game()
