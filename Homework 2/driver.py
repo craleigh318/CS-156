@@ -11,19 +11,23 @@ from crazy_eights import *
 class HumanPlayer(object):
     @staticmethod
     def move(partial_state):
-        return HumanPlayer.move(partial_state)
-
-    @staticmethod
-    def move_perfect_knowledge(state):
-        return HumanPlayer.move(state.partial_state)
-
-    @staticmethod
-    def move(partial_state):
         """Gets a tuple from the player's input."""
+        print('Face-up card:')
+        print(CardNames.full_name(partial_state.face_up_card))
+        print('')
+        print('Cards in hand:')
+        for card in partial_state.hand.cards:
+            print(CardNames.full_name(card))
+        print('')
+        # Get user input.
         print("Enter input as a tuple:")
         str_input = raw_input()
         tpl_input = tuple(str_input)
         return tpl_input
+
+    @staticmethod
+    def move_perfect_knowledge(state):
+        return HumanPlayer.move(state.partial_state)
 
 
 class AIPlayer(object):

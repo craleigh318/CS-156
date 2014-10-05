@@ -290,7 +290,7 @@ class State(object):
     def best_move(self):
         ai_player = MinimaxPlayer(lambda a, b: max(a, b), float("-inf"))
         human_player = MinimaxPlayer(lambda a, b: min(a, b), float("inf"))
-        max_depth = 10  # TODO mess with this value, or find a better way to find a cutoff point
+        max_depth = Hand.initial_num_cards()
         return self.__alpha_beta_search(ai_player, human_player, max_depth)
 
 
