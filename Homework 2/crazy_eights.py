@@ -20,6 +20,7 @@ class CrazyEight(object):
         state_object = State.from_tuple(state)
         return state_object.best_move()
 
+
 class Card(object):
     """A playing card."""
 
