@@ -15,9 +15,12 @@ class HumanPlayer(object):
         print_partial_state(partial_state)
         # Get user input.
         print("Enter input as a tuple:")
-        str_input = raw_input()
-        tpl_input = tuple(str_input)
-        return tpl_input
+        face_up_card = partial_state.face_up_card.deck_index
+        suit = partial_state.suit
+        number_of_cards = 0
+        move = (0, face_up_card, suit, number_of_cards)
+        move = list_actions(move)
+        return Move.from_tuple(move)
 
     @staticmethod
     def move_perfect_knowledge(state):
@@ -45,9 +48,27 @@ def print_partial_state(partial_state):
     print('')
 
 
-def list_actions(partial_state):
+def list_actions(move):
     """Lists possible actions for human to take."""
-    pass
+    print('Available actions:')
+    print('[play #]: Place the card face-up.  # is the card number.')
+    print('[draw]: Draw a card from the deck.')
+    print('[suit #]: Declare a new suit after playing an 8.  # is the suit number')
+    # print('[end]: End your turn.')
+    str_input = raw_input()
+    args = str_input.split()
+    player_num = move[0]
+    face_up_card = move[1]
+    suit = move[2]
+    number_of_cards = move[3]
+    if args[0] is 'draw':
+        number_of_cards += 1
+    elif args[0] is 'play':
+        face_up_card = int(args[1])
+    elif args[0] is 'suit':
+        suit = int(args[1])
+    new_move = (player_num, face_up_card, suit, number_of_cards)
+    return new_move
 
 
 def perform_move(state, move):
