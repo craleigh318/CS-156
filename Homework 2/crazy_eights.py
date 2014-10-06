@@ -19,7 +19,7 @@ class CrazyEight(object):
         possible_moves = []
         for i in xrange(100):
             guess_state = partial_state_object.guess_state()
-            good_move = guess_state.best_move(CrazyEight.depth_limit)
+            good_move = CrazyEight.move_perfect_knowledge(guess_state)
             possible_moves.append(good_move)
         # Count the most common move in the list.
         list_counter = Counter(possible_moves)
@@ -29,8 +29,7 @@ class CrazyEight(object):
     @staticmethod
     def move_perfect_knowledge(state):
         """Returns a move by the AI with full knowledge."""
-        state_object = State.from_tuple(state)
-        return state_object.best_move(CrazyEight.depth_limit)
+        return state.best_move(CrazyEight.depth_limit)
 
 
 class Card(object):
@@ -418,6 +417,12 @@ class PartialState(object):
         new_partial_state = PartialState(face_up_card, hand, history)
         return new_partial_state
 
+    def to_tuple(self):
+        """Returns this object represented as a tuple, as defined in the assignment."""
+        hand_deck_indices = [card.deck_index for card in self.hand.cards]
+        history_move_tuples = [move.to_tuple() for move in self.history]
+        return self.face_up_card.rank, self.face_up_card.suit, hand_deck_indices, history_move_tuples
+
     def __init__(self, face_up_card, hand=Hand(), history=[]):
         self.__face_up_card = face_up_card
         self.__hand = hand
@@ -513,18 +518,17 @@ class Move(object):
     @staticmethod
     def draw(player_num, number_of_cards):
         """Return a Move representing a card-draw."""
-        draw_placeholder = 0
-        return Move(player_num, draw_placeholder, draw_placeholder, number_of_cards)
+        draw_placeholder = Card(0)
+        return Move(player_num, draw_placeholder, number_of_cards)
 
     @staticmethod
-    def play(player_num, face_up_card, suit):
+    def play(player_num, rank, suit):
         """Return a Move representing a card-play."""
-        return Move(player_num, face_up_card, suit, 0)
+        return Move(player_num, Card(rank, suit), 0)
 
-    def __init__(self, player_num, face_up_card, suit, number_of_cards):
+    def __init__(self, player_num, face_up_card, number_of_cards):
         self.__player_num = player_num
         self.__face_up_card = face_up_card
-        self.__suit = suit
         self.__number_of_cards = number_of_cards
 
     def next_draw(self, face_up_card_rank):
@@ -537,9 +541,9 @@ class Move(object):
             num_of_cards_to_draw = 1
         return Move.draw(self.__next_player_num(), num_of_cards_to_draw)
 
-    def next_play(self, face_up_card, suit):
+    def next_play(self, rank, suit):
         """Return a new Move representing a card-play performed immediately after the current Move."""
-        return Move.play(self.__next_player_num(), face_up_card, suit)
+        return Move.play(self.__next_player_num(), rank, suit)
 
     def __next_player_num(self):
         """Return the ID number (0 or 1) of the player who is to make a move after this Move."""
@@ -554,11 +558,6 @@ class Move(object):
     def face_up_card(self):
         """The card that was placed face-up in this move."""
         return self.__face_up_card
-
-    @property
-    def suit(self):
-        """The suit that must be matched in the next turn."""
-        return self.__suit
 
     @property
     def number_of_cards(self):
