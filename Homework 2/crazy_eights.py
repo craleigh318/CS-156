@@ -305,7 +305,7 @@ class State(object):
         legal_moves += \
             [last_move.next_play(card.rank, card.suit)
              for card in hand_no_eights if self.partial_state.can_play(card)]
-        legal_moves.append(last_move.next_draw(self.partial_state.face_up_card))
+        legal_moves.append(last_move.next_draw(self.partial_state.face_up_card.rank))
 
         return legal_moves
 
