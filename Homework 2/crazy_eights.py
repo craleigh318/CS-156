@@ -27,10 +27,12 @@ class CrazyEight(object):
 class Card(object):
     """A playing card."""
 
-    rank_two = 1
-    rank_eight = 8
-    rank_jack = 10
-    rank_queen = 11
+    # Deck indexing starts at 0
+    rank_offset = 1
+    rank_two = 2 - rank_offset
+    rank_eight = 8 - rank_offset
+    rank_jack = 11 - rank_offset
+    rank_queen = 12 - rank_offset
 
     @staticmethod
     def make_deck_index(rank, suit):
