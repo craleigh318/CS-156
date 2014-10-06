@@ -64,8 +64,10 @@ class Card(object):
     def __eq__(self, other):
         return self.rank == other.rank and self.suit == other.suit
 
-    def __copy__(self):
-        return Card(self.deck_index)
+    def __deepcopy__(self, memo):
+        self_copy = Card(self.__deck_index)
+        memo[id(self)] = self_copy
+        return self_copy
 
     @property
     def deck_index(self):
@@ -152,8 +154,21 @@ class Hand(object):
         return len(self.cards)
 
     def __deepcopy__(self, memo):
-        cards_copy = [copy.copy(card) for card in self.cards]
-        return Hand(cards_copy)
+        cards_id = id(self.__cards)
+        if cards_id in memo:
+            cards_copy = memo[cards_id]
+        else:
+            cards_copy = []
+            for card in self.__cards:
+                cards_copy += _deepcopy([card], memo)
+            memo[cards_id] = cards_copy
+
+        self_id = id(self)
+        if self_id in memo:
+            self_copy = memo[self_id]
+        else:
+            self_copy = Hand(cards_copy)
+        return self_copy
 
     @property
     def cards(self):
@@ -197,8 +212,21 @@ class Deck(object):
         return len(self.__cards)
 
     def __deepcopy__(self, memo):
-        cards_copy = [copy.copy(card) for card in self.cards]
-        return Deck(cards_copy)
+        cards_id = id(self.__cards)
+        if cards_id in memo:
+            cards_copy = memo[cards_id]
+        else:
+            cards_copy = []
+            for card in self.__cards:
+                cards_copy += _deepcopy([card], memo)
+            memo[cards_id] = cards_copy
+
+        self_id = id(self)
+        if self_id in memo:
+            self_copy = memo[self_id]
+        else:
+            self_copy = Deck(cards_copy)
+        return self_copy
 
     @property
     def cards(self):
@@ -224,10 +252,17 @@ class State(object):
             self.__partial_state = partial_state
 
     def __deepcopy__(self, memo):
-        deck_copy = copy.deepcopy(self.deck)
-        hand_copy = copy.deepcopy(self.hand)
-        partial_state_copy = copy.deepcopy(self.partial_state)
-        return State(deck_copy, hand_copy, partial_state_copy)
+        deck_copy = _deepcopy(self.__deck, memo)
+        hand_copy = _deepcopy(self.__hand, memo)
+        partial_state_copy = _deepcopy(self.__partial_state, memo)
+
+        self_id = id(self)
+        if self_id in memo:
+            self_copy = memo[self_id]
+        else:
+            self_copy = State(deck_copy, hand_copy, partial_state_copy)
+            memo[self_id] = self_copy
+        return self_copy
 
     @property
     def deck(self):
@@ -282,12 +317,14 @@ class State(object):
             else:
                 played_card = move.face_up_card
             player_hand_copy.remove_card(played_card)
-            self_copy.partial_state.face_up_card = Card(Card.make_deck_index(played_card.rank, played_card.suit))
+            self_copy.partial_state.face_up_card = played_card
 
         self_copy.partial_state.history.append(move)
         return self_copy, player_hand_copy
 
     def __min_move_result(self, move):
+        print("MOVE: " + str(move.to_tuple()))
+        print("HAND: " + str([str((card.rank, card.suit)) for card in self.partial_state.hand.cards]))
         result_state, result_hand = self.__move_result(self.partial_state.hand, move)
         result_state.partial_state.hand = result_hand
         return result_state
@@ -376,7 +413,10 @@ class State(object):
             return self.__evaluation()
         else:
             wanted_value = float("inf")
-            for move in self.partial_state.legal_moves(self.partial_state.hand):
+            legal_moves = self.partial_state.legal_moves(self.partial_state.hand)
+            for move in legal_moves:
+                print(str([move.to_tuple() for move in legal_moves]))
+                print("CONSIDERING MOVE: " + str(move.to_tuple()))
                 max_value, _ = self.__min_move_result(move).__max_value(alpha, beta, depth_counter - 1)
                 wanted_value = min(wanted_value, max_value)
                 if wanted_value <= alpha:
@@ -418,10 +458,26 @@ class PartialState(object):
         self.__history = list(history)
 
     def __deepcopy__(self, memo):
-        face_up_card_copy = copy.copy(self.face_up_card)
-        hand_copy = copy.deepcopy(self.hand)
-        history_copy = [copy.deepcopy(move) for move in self.history]
-        return PartialState(face_up_card_copy, hand_copy, history_copy)
+        face_up_card_copy = _deepcopy(self.__face_up_card, memo)
+        hand_copy = _deepcopy(self.__hand, memo)
+
+        history_id = id(self.__history)
+        if history_id in memo:
+            history_copy = memo[history_id]
+        else:
+            history_copy = []
+            for move in self.__history:
+                history_copy += _deepcopy([move], memo)
+            memo[history_id] = history_copy
+
+        self_id = id(self)
+        if self_id in memo:
+            self_copy = memo[self_id]
+        else:
+            self_copy = PartialState(face_up_card_copy, hand_copy, history_copy)
+            memo[self_id] = self_copy
+
+        return self_copy
 
     @property
     def face_up_card(self):
@@ -511,11 +567,8 @@ class PartialState(object):
             legal_moves += [last_move.next_play(Card(Card.make_deck_index(Card.rank_eight, suit)))
                             for suit in xrange(0, Card.num_suits())]
         hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
-        legal_moves += \
-            [last_move.next_play(card)
-             for card in hand_no_eights if self.can_play(card)]
+        legal_moves += [last_move.next_play(card) for card in hand_no_eights if self.can_play(card)]
         legal_moves.append(last_move.next_draw(self.face_up_card.rank))
-
         return legal_moves
 
     def last_move(self):
@@ -559,8 +612,14 @@ class Move(object):
                 self.number_of_cards == other.number_of_cards)
 
     def __deepcopy__(self, memo):
-        face_up_card_copy = copy.copy(self.face_up_card)
-        return Move(self.player_num, face_up_card_copy, self.number_of_cards)
+        face_up_card_copy = _deepcopy(self.__face_up_card, memo)
+        self_id = id(self)
+        if self_id in memo:
+            self_copy = memo[self_id]
+        else:
+            self_copy = Move(self.player_num, face_up_card_copy, self.number_of_cards)
+            memo[self_id] = self_copy
+        return self_copy
 
     def next_draw(self, face_up_card_rank):
         """Return a new Move representing a card-draw performed immediately after the current Move."""
@@ -602,6 +661,16 @@ class Move(object):
 
     def to_tuple(self):
         return self.__player_num, self.__face_up_card.rank, self.__face_up_card.suit, self.__number_of_cards
+
+
+def _deepcopy(old_obj, memo):
+    old_obj_id = id(old_obj)
+    if old_obj_id in memo:
+        return memo[old_obj_id]
+    else:
+        old_obj_copy = copy.deepcopy(old_obj, memo)
+        memo[old_obj_id] = old_obj_copy
+        return old_obj_copy
 
 
 if __name__ == '__main__':
