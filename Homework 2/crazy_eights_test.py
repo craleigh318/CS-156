@@ -21,7 +21,7 @@ class StateTest(unittest.TestCase):
         partial_state = crazy_eights.PartialState(
             face_up_card=face_up_card,
             hand=human_hand,
-            history=[crazy_eights.Move.play(0, face_up_card.rank, face_up_card.suit)]
+            history=[crazy_eights.Move.play(0, face_up_card)]
         )
         state = crazy_eights.State(
             hand=ai_hand,
@@ -45,7 +45,7 @@ class StateTest(unittest.TestCase):
 
     def test_best_move(self):
         state = StateTest.make_test_state()
-        depth_limit = 4
+        depth_limit = 8
         expected = (1, 3, 0, 0)
         self.assertEqual(expected, state.best_move(depth_limit).to_tuple())
 
