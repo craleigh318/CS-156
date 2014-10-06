@@ -335,19 +335,19 @@ class State(object):
         enemy_hand_rank_counts = count_card_ranks(enemy_cards)
         our_hand_rank_counts = count_card_ranks(our_cards)
 
-        def card_rank_weight(rank):
+        def card_rank_weight(rank, good_hand_rank_counts, bad_hand_rank_counts):
             if rank == Card.rank_two:
                 # These weights will be counted twice, so their true contribution is weight * 2
-                if our_hand_rank_counts[rank] > enemy_hand_rank_counts[rank]:
+                if good_hand_rank_counts[rank] > bad_hand_rank_counts[rank]:
                     return 1.5
                 else:
                     return -1.5
             elif rank == Card.rank_eight:
                 # These weights will be counted twice, so their true contribution is weight * 2
-                if our_hand_rank_counts[rank] > enemy_hand_rank_counts[rank]:
+                if good_hand_rank_counts[rank] > bad_hand_rank_counts[rank]:
                     return 1.5
                 else:
-                    return 1.5
+                    return -1.5
             elif rank == Card.rank_queen:
                 return 4
             elif rank == Card.rank_jack:
@@ -355,13 +355,16 @@ class State(object):
             else:
                 return 1
 
-        def total_card_weight(card):
-            return next_play_weight(card) + card_rank_weight(card.rank)
+        def total_card_weight(card, good_hand_rank_counts, bad_hand_rank_counts):
+            return next_play_weight(card) + card_rank_weight(card.rank, good_hand_rank_counts, bad_hand_rank_counts)
 
-        def hand_value(cards):
-            return sum([total_card_weight(card) for card in cards])
+        def hand_value(cards, good_hand_rank_counts, bad_hand_rank_counts):
+            return sum([total_card_weight(card, good_hand_rank_counts, bad_hand_rank_counts) for card in cards])
 
-        evaluation += hand_value(our_cards) - hand_value(enemy_cards)
+        positive_hand_value = hand_value(our_cards, our_hand_rank_counts, enemy_hand_rank_counts)
+        negative_hand_value = -hand_value(enemy_cards, enemy_hand_rank_counts, our_hand_rank_counts)
+        evaluation += positive_hand_value + negative_hand_value
+
         return evaluation
 
     def __max_value(self, alpha, beta, depth_counter):
