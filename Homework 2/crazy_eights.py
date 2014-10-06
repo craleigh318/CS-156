@@ -465,7 +465,6 @@ class PartialState(object):
                     break
             if add_card:
                 initial_list.append(Card(i))
-        # Shuffle list
         random.shuffle(initial_list)
         # Remove possible opponent cards.
         opponent_num_cards = self.get_opponent_num_cards(0)
