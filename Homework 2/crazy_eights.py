@@ -288,26 +288,8 @@ class State(object):
         result_state.__hand = result_hand
         return result_state
 
-    def __legal_moves(self, player_hand):
-        """Return a list of Moves that can be performed by a player with a certain hand in this state."""
-
-        last_move = self.partial_state.history[-1]
-        # We need only consider if a single eight is in the hand, since all 4 eights are considered
-        # to be the same from the perspective of the game's rules.
-        eight_in_hand = any((card.rank == Card.rank_eight) for card in player_hand.cards)
-        legal_moves = []
-        if eight_in_hand:
-            legal_moves += [last_move.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
-        hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
-        legal_moves += \
-            [last_move.next_play(card.rank, card.suit)
-             for card in hand_no_eights if self.partial_state.can_play(card)]
-        legal_moves.append(last_move.next_draw(self.partial_state.face_up_card.rank))
-
-        return legal_moves
-
     def __evaluation(self):
-        num_of_legal_moves = len(self.__legal_moves(self.hand))
+        num_of_legal_moves = len(self.partial_state.legal_moves(self.hand))
         weight_of_legal_move = 1.25
         evaluation = num_of_legal_moves * weight_of_legal_move
 
@@ -369,7 +351,7 @@ class State(object):
             return self.__evaluation(), None
         else:
             wanted_value = float("-inf")
-            for move in self.__legal_moves(self.hand):
+            for move in self.partial_state.legal_moves(self.hand):
                 min_value = self.__max_move_result(move).__min_value(alpha, beta, depth_counter - 1)
                 if min_value >= wanted_value:
                     wanted_value = min_value
@@ -385,7 +367,7 @@ class State(object):
             return self.__evaluation()
         else:
             wanted_value = float("inf")
-            for move in self.__legal_moves(self.partial_state.hand):
+            for move in self.partial_state.legal_moves(self.partial_state.hand):
                 max_value, _ = self.__min_move_result(move).__max_value(alpha, beta, depth_counter - 1)
                 wanted_value = min(wanted_value, max_value)
                 if wanted_value <= alpha:
@@ -474,10 +456,10 @@ class PartialState(object):
         num_cards = 8
         for move in self.__history:
             if move.player_num == opponent_num:
-                # Minus one card for placing face-up.
-                num_cards -= 1
-                # Plus number of card draws.
-                num_cards += move.number_of_cards
+                if move.is_card_draw:
+                    num_cards += move.number_of_cards
+                else:
+                    num_cards -= 1
         return num_cards
 
     def random_state(self):
@@ -504,6 +486,23 @@ class PartialState(object):
         guessed_state = State(deck, opponent_hand, self)
         return guessed_state
 
+    def legal_moves(self, player_hand):
+        """Return a list of Moves that can be performed by a player with a certain hand in this state."""
+
+        last_move = self.history[-1]
+        # We need only consider if a single eight is in the hand, since all 4 eights are considered
+        # to be the same from the perspective of the game's rules.
+        eight_in_hand = any((card.rank == Card.rank_eight) for card in player_hand.cards)
+        legal_moves = []
+        if eight_in_hand:
+            legal_moves += [last_move.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
+        hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
+        legal_moves += \
+            [last_move.next_play(card.rank, card.suit)
+             for card in hand_no_eights if self.can_play(card)]
+        legal_moves.append(last_move.next_draw(self.face_up_card.rank))
+
+        return legal_moves
 
 class Move(object):
     """An action taken by a player."""
