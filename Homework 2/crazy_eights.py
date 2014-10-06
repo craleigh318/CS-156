@@ -16,6 +16,12 @@ class CrazyEight(object):
     def move(partial_state):
         """Returns a move by the AI with partial knowledge."""
         partial_state_object = PartialState.from_tuple(partial_state)
+        possible_moves = []
+        for i in xrange(100):
+            guess_state = partial_state_object.guess_state()
+            good_move = CrazyEight.move_perfect_knowledge(guess_state)
+            possible_moves.append(good_move)
+            # TODO: Count the most common move in the list.
 
     @staticmethod
     def move_perfect_knowledge(state):
