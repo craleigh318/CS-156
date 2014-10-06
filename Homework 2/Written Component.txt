@@ -4,6 +4,10 @@ Eight queens on a chess board need to be placed so that none of them can capture
 Beam Search tries to find the quickest solution, by considering all possible future states and returning the first acceptable one reached.
 Hill Climbing focuses only on the moves that lead to the best future state, and returns the following successful stae once it is reached.
 
+Assume that the eight queens start lined up at the top row.  The queens share the first row, but they are all already in seperate diagonals and columns.
 
+A hill-climbing AI will move one of the queens at least two squares down.  The AI will not move one square down, because then the queen will be in another's diagonal.  The AI will not move the queen into another column, because then the queen will occupy the column of another queen.  Queens will continue to move in their column, avoiding shared rows and diagonals, until an acceptable state is reached, even if this is not the fastest way.
+
+A beam-searching AI will consider all of the possible moves that it can do with the queens (aside from captures) and the states that will result from them.  From there, it will go to each resulting state and make all possible new moves for them.  This will exponentially grow the tree of all possible states.  This tree will keep growing this way until an acceptable solution is reached.  The result will always be a list of moves that will require the least amount of turns.
 
 Problem 2:
