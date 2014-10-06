@@ -18,7 +18,7 @@ class CrazyEight(object):
         partial_state_object = PartialState.from_tuple(partial_state)
         possible_moves = []
         for i in xrange(100):
-            guess_state = partial_state_object.guess_state()
+            guess_state = partial_state_object.random_state()
             good_move = CrazyEight.move_perfect_knowledge(guess_state)
             possible_moves.append(good_move)
         # Count the most common move in the list.
@@ -29,7 +29,7 @@ class CrazyEight(object):
     @staticmethod
     def move_perfect_knowledge(state):
         """Returns a move by the AI with full knowledge."""
-        return state.best_move(CrazyEight.depth_limit)
+        return state.best_move(CrazyEight.depth_limit).to_tuple()
 
 
 class Card(object):
@@ -268,11 +268,10 @@ class State(object):
         else:
             # All 8 cards are treated equally by the rules of Crazy Eights, so if we're playing an 8 then we just
             # look for one in our hand and play it rather than trying to play any particular one.
-            if move.face_up_card == Card.rank_eight:
+            if move.face_up_card.rank == Card.rank_eight:
                 played_card = next(card for card in player_hand_copy.cards if card.rank == Card.rank_eight)
             else:
-                move_card_deck_index = Card.make_deck_index(move.face_up_card, move.suit)
-                played_card = Card(move_card_deck_index)
+                played_card = move.face_up_card
             player_hand_copy.remove_card(played_card)
             self_copy.partial_state.face_up_card = Card(Card.make_deck_index(played_card.rank, played_card.suit))
 
@@ -481,8 +480,8 @@ class PartialState(object):
                 num_cards += move.number_of_cards
         return num_cards
 
-    def guess_state(self):
-        """Guesses the whole state from the partial state."""
+    def random_state(self):
+        """Generates a random whole state from the partial state."""
         # Make a list from cards that this player does not have.
         initial_list = []
         for i in xrange(Deck.max_deck_size()):
@@ -512,7 +511,7 @@ class Move(object):
     @staticmethod
     def from_tuple(tpl_param):
         """Return a new move from a tuple."""
-        new_move = Move(tpl_param[0], tpl_param[1], tpl_param[2], tpl_param[3])
+        new_move = Move(tpl_param[0], Card(Card.make_deck_index(tpl_param[1], tpl_param[2])), tpl_param[3])
         return new_move
 
     @staticmethod
@@ -524,7 +523,7 @@ class Move(object):
     @staticmethod
     def play(player_num, rank, suit):
         """Return a Move representing a card-play."""
-        return Move(player_num, Card(rank, suit), 0)
+        return Move(player_num, Card(Card.make_deck_index(rank, suit)), 0)
 
     def __init__(self, player_num, face_up_card, number_of_cards):
         self.__player_num = player_num
@@ -570,7 +569,7 @@ class Move(object):
         return self.__number_of_cards > 0
 
     def to_tuple(self):
-        return self.__player_num, self.__face_up_card, self.__suit, self.__number_of_cards
+        return self.__player_num, self.__face_up_card.rank, self.__face_up_card.suit, self.__number_of_cards
 
 
 if __name__ == '__main__':

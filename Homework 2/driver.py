@@ -22,7 +22,7 @@ class HumanPlayer(object):
 class AIPlayer(object):
     @staticmethod
     def move(partial_state):
-        return CrazyEight.move(partial_state)
+        return Move.from_tuple(CrazyEight.move(partial_state))
 
 
 def print_partial_state(partial_state):

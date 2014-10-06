@@ -68,7 +68,7 @@ class StateTest(unittest.TestCase):
 
     def test_move_from_partial_state(self):
         partial_state = crazy_eights.PartialState.from_tuple((0, 0, [1, 2, 3, 4, 5, 6, 7, 8], []))
-        state = partial_state.guess_state()
+        state = partial_state.random_state()
         print('Face-up card:')
         print(crazy_eights.CardNames.full_name(state.partial_state.face_up_card))
         print('')
