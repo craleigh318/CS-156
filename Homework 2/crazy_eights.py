@@ -275,7 +275,7 @@ class State(object):
                 move_card_deck_index = Card.make_deck_index(move.face_up_card, move.suit)
                 played_card = Card(move_card_deck_index)
             player_hand_copy.remove_card(played_card)
-            self_copy.partial_state.face_up_card = played_card.rank
+            self_copy.partial_state.face_up_card = Card(Card.make_deck_index(played_card.rank, played_card.suit))
             self_copy.partial_state.suit = played_card.suit
 
         self_copy.partial_state.history.append(move)
@@ -292,12 +292,12 @@ class State(object):
         return result_state
 
     def __legal_moves(self, player_hand):
-        """Return a list of Moves that can be performed by the AI in this state."""
+        """Return a list of Moves that can be performed by a player with a certain hand in this state."""
 
         last_move = self.partial_state.history[-1]
-        # We need only consider if a single eight is in the AI's hand, since all 4 eights are considered
+        # We need only consider if a single eight is in the hand, since all 4 eights are considered
         # to be the same from the perspective of the game's rules.
-        eight_in_hand = any((card.rank == Card.rank_eight) for card in self.__hand.cards)
+        eight_in_hand = any((card.rank == Card.rank_eight) for card in player_hand.cards)
         legal_moves = []
         if eight_in_hand:
             legal_moves += [last_move.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
@@ -470,9 +470,9 @@ class PartialState(object):
         """Return True if card can be played in this state, otherwise return False."""
         if card.rank == Card.rank_eight:
             value = True
-        elif self.__face_up_card == card.rank:
+        elif self.__face_up_card.rank == card.rank:
             value = True
-        elif self.__face_up_card == Card.rank_two:
+        elif self.__face_up_card.rank == Card.rank_two:
             value = False
         elif self.__suit == card.suit:
             value = True
