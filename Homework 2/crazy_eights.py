@@ -262,8 +262,10 @@ class State(object):
         player_hand_copy = copy.deepcopy(player_hand)
 
         if move.is_card_draw:
-            for ind in xrange(0, move.number_of_cards):
+            draw_count = 0
+            while draw_count < move.number_of_cards and len(self.deck) > 0:
                 player_hand_copy.add_card(self_copy.deck.draw_card())
+                draw_count += 1
         else:
             # All 8 cards are treated equally by the rules of Crazy Eights, so if we're playing an 8 then we just
             # look for one in our hand and play it rather than trying to play any particular one.
