@@ -276,7 +276,6 @@ class State(object):
                 played_card = Card(move_card_deck_index)
             player_hand_copy.remove_card(played_card)
             self_copy.partial_state.face_up_card = Card(Card.make_deck_index(played_card.rank, played_card.suit))
-            self_copy.partial_state.suit = played_card.suit
 
         self_copy.partial_state.history.append(move)
         return self_copy, player_hand_copy
@@ -409,23 +408,18 @@ class PartialState(object):
     @staticmethod
     def from_tuple(tpl_param):
         """Return a new partial state from a tuple."""
-        face_up_card = Card(tpl_param[0])
-        suit = tpl_param[1]
+        face_up_card = Card(Card.make_deck_index(tpl_param[0], tpl_param[1]))
         hand = Hand()
         for num in tpl_param[2]:
             hand.add_card(Card(num))
         history = []
         for move in tpl_param[3]:
             history.append(Move.from_tuple(move))
-        new_partial_state = PartialState(face_up_card, suit, hand, history)
+        new_partial_state = PartialState(face_up_card, hand, history)
         return new_partial_state
 
-    def __init__(self, face_up_card, suit=None, hand=Hand(), history=[]):
+    def __init__(self, face_up_card, hand=Hand(), history=[]):
         self.__face_up_card = face_up_card
-        if suit is None:
-            self.__suit = face_up_card.suit
-        else:
-            self.__suit = suit
         self.__hand = hand
         self.__history = list(history)
 
@@ -437,15 +431,6 @@ class PartialState(object):
     @face_up_card.setter
     def face_up_card(self, value):
         self.__face_up_card = value
-
-    @property
-    def suit(self):
-        """The suit that the active player must match."""
-        return self.__suit
-
-    @suit.setter
-    def suit(self, value):
-        self.__suit = value
 
     @property
     def hand(self):
@@ -474,7 +459,7 @@ class PartialState(object):
             value = True
         elif self.__face_up_card.rank == Card.rank_two:
             value = False
-        elif self.__suit == card.suit:
+        elif self.__face_up_card.suit == card.suit:
             value = True
         else:
             value = False
