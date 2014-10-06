@@ -490,7 +490,7 @@ class PartialState(object):
         """Guesses the whole state from the partial state."""
         # Make a list from cards that this player does not have.
         initial_list = []
-        for i in xrange[Deck.max_deck_size()]:
+        for i in xrange(Deck.max_deck_size()):
             add_card = True
             for card in self.hand.cards:
                 if i == card.deck_index:

@@ -50,7 +50,22 @@ class StateTest(unittest.TestCase):
             print(crazy_eights.CardNames.full_name(card))
 
     def test_move_from_partial_state(self):
-        pass
+        partial_state = crazy_eights.PartialState.from_tuple((0, 0, [1, 2, 3, 4, 5, 6, 7, 8], []))
+        state = partial_state.guess_state()
+        print('Face-up card:')
+        print(crazy_eights.CardNames.full_name(state.partial_state.face_up_card))
+        print('')
+        print('Cards in hand:')
+        for card in state.partial_state.hand.cards:
+            print(crazy_eights.CardNames.full_name(card))
+        print('')
+        print('Opponent\'s hand:')
+        for card in state.hand.cards:
+            print(crazy_eights.CardNames.full_name(card))
+        print('')
+        print('Cards in Deck:')
+        for card in state.deck.cards:
+            print(crazy_eights.CardNames.full_name(card))
 
 
 if __name__ == '__main__':
