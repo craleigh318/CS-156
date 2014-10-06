@@ -8,18 +8,63 @@ both the human and AI players.
 from crazy_eights import *
 
 
-class HumanPlayer(object):
+class Player(object):
+    def __init__(self, number):
+        self.__number = number
+
+    @property
+    def number(self):
+        return self.__number
+
+
+class HumanPlayer(Player):
+
     @staticmethod
-    def move(partial_state):
-        """Gets a tuple from the player's input."""
+    def __list_actions():
+        """Lists possible actions for human to take."""
+        print('Available actions:')
+        print('[play #]: Place the card face-up.  # is the card number.')
+        print('[draw]: Draw a card from the deck.')
+        print('[suit #]: Declare a new suit after playing an 8.  # is the suit number')
+        # print('[end]: End your turn.')
+
+    def __init__(self, number):
+        super(HumanPlayer, self).__init__(number)
+
+    def move(self, partial_state):
+        """Asks the player to choose a move."""
         print_partial_state(partial_state)
-        number_of_cards = 0
-        move = (0, partial_state[0], partial_state[1], number_of_cards)
-        move = list_actions(move)
-        return move
+        self.__list_actions()
+        legal_moves = partial_state.legal_moves(partial_state.hand)
+        return self.__choose_move(legal_moves, partial_state.face_up_card, partial_state.last_move())
+
+    def __choose_move(self, legal_moves, face_up_card, last_move):
+        while True:
+            str_input = raw_input()
+            user_input = str_input.split()
+
+            chosen_command = user_input[0]
+            chosen_card = Card(int(user_input[1]))
+            if chosen_command == 'draw':
+                chosen_move = last_move.next_draw(face_up_card.rank)
+            elif chosen_command == 'play':
+                if chosen_card.rank == Card.rank_eight:
+                    print('You have played an eight card! Please choose a suit number from the following list:')
+                    for suit_num, suit_name in CardNames.suit_name_map.items():
+                        print('[' + str(suit_num) + ']: ' + suit_name)
+                    suit_input = raw_input()
+                    suit_num = int(suit_input)
+                    chosen_card = Card(Card.make_deck_index(Card.rank_eight, suit_num))
+                chosen_move = last_move.next_play(chosen_card)
+
+            if chosen_move in legal_moves:
+                return chosen_move
+            else:
+                print('You cannot place a [' + CardNames.full_name(chosen_move.face_up_card) +
+                      '] on top of a [' + CardNames.full_name(face_up_card) + ']')
 
 
-class AIPlayer(object):
+class AIPlayer(Player):
     @staticmethod
     def move(partial_state):
         return Move.from_tuple(CrazyEight.move(partial_state))
@@ -28,35 +73,12 @@ class AIPlayer(object):
 def print_partial_state(partial_state):
     """Prints, in console, the face-up card and the player's cards."""
     print('Face-up card:')
-    print(CardNames.full_name_and_deck_value(Card(Card.make_deck_index(partial_state[0], partial_state[1]))))
+    print(CardNames.full_name_and_deck_value(partial_state.face_up_card))
     print('')
     print('Cards in hand:')
-    for card in partial_state[2]:
-        print(CardNames.full_name_and_deck_value(Card(card)))
+    for card in partial_state.hand.cards:
+        print(CardNames.full_name_and_deck_value(card))
     print('')
-
-
-def list_actions(move):
-    """Lists possible actions for human to take."""
-    print('Available actions:')
-    print('[play #]: Place the card face-up.  # is the card number.')
-    print('[draw]: Draw a card from the deck.')
-    print('[suit #]: Declare a new suit after playing an 8.  # is the suit number')
-    # print('[end]: End your turn.')
-    str_input = raw_input()
-    args = str_input.split()
-    player_num = move[0]
-    face_up_card = move[1]
-    suit = move[2]
-    number_of_cards = move[3]
-    if args[0] == 'draw':
-        number_of_cards += 1
-    elif args[0] == 'play':
-        face_up_card = int(args[1])
-    elif args[0] == 'suit':
-        suit = int(args[1])
-    new_move = Move(player_num, Card(Card.make_deck_index(face_up_card, suit)), number_of_cards)
-    return new_move
 
 
 def perform_move(state, move):
@@ -71,37 +93,44 @@ def perform_move(state, move):
     state.next_turn(move)
 
 
-def game_loop(state, current_player, next_player):
+def game_loop(state, current_player, next_player, human_player_num):
     """Cycles through player turns until the game is over."""
-    player_move = current_player.move(state.partial_state.to_tuple())
+    if current_player.number == human_player_num:
+        player_move = current_player.move(state.partial_state)
+    else:
+        player_move = current_player.move(state.partial_state.to_tuple())
+        player_move = Move.from_tuple(player_move)
+
     perform_move(state, player_move)
     # Loop while game is not over.  Switch players.
     if not state.game_ended():
-        game_loop(state, next_player, current_player)
+        game_loop(state, next_player, current_player, human_player_num)
 
 
-def get_first_player():
-    """Gets the first player. 0 is the human.  1 is the AI."""
-    print ('Would you like to go first or second?')
-    print ('[1] for first, [2] for second')
-    str_input = raw_input()
-    int_input = int(str_input)
-    return int_input
+def choose_human_player_number():
+    print('Would you like to go first or second?')
+    print('[0] for first, [1] for second')
+    while True:
+        str_input = raw_input()
+        int_input = int(str_input)
+        if int_input != 0 and int_input != 1:
+            print('ERROR: You must choose either 0 or 1.')
+        else:
+            return int_input
 
 
 def start_game():
     """Initializes game objects."""
-    human_choice = get_first_player()
-    if human_choice == 1:
-        player_1 = HumanPlayer
-        player_2 = AIPlayer
-    elif human_choice == 2:
-        player_1 = AIPlayer
-        player_2 = HumanPlayer
+    chosen_player_number = choose_human_player_number()
+    human_player = HumanPlayer(chosen_player_number)
+    ai_player = AIPlayer(chosen_player_number ^ 1)
+    if chosen_player_number == 0:
+        first_player, second_player = human_player, ai_player
     else:
-        return
+        first_player, second_player = ai_player, human_player
+
     current_state = State()
-    game_loop(current_state, player_1, player_2)
+    game_loop(current_state, first_player, second_player, human_player.number)
 
 
 if __name__ == '__main__':
