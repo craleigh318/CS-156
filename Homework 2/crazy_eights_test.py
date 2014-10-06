@@ -49,6 +49,9 @@ class StateTest(unittest.TestCase):
         for card in state.deck.cards:
             print(crazy_eights.CardNames.full_name(card))
 
+    def test_move_from_partial_state(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

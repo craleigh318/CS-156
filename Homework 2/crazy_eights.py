@@ -21,7 +21,10 @@ class CrazyEight(object):
             guess_state = partial_state_object.guess_state()
             good_move = CrazyEight.move_perfect_knowledge(guess_state)
             possible_moves.append(good_move)
-            # TODO: Count the most common move in the list.
+        # Count the most common move in the list.
+        list_counter = Counter(possible_moves)
+        best_move = list_counter.most_common(1)[0][0]
+        return best_move
 
     @staticmethod
     def move_perfect_knowledge(state):
