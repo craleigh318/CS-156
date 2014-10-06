@@ -11,6 +11,7 @@ class CrazyEight(object):
     """Contains methods for AI actions."""
 
     depth_limit = 8
+    first_player_num = 0
 
     @staticmethod
     def move(partial_state):
@@ -203,11 +204,11 @@ class Deck(object):
 class State(object):
     """Stores the deck, opponent's hand, and partial state."""
 
-    def __init__(self, first_move_player_num, deck=Deck(), hand=Hand(), partial_state=None):
+    def __init__(self, deck=Deck(), hand=Hand(), partial_state=None):
         self.__deck = deck
         self.__hand = hand
         if partial_state is None:
-            self.__randomize_partial_state(first_move_player_num)
+            self.__randomize_partial_state()
         else:
             self.__partial_state = partial_state
 
@@ -226,10 +227,10 @@ class State(object):
         """Information that the active player can access."""
         return self.__partial_state
 
-    def __randomize_partial_state(self, first_move_player_num):
+    def __randomize_partial_state(self):
         """Fills both hands and places a face-up card."""
         face_up_card = self.__deck.draw_card()
-        self.__partial_state = PartialState(first_move_player_num, face_up_card)
+        self.__partial_state = PartialState(face_up_card)
         for i in xrange(0, Hand.initial_num_cards()):
             self.__hand.add_card(self.__deck.draw_card())
             self.__partial_state.hand.add_card(self.__deck.draw_card())
@@ -394,8 +395,7 @@ class PartialState(object):
         history_move_tuples = [move.to_tuple() for move in self.history]
         return self.face_up_card.rank, self.face_up_card.suit, hand_deck_indices, history_move_tuples
 
-    def __init__(self, first_move_player_num, face_up_card, hand=Hand(), history=[]):
-        self.__first_move_player_num = first_move_player_num
+    def __init__(self, face_up_card, hand=Hand(), history=[]):
         self.__face_up_card = face_up_card
         self.__hand = hand
         self.__history = list(history)
@@ -496,13 +496,13 @@ class PartialState(object):
         return legal_moves
 
     def last_move(self):
-        if len(self.history) > 0:
-            return self.history[-1]
+        if len(self.history) == 0:
+            # Pretend a move was made at the start of the game, to take advantage of Move class's methods.
+            second_player_num = CrazyEight.first_player_num ^ 1
+            last_move = Move(second_player_num, self.face_up_card, 0)
         else:
-            # Pretend that the other player played a card, even though it's just the start of the game and
-            # no one has played anything yet. This is just for the convenience of being able to leverage
-            # Move's methods.
-            return Move.play(self.__first_move_player_num ^ 1, self.face_up_card)
+            last_move = self.last_move()
+        return last_move
 
 
 class Move(object):
