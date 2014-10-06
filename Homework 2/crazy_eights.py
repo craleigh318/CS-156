@@ -10,7 +10,7 @@ from collections import Counter
 class CrazyEight(object):
     """Contains methods for AI actions."""
 
-    depth_limit = 8
+    depth_limit = 4
     first_player_num = 0
 
     @staticmethod
@@ -501,7 +501,7 @@ class PartialState(object):
             second_player_num = CrazyEight.first_player_num ^ 1
             last_move = Move(second_player_num, self.face_up_card, 0)
         else:
-            last_move = self.last_move()
+            last_move = self.__history[-1]
         return last_move
 
 
