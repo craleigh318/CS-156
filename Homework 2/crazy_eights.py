@@ -466,6 +466,17 @@ class PartialState(object):
             value = False
         return value
 
+    def get_opponent_num_cards(self, opponent_num):
+        """Uses history to get the size of the opponent's hand."""
+        num_cards = 8
+        for move in self.__history:
+            if move.player_num == opponent_num:
+                # Minus one card for placing face-up.
+                num_cards -= 1
+                # Plus number of card draws.
+                num_cards += move.number_of_cards
+        return num_cards
+
 
 class Move(object):
     """An action taken by a player."""
