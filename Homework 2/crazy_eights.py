@@ -10,7 +10,7 @@ from collections import Counter
 class CrazyEight(object):
     """Contains methods for AI actions."""
 
-    depth_limit = 4
+    depth_limit = 8
     first_player_num = 0
 
     @staticmethod
@@ -63,6 +63,9 @@ class Card(object):
 
     def __eq__(self, other):
         return self.rank == other.rank and self.suit == other.suit
+
+    def __copy__(self):
+        return Card(self.deck_index)
 
     @property
     def deck_index(self):
@@ -148,6 +151,10 @@ class Hand(object):
     def __len__(self):
         return len(self.cards)
 
+    def __deepcopy__(self, memo):
+        cards_copy = [copy.copy(card) for card in self.cards]
+        return Hand(cards_copy)
+
     @property
     def cards(self):
         """A copy of the list of all of the cards in the hand."""
@@ -189,6 +196,10 @@ class Deck(object):
     def __len__(self):
         return len(self.__cards)
 
+    def __deepcopy__(self, memo):
+        cards_copy = [copy.copy(card) for card in self.cards]
+        return Deck(cards_copy)
+
     @property
     def cards(self):
         """A copy of the list of the cards in the deck."""
@@ -211,6 +222,12 @@ class State(object):
             self.__randomize_partial_state()
         else:
             self.__partial_state = partial_state
+
+    def __deepcopy__(self, memo):
+        deck_copy = copy.deepcopy(self.deck)
+        hand_copy = copy.deepcopy(self.hand)
+        partial_state_copy = copy.deepcopy(self.partial_state)
+        return State(deck_copy, hand_copy, partial_state_copy)
 
     @property
     def deck(self):
@@ -250,7 +267,7 @@ class State(object):
     def __move_result(self, player_hand, move):
         """Returns the State that results from making a move."""
         self_copy = copy.deepcopy(self)
-        player_hand_copy = copy.deepcopy(player_hand)
+        player_hand_copy = copy.copy(player_hand)
 
         if move.is_card_draw:
             draw_count = 0
@@ -400,6 +417,12 @@ class PartialState(object):
         self.__hand = hand
         self.__history = list(history)
 
+    def __deepcopy__(self, memo):
+        face_up_card_copy = copy.copy(self.face_up_card)
+        hand_copy = copy.deepcopy(self.hand)
+        history_copy = [copy.deepcopy(move) for move in self.history]
+        return PartialState(face_up_card_copy, hand_copy, history_copy)
+
     @property
     def face_up_card(self):
         """The card that the active player must follow."""
@@ -534,6 +557,10 @@ class Move(object):
         return (self.player_num == other.player_num and
                 self.face_up_card == other.face_up_card and
                 self.number_of_cards == other.number_of_cards)
+
+    def __deepcopy__(self, memo):
+        face_up_card_copy = copy.copy(self.face_up_card)
+        return Move(self.player_num, face_up_card_copy, self.number_of_cards)
 
     def next_draw(self, face_up_card_rank):
         """Return a new Move representing a card-draw performed immediately after the current Move."""
