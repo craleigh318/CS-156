@@ -18,7 +18,7 @@ class StateTest(unittest.TestCase):
         deck_card_indices = [x for x in xrange(face_up_card.rank + 1, crazy_eights.Deck.max_deck_size())]
         deck_cards = [crazy_eights.Card(x) for x in deck_card_indices]
         partial_state = crazy_eights.PartialState(
-            face_up_card=face_up_card.rank,
+            face_up_card=face_up_card,
             suit=face_up_card.suit,
             hand=human_hand,
             history=[crazy_eights.Move.play(0, 2, 1)]

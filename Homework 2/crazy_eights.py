@@ -314,7 +314,7 @@ class State(object):
         weight_of_legal_move = 1.25
         evaluation = num_of_legal_moves * weight_of_legal_move
 
-        last_played_card = Card(Card.make_deck_index(self.partial_state.face_up_card, self.partial_state.suit))
+        last_played_card = self.partial_state.face_up_card
 
         def next_play_weight(card):
             suit_weight = 0
