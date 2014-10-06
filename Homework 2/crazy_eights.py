@@ -19,7 +19,7 @@ class CrazyEight(object):
         possible_moves = []
         for i in xrange(100):
             guess_state = partial_state_object.guess_state()
-            good_move = CrazyEight.move_perfect_knowledge(guess_state)
+            good_move = guess_state.best_move(CrazyEight.depth_limit)
             possible_moves.append(good_move)
         # Count the most common move in the list.
         list_counter = Counter(possible_moves)
