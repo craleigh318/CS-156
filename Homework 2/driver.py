@@ -18,19 +18,11 @@ class HumanPlayer(object):
         move = list_actions(move)
         return move
 
-    @staticmethod
-    def move_perfect_knowledge(state):
-        return HumanPlayer.move(state.partial_state)
-
 
 class AIPlayer(object):
     @staticmethod
     def move(partial_state):
         return CrazyEight.move(partial_state)
-
-    @staticmethod
-    def move_perfect_knowledge(state):
-        return CrazyEight.move_perfect_knowledge(state)
 
 
 def print_partial_state(partial_state):
