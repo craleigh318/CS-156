@@ -479,6 +479,30 @@ class PartialState(object):
                 num_cards += move.number_of_cards
         return num_cards
 
+    def guess_state(self):
+        """Guesses the whole state from the partial state."""
+        # Make a list from cards that this player does not have.
+        initial_list = []
+        for i in xrange[Deck.max_deck_size()]:
+            add_card = True
+            for card in self.hand.cards:
+                if i == card.deck_index:
+                    add_card = False
+                    break
+            if add_card:
+                initial_list.append(Card(i))
+        # Shuffle list
+        random.shuffle(initial_list)
+        # Remove possible opponent cards.
+        opponent_num_cards = self.get_opponent_num_cards(0)
+        opponent_list = []
+        for i in xrange(opponent_num_cards):
+            opponent_list.append(initial_list.pop())
+        deck = Deck(initial_list)
+        opponent_hand = Hand(opponent_list)
+        guessed_state = State(deck, opponent_hand, self)
+        return guessed_state
+
 
 class Move(object):
     """An action taken by a player."""
