@@ -203,17 +203,6 @@ class Deck(object):
 class State(object):
     """Stores the deck, opponent's hand, and partial state."""
 
-    @staticmethod
-    def from_tuple(tpl_param):
-        """Return a new state from a tuple."""
-        deck = Deck(tpl_param[0])
-        hand = Hand()
-        for num in tpl_param[1]:
-            hand.add_card(Card(num))
-        partial_state = PartialState.from_tuple(tpl_param[2])
-        new_state = State(deck, hand, partial_state)
-        return new_state
-
     def __init__(self, first_move_player_num, deck=Deck(), hand=Hand(), partial_state=None):
         self.__deck = deck
         self.__hand = hand
@@ -378,7 +367,6 @@ class State(object):
 
             return wanted_value
 
-    # TODO Runs too slow. A single run with a depth limit > 4 takes over 1 second.
     def best_move(self, depth_limit):
         _, best_move = self.__max_value(float("-inf"), float("inf"), depth_limit)
         return best_move
