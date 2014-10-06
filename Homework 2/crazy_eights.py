@@ -202,8 +202,6 @@ class Deck(object):
 class State(object):
     """Stores the deck, opponent's hand, and partial state."""
 
-    depth_limit = Hand.initial_num_cards()
-
     @staticmethod
     def from_tuple(tpl_param):
         """Return a new state from a tuple."""
