@@ -20,7 +20,6 @@ class StateTest(unittest.TestCase):
         deck_cards = [crazy_eights.Card(x) for x in deck_card_indices]
         partial_state = crazy_eights.PartialState(
             face_up_card=face_up_card,
-            suit=face_up_card.suit,
             hand=human_hand,
             history=[crazy_eights.Move.play(0, face_up_card.rank, face_up_card.suit)]
         )
@@ -46,7 +45,7 @@ class StateTest(unittest.TestCase):
 
     def test_best_move(self):
         state = StateTest.make_test_state()
-        depth_limit = 8
+        depth_limit = 4
         expected = (1, 3, 0, 0)
         self.assertEqual(expected, state.best_move(depth_limit).to_tuple())
 
@@ -69,7 +68,7 @@ class StateTest(unittest.TestCase):
 
     def test_move_from_partial_state(self):
         partial_state = crazy_eights.PartialState.from_tuple((0, 0, [1, 2, 3, 4, 5, 6, 7, 8], []))
-        state = partial_state.guess_state()
+        state = partial_state.random_state()
         print('Face-up card:')
         print(crazy_eights.CardNames.full_name(state.partial_state.face_up_card))
         print('')

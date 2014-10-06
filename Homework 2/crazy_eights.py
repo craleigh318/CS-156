@@ -10,7 +10,8 @@ from collections import Counter
 class CrazyEight(object):
     """Contains methods for AI actions."""
 
-    depth_limit = 8
+    depth_limit = 4
+    first_player_num = 0
 
     @staticmethod
     def move(partial_state):
@@ -18,8 +19,8 @@ class CrazyEight(object):
         partial_state_object = PartialState.from_tuple(partial_state)
         possible_moves = []
         for i in xrange(100):
-            guess_state = partial_state_object.guess_state()
-            good_move = guess_state.best_move(CrazyEight.depth_limit)
+            guess_state = partial_state_object.random_state()
+            good_move = CrazyEight.move_perfect_knowledge(guess_state)
             possible_moves.append(good_move)
         # Count the most common move in the list.
         list_counter = Counter(possible_moves)
@@ -29,8 +30,7 @@ class CrazyEight(object):
     @staticmethod
     def move_perfect_knowledge(state):
         """Returns a move by the AI with full knowledge."""
-        state_object = State.from_tuple(state)
-        return state_object.best_move(CrazyEight.depth_limit)
+        return state.best_move(CrazyEight.depth_limit).to_tuple()
 
 
 class Card(object):
@@ -85,6 +85,13 @@ class Card(object):
 class CardNames(object):
     """Suits and ranks of cards."""
 
+    suit_name_map = {
+        0: 'Spades',
+        1: 'Hearts',
+        2: 'Diamonds',
+        3: 'Clubs'
+    }
+
     @staticmethod
     def full_name_and_deck_value(card):
         """The full name of the card, plus the deck index."""
@@ -105,12 +112,7 @@ class CardNames(object):
     @staticmethod
     def suit(integer):
         """The name of the card's suit."""
-        return {
-            0: 'Spades',
-            1: 'Hearts',
-            2: 'Diamonds',
-            3: 'Clubs'
-        }.get(integer)
+        return CardNames.suit_name_map[integer]
 
     @staticmethod
     def rank(integer):
@@ -202,17 +204,6 @@ class Deck(object):
 class State(object):
     """Stores the deck, opponent's hand, and partial state."""
 
-    @staticmethod
-    def from_tuple(tpl_param):
-        """Return a new state from a tuple."""
-        deck = Deck(tpl_param[0])
-        hand = Hand()
-        for num in tpl_param[1]:
-            hand.add_card(Card(num))
-        partial_state = PartialState.from_tuple(tpl_param[2])
-        new_state = State(deck, hand, partial_state)
-        return new_state
-
     def __init__(self, deck=Deck(), hand=Hand(), partial_state=None):
         self.__deck = deck
         self.__hand = hand
@@ -269,14 +260,12 @@ class State(object):
         else:
             # All 8 cards are treated equally by the rules of Crazy Eights, so if we're playing an 8 then we just
             # look for one in our hand and play it rather than trying to play any particular one.
-            if move.face_up_card == Card.rank_eight:
+            if move.face_up_card.rank == Card.rank_eight:
                 played_card = next(card for card in player_hand_copy.cards if card.rank == Card.rank_eight)
             else:
-                move_card_deck_index = Card.make_deck_index(move.face_up_card, move.suit)
-                played_card = Card(move_card_deck_index)
+                played_card = move.face_up_card
             player_hand_copy.remove_card(played_card)
             self_copy.partial_state.face_up_card = Card(Card.make_deck_index(played_card.rank, played_card.suit))
-            self_copy.partial_state.suit = played_card.suit
 
         self_copy.partial_state.history.append(move)
         return self_copy, player_hand_copy
@@ -291,26 +280,8 @@ class State(object):
         result_state.__hand = result_hand
         return result_state
 
-    def __legal_moves(self, player_hand):
-        """Return a list of Moves that can be performed by a player with a certain hand in this state."""
-
-        last_move = self.partial_state.history[-1]
-        # We need only consider if a single eight is in the hand, since all 4 eights are considered
-        # to be the same from the perspective of the game's rules.
-        eight_in_hand = any((card.rank == Card.rank_eight) for card in player_hand.cards)
-        legal_moves = []
-        if eight_in_hand:
-            legal_moves += [last_move.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
-        hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
-        legal_moves += \
-            [last_move.next_play(card.rank, card.suit)
-             for card in hand_no_eights if self.partial_state.can_play(card)]
-        legal_moves.append(last_move.next_draw(self.partial_state.face_up_card.rank))
-
-        return legal_moves
-
     def __evaluation(self):
-        num_of_legal_moves = len(self.__legal_moves(self.hand))
+        num_of_legal_moves = len(self.partial_state.legal_moves(self.hand))
         weight_of_legal_move = 1.25
         evaluation = num_of_legal_moves * weight_of_legal_move
 
@@ -372,7 +343,7 @@ class State(object):
             return self.__evaluation(), None
         else:
             wanted_value = float("-inf")
-            for move in self.__legal_moves(self.hand):
+            for move in self.partial_state.legal_moves(self.hand):
                 min_value = self.__max_move_result(move).__min_value(alpha, beta, depth_counter - 1)
                 if min_value >= wanted_value:
                     wanted_value = min_value
@@ -388,7 +359,7 @@ class State(object):
             return self.__evaluation()
         else:
             wanted_value = float("inf")
-            for move in self.__legal_moves(self.partial_state.hand):
+            for move in self.partial_state.legal_moves(self.partial_state.hand):
                 max_value, _ = self.__min_move_result(move).__max_value(alpha, beta, depth_counter - 1)
                 wanted_value = min(wanted_value, max_value)
                 if wanted_value <= alpha:
@@ -397,7 +368,6 @@ class State(object):
 
             return wanted_value
 
-    # TODO Runs too slow. A single run with a depth limit > 4 takes over 1 second.
     def best_move(self, depth_limit):
         _, best_move = self.__max_value(float("-inf"), float("inf"), depth_limit)
         return best_move
@@ -409,23 +379,24 @@ class PartialState(object):
     @staticmethod
     def from_tuple(tpl_param):
         """Return a new partial state from a tuple."""
-        face_up_card = Card(tpl_param[0])
-        suit = tpl_param[1]
+        face_up_card = Card(Card.make_deck_index(tpl_param[0], tpl_param[1]))
         hand = Hand()
         for num in tpl_param[2]:
             hand.add_card(Card(num))
         history = []
         for move in tpl_param[3]:
             history.append(Move.from_tuple(move))
-        new_partial_state = PartialState(face_up_card, suit, hand, history)
+        new_partial_state = PartialState(face_up_card, hand, history)
         return new_partial_state
 
-    def __init__(self, face_up_card, suit=None, hand=Hand(), history=[]):
+    def to_tuple(self):
+        """Returns this object represented as a tuple, as defined in the assignment."""
+        hand_deck_indices = [card.deck_index for card in self.hand.cards]
+        history_move_tuples = [move.to_tuple() for move in self.history]
+        return self.face_up_card.rank, self.face_up_card.suit, hand_deck_indices, history_move_tuples
+
+    def __init__(self, face_up_card, hand=Hand(), history=[]):
         self.__face_up_card = face_up_card
-        if suit is None:
-            self.__suit = face_up_card.suit
-        else:
-            self.__suit = suit
         self.__hand = hand
         self.__history = list(history)
 
@@ -437,15 +408,6 @@ class PartialState(object):
     @face_up_card.setter
     def face_up_card(self, value):
         self.__face_up_card = value
-
-    @property
-    def suit(self):
-        """The suit that the active player must match."""
-        return self.__suit
-
-    @suit.setter
-    def suit(self, value):
-        self.__suit = value
 
     @property
     def hand(self):
@@ -474,7 +436,7 @@ class PartialState(object):
             value = True
         elif self.__face_up_card.rank == Card.rank_two:
             value = False
-        elif self.__suit == card.suit:
+        elif self.__face_up_card.suit == card.suit:
             value = True
         else:
             value = False
@@ -485,14 +447,14 @@ class PartialState(object):
         num_cards = 8
         for move in self.__history:
             if move.player_num == opponent_num:
-                # Minus one card for placing face-up.
-                num_cards -= 1
-                # Plus number of card draws.
-                num_cards += move.number_of_cards
+                if move.is_card_draw:
+                    num_cards += move.number_of_cards
+                else:
+                    num_cards -= 1
         return num_cards
 
-    def guess_state(self):
-        """Guesses the whole state from the partial state."""
+    def random_state(self):
+        """Generates a random whole state from the partial state."""
         # Make a list from cards that this player does not have.
         initial_list = []
         for i in xrange(Deck.max_deck_size()):
@@ -503,7 +465,6 @@ class PartialState(object):
                     break
             if add_card:
                 initial_list.append(Card(i))
-        # Shuffle list
         random.shuffle(initial_list)
         # Remove possible opponent cards.
         opponent_num_cards = self.get_opponent_num_cards(0)
@@ -515,6 +476,34 @@ class PartialState(object):
         guessed_state = State(deck, opponent_hand, self)
         return guessed_state
 
+    def legal_moves(self, player_hand):
+        """Return a list of Moves that can be performed by a player with a certain hand in this state."""
+
+        last_move = self.last_move()
+        # We need only consider if a single eight is in the hand, since all 4 eights are considered
+        # to be the same from the perspective of the game's rules.
+        eight_in_hand = any((card.rank == Card.rank_eight) for card in player_hand.cards)
+        legal_moves = []
+        if eight_in_hand:
+            legal_moves += [last_move.next_play(Card(Card.make_deck_index(Card.rank_eight, suit)))
+                            for suit in xrange(0, Card.num_suits())]
+        hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
+        legal_moves += \
+            [last_move.next_play(card)
+             for card in hand_no_eights if self.can_play(card)]
+        legal_moves.append(last_move.next_draw(self.face_up_card.rank))
+
+        return legal_moves
+
+    def last_move(self):
+        if len(self.history) == 0:
+            # Pretend a move was made at the start of the game, to take advantage of Move class's methods.
+            second_player_num = CrazyEight.first_player_num ^ 1
+            last_move = Move(second_player_num, self.face_up_card, 0)
+        else:
+            last_move = self.__history[-1]
+        return last_move
+
 
 class Move(object):
     """An action taken by a player."""
@@ -522,25 +511,29 @@ class Move(object):
     @staticmethod
     def from_tuple(tpl_param):
         """Return a new move from a tuple."""
-        new_move = Move(tpl_param[0], tpl_param[1], tpl_param[2], tpl_param[3])
+        new_move = Move(tpl_param[0], Card(Card.make_deck_index(tpl_param[1], tpl_param[2])), tpl_param[3])
         return new_move
 
     @staticmethod
     def draw(player_num, number_of_cards):
         """Return a Move representing a card-draw."""
-        draw_placeholder = 0
-        return Move(player_num, draw_placeholder, draw_placeholder, number_of_cards)
+        draw_placeholder = Card(0)
+        return Move(player_num, draw_placeholder, number_of_cards)
 
     @staticmethod
-    def play(player_num, face_up_card, suit):
+    def play(player_num, card):
         """Return a Move representing a card-play."""
-        return Move(player_num, face_up_card, suit, 0)
+        return Move(player_num, card, 0)
 
-    def __init__(self, player_num, face_up_card, suit, number_of_cards):
+    def __init__(self, player_num, face_up_card, number_of_cards):
         self.__player_num = player_num
         self.__face_up_card = face_up_card
-        self.__suit = suit
         self.__number_of_cards = number_of_cards
+
+    def __eq__(self, other):
+        return (self.player_num == other.player_num and
+                self.face_up_card == other.face_up_card and
+                self.number_of_cards == other.number_of_cards)
 
     def next_draw(self, face_up_card_rank):
         """Return a new Move representing a card-draw performed immediately after the current Move."""
@@ -552,9 +545,9 @@ class Move(object):
             num_of_cards_to_draw = 1
         return Move.draw(self.__next_player_num(), num_of_cards_to_draw)
 
-    def next_play(self, face_up_card, suit):
+    def next_play(self, card):
         """Return a new Move representing a card-play performed immediately after the current Move."""
-        return Move.play(self.__next_player_num(), face_up_card, suit)
+        return Move.play(self.__next_player_num(), card)
 
     def __next_player_num(self):
         """Return the ID number (0 or 1) of the player who is to make a move after this Move."""
@@ -571,11 +564,6 @@ class Move(object):
         return self.__face_up_card
 
     @property
-    def suit(self):
-        """The suit that must be matched in the next turn."""
-        return self.__suit
-
-    @property
     def number_of_cards(self):
         """The number of cards that the active player drew in this turn."""
         return self.__number_of_cards
@@ -586,7 +574,7 @@ class Move(object):
         return self.__number_of_cards > 0
 
     def to_tuple(self):
-        return self.__player_num, self.__face_up_card, self.__suit, self.__number_of_cards
+        return self.__player_num, self.__face_up_card.rank, self.__face_up_card.suit, self.__number_of_cards
 
 
 if __name__ == '__main__':
