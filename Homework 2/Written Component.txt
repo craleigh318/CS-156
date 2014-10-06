@@ -1,0 +1,9 @@
+Problem 1:
+
+Eight queens on a chess board need to be placed so that none of them can capture another in one turn.  Therefore, only one queen is allowed per row, column, or diagonal.
+Beam Search tries to find the quickest solution, by considering all possible future states and returning the first acceptable one reached.
+Hill Climbing focuses only on the moves that lead to the best future state, and returns the following successful stae once it is reached.
+
+
+
+Problem 2:
