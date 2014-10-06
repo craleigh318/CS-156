@@ -84,6 +84,13 @@ class Card(object):
 class CardNames(object):
     """Suits and ranks of cards."""
 
+    suit_name_map = {
+        0: 'Spades',
+        1: 'Hearts',
+        2: 'Diamonds',
+        3: 'Clubs'
+    }
+
     @staticmethod
     def full_name_and_deck_value(card):
         """The full name of the card, plus the deck index."""
@@ -104,12 +111,7 @@ class CardNames(object):
     @staticmethod
     def suit(integer):
         """The name of the card's suit."""
-        return {
-            0: 'Spades',
-            1: 'Hearts',
-            2: 'Diamonds',
-            3: 'Clubs'
-        }.get(integer)
+        return CardNames.suit_name_map[integer]
 
     @staticmethod
     def rank(integer):
@@ -212,11 +214,11 @@ class State(object):
         new_state = State(deck, hand, partial_state)
         return new_state
 
-    def __init__(self, deck=Deck(), hand=Hand(), partial_state=None):
+    def __init__(self, first_move_player_num, deck=Deck(), hand=Hand(), partial_state=None):
         self.__deck = deck
         self.__hand = hand
         if partial_state is None:
-            self.__randomize_partial_state()
+            self.__randomize_partial_state(first_move_player_num)
         else:
             self.__partial_state = partial_state
 
@@ -235,10 +237,10 @@ class State(object):
         """Information that the active player can access."""
         return self.__partial_state
 
-    def __randomize_partial_state(self):
+    def __randomize_partial_state(self, first_move_player_num):
         """Fills both hands and places a face-up card."""
         face_up_card = self.__deck.draw_card()
-        self.__partial_state = PartialState(face_up_card)
+        self.__partial_state = PartialState(first_move_player_num, face_up_card)
         for i in xrange(0, Hand.initial_num_cards()):
             self.__hand.add_card(self.__deck.draw_card())
             self.__partial_state.hand.add_card(self.__deck.draw_card())
@@ -404,7 +406,8 @@ class PartialState(object):
         history_move_tuples = [move.to_tuple() for move in self.history]
         return self.face_up_card.rank, self.face_up_card.suit, hand_deck_indices, history_move_tuples
 
-    def __init__(self, face_up_card, hand=Hand(), history=[]):
+    def __init__(self, first_move_player_num, face_up_card, hand=Hand(), history=[]):
+        self.__first_move_player_num = first_move_player_num
         self.__face_up_card = face_up_card
         self.__hand = hand
         self.__history = list(history)
@@ -489,20 +492,31 @@ class PartialState(object):
     def legal_moves(self, player_hand):
         """Return a list of Moves that can be performed by a player with a certain hand in this state."""
 
-        last_move = self.history[-1]
+        last_move = self.last_move()
         # We need only consider if a single eight is in the hand, since all 4 eights are considered
         # to be the same from the perspective of the game's rules.
         eight_in_hand = any((card.rank == Card.rank_eight) for card in player_hand.cards)
         legal_moves = []
         if eight_in_hand:
-            legal_moves += [last_move.next_play(Card.rank_eight, suit) for suit in xrange(0, Card.num_suits())]
+            legal_moves += [last_move.next_play(Card(Card.make_deck_index(Card.rank_eight, suit)))
+                            for suit in xrange(0, Card.num_suits())]
         hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
         legal_moves += \
-            [last_move.next_play(card.rank, card.suit)
+            [last_move.next_play(card)
              for card in hand_no_eights if self.can_play(card)]
         legal_moves.append(last_move.next_draw(self.face_up_card.rank))
 
         return legal_moves
+
+    def last_move(self):
+        if len(self.history) > 0:
+            return self.history[-1]
+        else:
+            # Pretend that the other player played a card, even though it's just the start of the game and
+            # no one has played anything yet. This is just for the convenience of being able to leverage
+            # Move's methods.
+            return Move.play(self.__first_move_player_num ^ 1, self.face_up_card)
+
 
 class Move(object):
     """An action taken by a player."""
@@ -520,14 +534,19 @@ class Move(object):
         return Move(player_num, draw_placeholder, number_of_cards)
 
     @staticmethod
-    def play(player_num, rank, suit):
+    def play(player_num, card):
         """Return a Move representing a card-play."""
-        return Move(player_num, Card(Card.make_deck_index(rank, suit)), 0)
+        return Move(player_num, card, 0)
 
     def __init__(self, player_num, face_up_card, number_of_cards):
         self.__player_num = player_num
         self.__face_up_card = face_up_card
         self.__number_of_cards = number_of_cards
+
+    def __eq__(self, other):
+        return (self.player_num == other.player_num and
+                self.face_up_card == other.face_up_card and
+                self.number_of_cards == other.number_of_cards)
 
     def next_draw(self, face_up_card_rank):
         """Return a new Move representing a card-draw performed immediately after the current Move."""
@@ -539,9 +558,9 @@ class Move(object):
             num_of_cards_to_draw = 1
         return Move.draw(self.__next_player_num(), num_of_cards_to_draw)
 
-    def next_play(self, rank, suit):
+    def next_play(self, card):
         """Return a new Move representing a card-play performed immediately after the current Move."""
-        return Move.play(self.__next_player_num(), rank, suit)
+        return Move.play(self.__next_player_num(), card)
 
     def __next_player_num(self):
         """Return the ID number (0 or 1) of the player who is to make a move after this Move."""
