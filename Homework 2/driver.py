@@ -35,11 +35,10 @@ class HumanPlayer(Player):
         """Asks the player to choose a move."""
         print_partial_state(partial_state)
         self.__list_actions()
-        legal_moves = partial_state.legal_moves(partial_state.hand)
-        return self.__choose_move(legal_moves, partial_state.face_up_card, partial_state.last_move())
+        return self.__choose_move(partial_state)
 
     @staticmethod
-    def __choose_move(legal_moves, face_up_card, last_move):
+    def __choose_move(partial_state):
         while True:
             str_input = raw_input()
             user_input = str_input.split()
@@ -47,7 +46,7 @@ class HumanPlayer(Player):
             chosen_command = user_input[0]
             chosen_card = Card(int(user_input[1]))
             if chosen_command == 'draw':
-                chosen_move = last_move.next_draw(face_up_card.rank)
+                chosen_move = partial_state.last_move.next_draw(partial_state.face_up_card.rank)
             elif chosen_command == 'play':
                 if chosen_card.rank == Card.rank_eight:
                     print('You have played an eight card! Please choose a suit number from the following list:')
@@ -56,13 +55,13 @@ class HumanPlayer(Player):
                     suit_input = raw_input()
                     suit_num = int(suit_input)
                     chosen_card = Card(Card.make_deck_index(Card.rank_eight, suit_num))
-                chosen_move = last_move.next_play(chosen_card)
+                chosen_move = partial_state.last_move.next_play(chosen_card)
 
-            if chosen_move in legal_moves:
+            if chosen_move in partial_state.legal_moves:
                 return chosen_move
             else:
                 print('You cannot place a [' + CardNames.full_name(chosen_move.face_up_card) +
-                      '] on top of a [' + CardNames.full_name(face_up_card) + ']')
+                      '] on top of a [' + CardNames.full_name(partial_state.face_up_card) + ']')
 
 
 class AIPlayer(Player):
@@ -82,18 +81,6 @@ def print_partial_state(partial_state):
     print('')
 
 
-def perform_move(state, move):
-    # Draw cards.
-    for i in xrange(0, move.number_of_cards):
-        drawn_card = state.deck.draw_card()
-        state.partial_state.hand.add_card(drawn_card)
-    # Move face-up card.
-    state.partial_state.hand.remove_card(move.face_up_card)
-    state.partial_state.face_up_card = move.face_up_card
-    # Add this move to history.
-    state.partial_state.next_turn(state.deck, state.partial_state.hand, move)
-
-
 def game_loop(state, current_player, next_player, human_player_num):
     """Cycles through player turns until the game is over."""
     if current_player.number == human_player_num:
@@ -102,10 +89,14 @@ def game_loop(state, current_player, next_player, human_player_num):
         player_move = current_player.move(state.partial_state.to_tuple())
         player_move = Move.from_tuple(player_move)
 
-    perform_move(state, player_move)
+    state.partial_state.next_turn(state.deck, state.partial_state.hand, player_move)
     # Loop while game is not over.  Switch players.
     if not state.game_ended():
-        game_loop(state, next_player, current_player, human_player_num)
+        # If a jack was played, the player who played it gets to go again.
+        if player_move.face_up_card.rank == Card.rank_jack:
+            game_loop(state, current_player, next_player, human_player_num)
+        else:
+            game_loop(state, next_player, current_player, human_player_num)
 
 
 def choose_human_player_number():
