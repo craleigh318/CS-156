@@ -46,7 +46,7 @@ class StateTest(unittest.TestCase):
     def test_best_move(self):
         state = StateTest.make_test_state()
         depth_limit = 8
-        expected = (1, 3, 0, 0)
+        expected = (0, 7, 3, 0)
         self.assertEqual(expected, state.best_move(depth_limit).to_tuple())
 
     def test_random_state(self):
