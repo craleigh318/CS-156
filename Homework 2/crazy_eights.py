@@ -306,7 +306,7 @@ class State(object):
         self_copy = copy.deepcopy(self)
         player_hand_copy = copy.deepcopy(player_hand)
         move_copy = copy.deepcopy(move)
-        self_copy.partial_state.next_turn(self_copy.deck, player_hand, move_copy)
+        self_copy.partial_state.next_turn(self_copy.deck, player_hand_copy, move_copy)
         return self_copy, player_hand_copy
 
     def __min_move_result(self, move):
@@ -382,7 +382,17 @@ class State(object):
             return self.__evaluation(), None
         else:
             wanted_value = float("-inf")
-            for move in self.partial_state.legal_moves(self.hand):
+            legal_moves = self.partial_state.legal_moves(self.hand)
+            for move in legal_moves:
+                '''print("")
+                print("MAX")
+                print("DEPTH: " + str(depth_counter))
+                print("FACE-UP CARD: " + str((self.partial_state.face_up_card.rank, self.partial_state.face_up_card.suit)))
+                print("HISTORY: " + str([move.to_tuple() for move in self.partial_state.history]))
+                print("HAND: " + str([(card.rank, card.suit) for card in self.hand.cards]))
+                print("LEGAL MOVES: " + str([move.to_tuple() for move in legal_moves]))
+                print("CONSIDERING MOVE: " + str(move.to_tuple()))
+                print("")'''
                 min_value = self.__max_move_result(move).__min_value(alpha, beta, depth_counter - 1)
                 if min_value >= wanted_value:
                     wanted_value = min_value
@@ -401,10 +411,13 @@ class State(object):
             legal_moves = self.partial_state.legal_moves(self.partial_state.hand)
             for move in legal_moves:
                 print("")
+                print("MIN")
+                print("MAX'S HAND: " + str([(card.rank, card.suit) for card in self.hand.cards]))
+                print("DEPTH: " + str(depth_counter))
                 print("FACE-UP CARD: " + str((self.partial_state.face_up_card.rank, self.partial_state.face_up_card.suit)))
                 print("HISTORY: " + str([move.to_tuple() for move in self.partial_state.history]))
                 print("HAND: " + str([(card.rank, card.suit) for card in self.partial_state.hand.cards]))
-                #print("LEGAL MOVES: " + str([move.to_tuple() for move in legal_moves]))
+                print("LEGAL MOVES: " + str([move.to_tuple() for move in legal_moves]))
                 print("CONSIDERING MOVE: " + str(move.to_tuple()))
                 print("")
                 max_value, _ = self.__min_move_result(move).__max_value(alpha, beta, depth_counter - 1)
