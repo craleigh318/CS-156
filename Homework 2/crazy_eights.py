@@ -541,15 +541,18 @@ class PartialState(object):
         """Return a list of Moves that can be performed by a player with a certain hand in this state."""
 
         last_move = self.last_move()
-        legal_moves = [last_move.next_draw(self.face_up_card.rank)]
         # We need only consider if a single eight is in the hand, since all 4 eights are considered
         # to be the same from the perspective of the game's rules.
-        eight_in_hand = not (player_hand.find_eight() is None)
-        if eight_in_hand and last_move.face_up_card.rank != Card.rank_two:
-            legal_moves += [last_move.next_play(Card(Card.make_deck_index(Card.rank_eight, suit)))
-                            for suit in xrange(0, Card.num_suits())]
-        hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
-        legal_moves += [last_move.next_play(card) for card in hand_no_eights if self.can_play(card)]
+        if last_move.face_up_card.rank == Card.rank_jack:
+            legal_moves = []
+        else:
+            legal_moves = [last_move.next_draw(self.face_up_card.rank)]
+            eight_in_hand = not (player_hand.find_eight() is None)
+            if eight_in_hand and last_move.face_up_card.rank != Card.rank_two:
+                legal_moves += [last_move.next_play(Card(Card.make_deck_index(Card.rank_eight, suit)))
+                                for suit in xrange(0, Card.num_suits())]
+            hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
+            legal_moves += [last_move.next_play(card) for card in hand_no_eights if self.can_play(card)]
         return legal_moves
 
     def last_move(self):
