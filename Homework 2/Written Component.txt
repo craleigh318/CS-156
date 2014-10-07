@@ -1,8 +1,8 @@
 Problem 1:
 
 Eight queens on a chess board need to be placed so that none of them can capture another in one turn.  Therefore, only one queen is allowed per row, column, or diagonal.
-Beam Search tries to find the quickest solution, by considering all viable future states and returning the first acceptable one reached.
-Hill Climbing focuses only on the moves that lead to the best future state, and returns the following successful stae once it is reached.
+Beam Search tries to find the quickest solution, by considering a number of viable future states and returning the first acceptable one reached.
+Hill Climbing focuses only on the moves that lead to the best future state, and returns the following successful state once it is reached.
 
 Assume that the eight queens start lined up at the top row.  The queens share the first row, but they are all already in seperate diagonals and columns.
 
@@ -13,3 +13,20 @@ A beam-searching AI will consider all of the possible moves that it can do with 
 If the AI favors moving the leftmost pieces first and moving as few spaces as needed, then the result of hill climbing will always have the leftmost queen two spaces down from where it started.
 
 Problem 2:
+
+Example annealing schedule:
+
+def annealing_schedule(self, t):
+	divisor = 1.0
+	for queen in self.list_of_queens:
+		if not self.shares_a_row(queen):
+			divisor += 3.0
+		if not self.shares_a_column(queen):
+			divisor += 3.0
+		if not self.shares_a_diagonal(queen):
+			divisor += 1.0
+	new_temp = t / divisor
+	return new_temp
+
+Assume the eight queens are in the following positions:
+d8, f8, g8, a5, b3, c1, e1, and h4.  Currently, three queens share row 8 and two queens share row 1, with everything else acceptable.  If this annealing schedule is run, the queens will gravitate towards forming a diagonal from one corner of the board to another.  This is because, in this schedule, being in a seperate diagonal does not lower T enough, whereas it does for being in a seperate row or column.  Since now none of the queens are in an proper position, the newer state is less fit.
