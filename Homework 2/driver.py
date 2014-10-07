@@ -67,7 +67,7 @@ class HumanPlayer(Player):
 class AIPlayer(Player):
     @staticmethod
     def move(partial_state):
-        return Move.from_tuple(CrazyEight.move(partial_state))
+        return Move.from_tuple(CrazyEight.move(partial_state.to_tuple()))
 
 
 def print_partial_state(partial_state):
@@ -81,22 +81,19 @@ def print_partial_state(partial_state):
     print('')
 
 
-def game_loop(state, current_player, next_player, human_player_num):
+def game_loop(state, current_player, next_player):
     """Cycles through player turns until the game is over."""
-    if current_player.number == human_player_num:
-        player_move = current_player.move(state.partial_state)
-    else:
-        player_move = current_player.move(state.partial_state.to_tuple())
-        player_move = Move.from_tuple(player_move)
+
+    player_move = current_player.move(state.partial_state)
 
     state.partial_state.next_turn(state.deck, state.partial_state.hand, player_move)
     # Loop while game is not over.  Switch players.
     if not state.game_ended():
         # If a jack was played, the player who played it gets to go again.
         if player_move.face_up_card.rank == Card.rank_jack:
-            game_loop(state, current_player, next_player, human_player_num)
+            game_loop(state, current_player, next_player)
         else:
-            game_loop(state, next_player, current_player, human_player_num)
+            game_loop(state, next_player, current_player)
 
 
 def choose_human_player_number():
@@ -122,7 +119,7 @@ def start_game():
         first_player, second_player = ai_player, human_player
 
     current_state = State()
-    game_loop(current_state, first_player, second_player, human_player.number)
+    game_loop(current_state, first_player, second_player)
 
 
 if __name__ == '__main__':
