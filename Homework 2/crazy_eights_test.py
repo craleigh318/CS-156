@@ -14,14 +14,14 @@ class StateTest(unittest.TestCase):
     @staticmethod
     def make_test_state():
         ai_hand = crazy_eights.Hand([crazy_eights.Card(x) for x in [0, 1, 2, 3, 4, 5, 6, 7]])
-        human_hand = crazy_eights.Hand([crazy_eights.Card(x) for x in [8, 9, 10, 11, 12, 13, 14]])
+        human_hand = crazy_eights.Hand([crazy_eights.Card(x) for x in [8, 9, 10, 11, 12, 13, 14, 15]])
         face_up_card = crazy_eights.Card(16)
         deck_card_indices = [x for x in xrange(face_up_card.rank + 1, crazy_eights.Deck.max_deck_size())]
         deck_cards = [crazy_eights.Card(x) for x in deck_card_indices]
         partial_state = crazy_eights.PartialState(
             face_up_card=face_up_card,
             hand=human_hand,
-            history=[crazy_eights.Move.play(0, face_up_card)]
+            history=[]
         )
         state = crazy_eights.State(
             hand=ai_hand,
