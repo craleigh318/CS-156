@@ -172,8 +172,8 @@ class Hand(object):
 
     @property
     def cards(self):
-        """A copy of the list of all of the cards in the hand."""
-        cards = list(self.__cards)
+        """List of all of the cards in the hand."""
+        cards = self.__cards
         return cards
 
     def add_card(self, card):
@@ -234,7 +234,7 @@ class Deck(object):
     @property
     def cards(self):
         """A copy of the list of the cards in the deck."""
-        cards = list(self.__cards)
+        cards = self.__cards
         return cards
 
     def draw_card(self):
@@ -305,12 +305,11 @@ class State(object):
         """Returns the State that results from making a move."""
         self_copy = copy.deepcopy(self)
         player_hand_copy = copy.deepcopy(player_hand)
-        self_copy.partial_state.next_turn(self.deck, player_hand, move)
+        move_copy = copy.deepcopy(move)
+        self_copy.partial_state.next_turn(self_copy.deck, player_hand, move_copy)
         return self_copy, player_hand_copy
 
     def __min_move_result(self, move):
-        #print("MOVE: " + str(move.to_tuple()))
-        #print("HAND: " + str([str((card.rank, card.suit)) for card in self.partial_state.hand.cards]))
         result_state, result_hand = self.__move_result(self.partial_state.hand, move)
         result_state.partial_state.hand = result_hand
         return result_state
@@ -401,8 +400,13 @@ class State(object):
             wanted_value = float("inf")
             legal_moves = self.partial_state.legal_moves(self.partial_state.hand)
             for move in legal_moves:
-                #print(str([move.to_tuple() for move in legal_moves]))
-                #print("CONSIDERING MOVE: " + str(move.to_tuple()))
+                print("")
+                print("FACE-UP CARD: " + str((self.partial_state.face_up_card.rank, self.partial_state.face_up_card.suit)))
+                print("HISTORY: " + str([move.to_tuple() for move in self.partial_state.history]))
+                print("HAND: " + str([(card.rank, card.suit) for card in self.partial_state.hand.cards]))
+                #print("LEGAL MOVES: " + str([move.to_tuple() for move in legal_moves]))
+                print("CONSIDERING MOVE: " + str(move.to_tuple()))
+                print("")
                 max_value, _ = self.__min_move_result(move).__max_value(alpha, beta, depth_counter - 1)
                 wanted_value = min(wanted_value, max_value)
                 if wanted_value <= alpha:
@@ -543,16 +547,15 @@ class PartialState(object):
         """Return a list of Moves that can be performed by a player with a certain hand in this state."""
 
         last_move = self.last_move()
+        legal_moves = [last_move.next_draw(self.face_up_card.rank)]
         # We need only consider if a single eight is in the hand, since all 4 eights are considered
         # to be the same from the perspective of the game's rules.
-        eight_in_hand = any((card.rank == Card.rank_eight) for card in player_hand.cards)
-        legal_moves = []
+        eight_in_hand = not (player_hand.find_eight() is None)
         if eight_in_hand:
             legal_moves += [last_move.next_play(Card(Card.make_deck_index(Card.rank_eight, suit)))
                             for suit in xrange(0, Card.num_suits())]
         hand_no_eights = [card for card in player_hand.cards if card.rank != Card.rank_eight]
         legal_moves += [last_move.next_play(card) for card in hand_no_eights if self.can_play(card)]
-        legal_moves.append(last_move.next_draw(self.face_up_card.rank))
         return legal_moves
 
     def last_move(self):
