@@ -91,7 +91,7 @@ def perform_move(state, move):
     state.partial_state.hand.remove_card(move.face_up_card)
     state.partial_state.face_up_card = move.face_up_card
     # Add this move to history.
-    state.next_turn(move)
+    state.partial_state.next_turn(state.deck, state.partial_state.hand, move)
 
 
 def game_loop(state, current_player, next_player, human_player_num):

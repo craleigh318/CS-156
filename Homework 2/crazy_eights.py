@@ -187,6 +187,12 @@ class Hand(object):
         """Removes the card from the hand."""
         self.__cards.remove(card)
 
+    def find_eight(self):
+        for card in self.__cards:
+            if card.rank == Card.rank_eight:
+                return card
+        return None
+
 
 class Deck(object):
     """The collection of all 52 cards."""
@@ -296,13 +302,6 @@ class State(object):
             self.__hand.add_card(self.__deck.draw_card())
             self.__partial_state.hand.add_card(self.__deck.draw_card())
 
-    def next_turn(self, move):
-        """Adds the move to the game's move history.  Swaps the next player into the partial state."""
-        self.__partial_state.add_move(move)
-        temp = self.__hand
-        self.__hand = self.__partial_state.hand
-        self.__partial_state.hand = temp
-
     def game_ended(self):
         """Returns true if the game ended.  The game ends if the deck or either hand is empty."""
         ended = not (self.__deck.cards and self.__hand.cards and self.__partial_state.hand.cards)
@@ -311,29 +310,13 @@ class State(object):
     def __move_result(self, player_hand, move):
         """Returns the State that results from making a move."""
         self_copy = copy.deepcopy(self)
-        player_hand_copy = copy.copy(player_hand)
-
-        if move.is_card_draw:
-            draw_count = 0
-            while draw_count < move.number_of_cards and len(self.deck) > 0:
-                player_hand_copy.add_card(self_copy.deck.draw_card())
-                draw_count += 1
-        else:
-            # All 8 cards are treated equally by the rules of Crazy Eights, so if we're playing an 8 then we just
-            # look for one in our hand and play it rather than trying to play any particular one.
-            if move.face_up_card.rank == Card.rank_eight:
-                played_card = next(card for card in player_hand_copy.cards if card.rank == Card.rank_eight)
-            else:
-                played_card = move.face_up_card
-            player_hand_copy.remove_card(played_card)
-            self_copy.partial_state.face_up_card = played_card
-
-        self_copy.partial_state.history.append(move)
+        player_hand_copy = copy.deepcopy(player_hand)
+        self_copy.partial_state.next_turn(self.deck, player_hand, move)
         return self_copy, player_hand_copy
 
     def __min_move_result(self, move):
-        print("MOVE: " + str(move.to_tuple()))
-        print("HAND: " + str([str((card.rank, card.suit)) for card in self.partial_state.hand.cards]))
+        #print("MOVE: " + str(move.to_tuple()))
+        #print("HAND: " + str([str((card.rank, card.suit)) for card in self.partial_state.hand.cards]))
         result_state, result_hand = self.__move_result(self.partial_state.hand, move)
         result_state.partial_state.hand = result_hand
         return result_state
@@ -424,8 +407,8 @@ class State(object):
             wanted_value = float("inf")
             legal_moves = self.partial_state.legal_moves(self.partial_state.hand)
             for move in legal_moves:
-                print(str([move.to_tuple() for move in legal_moves]))
-                print("CONSIDERING MOVE: " + str(move.to_tuple()))
+                #print(str([move.to_tuple() for move in legal_moves]))
+                #print("CONSIDERING MOVE: " + str(move.to_tuple()))
                 max_value, _ = self.__min_move_result(move).__max_value(alpha, beta, depth_counter - 1)
                 wanted_value = min(wanted_value, max_value)
                 if wanted_value <= alpha:
@@ -594,6 +577,24 @@ class PartialState(object):
         else:
             last_move = self.__history[-1]
         return last_move
+
+    def next_turn(self, deck, player_hand, move):
+        if move.is_card_draw:
+            draw_count = 0
+            while draw_count < move.number_of_cards and len(deck) > 0:
+                player_hand.add_card(deck.draw_card())
+                draw_count += 1
+        else:
+            if move.face_up_card.rank == Card.rank_eight:
+                # All 8 cards are treated equally by the rules of Crazy Eights, so if we're playing an 8 then we
+                # just look for one in our hand and play it rather than trying to play any particular one.
+                played_card = player_hand.find_eight()
+            else:
+                played_card = move.face_up_card
+            player_hand.remove_card(played_card)
+            self.face_up_card = played_card
+
+        self.add_move(move)
 
 
 class Move(object):
