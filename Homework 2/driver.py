@@ -38,7 +38,8 @@ class HumanPlayer(Player):
         legal_moves = partial_state.legal_moves(partial_state.hand)
         return self.__choose_move(legal_moves, partial_state.face_up_card, partial_state.last_move())
 
-    def __choose_move(self, legal_moves, face_up_card, last_move):
+    @staticmethod
+    def __choose_move(legal_moves, face_up_card, last_move):
         while True:
             str_input = raw_input()
             user_input = str_input.split()
