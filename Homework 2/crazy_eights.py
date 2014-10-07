@@ -384,15 +384,6 @@ class State(object):
             wanted_value = float("-inf")
             legal_moves = self.partial_state.legal_moves(self.hand)
             for move in legal_moves:
-                '''print("")
-                print("MAX")
-                print("DEPTH: " + str(depth_counter))
-                print("FACE-UP CARD: " + str((self.partial_state.face_up_card.rank, self.partial_state.face_up_card.suit)))
-                print("HISTORY: " + str([move.to_tuple() for move in self.partial_state.history]))
-                print("HAND: " + str([(card.rank, card.suit) for card in self.hand.cards]))
-                print("LEGAL MOVES: " + str([move.to_tuple() for move in legal_moves]))
-                print("CONSIDERING MOVE: " + str(move.to_tuple()))
-                print("")'''
                 min_value = self.__max_move_result(move).__min_value(alpha, beta, depth_counter - 1)
                 if min_value >= wanted_value:
                     wanted_value = min_value
@@ -410,16 +401,6 @@ class State(object):
             wanted_value = float("inf")
             legal_moves = self.partial_state.legal_moves(self.partial_state.hand)
             for move in legal_moves:
-                print("")
-                print("MIN")
-                print("MAX'S HAND: " + str([(card.rank, card.suit) for card in self.hand.cards]))
-                print("DEPTH: " + str(depth_counter))
-                print("FACE-UP CARD: " + str((self.partial_state.face_up_card.rank, self.partial_state.face_up_card.suit)))
-                print("HISTORY: " + str([move.to_tuple() for move in self.partial_state.history]))
-                print("HAND: " + str([(card.rank, card.suit) for card in self.partial_state.hand.cards]))
-                print("LEGAL MOVES: " + str([move.to_tuple() for move in legal_moves]))
-                print("CONSIDERING MOVE: " + str(move.to_tuple()))
-                print("")
                 max_value, _ = self.__min_move_result(move).__max_value(alpha, beta, depth_counter - 1)
                 wanted_value = min(wanted_value, max_value)
                 if wanted_value <= alpha:
