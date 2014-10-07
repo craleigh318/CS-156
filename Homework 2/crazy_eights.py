@@ -147,8 +147,11 @@ class Hand(object):
         """The number of cards with which a player starts."""
         return 8
 
-    def __init__(self, initial_hand=[]):
-        self.__cards = list(initial_hand)
+    def __init__(self, initial_hand=None):
+        if initial_hand is None:
+            self.__cards = []
+        else:
+            self.__cards = list(initial_hand)
 
     def __len__(self):
         return len(self.cards)
@@ -243,9 +246,15 @@ class Deck(object):
 class State(object):
     """Stores the deck, opponent's hand, and partial state."""
 
-    def __init__(self, deck=Deck(), hand=Hand(), partial_state=None):
-        self.__deck = deck
-        self.__hand = hand
+    def __init__(self, deck=None, hand=None, partial_state=None):
+        if deck is None:
+            self.__deck = Deck()
+        else:
+            self.__deck = deck
+        if hand is None:
+            self.__hand = Hand()
+        else:
+            self.__hand = hand
         if partial_state is None:
             self.__randomize_partial_state()
         else:
@@ -452,10 +461,16 @@ class PartialState(object):
         history_move_tuples = [move.to_tuple() for move in self.history]
         return self.face_up_card.rank, self.face_up_card.suit, hand_deck_indices, history_move_tuples
 
-    def __init__(self, face_up_card, hand=Hand(), history=[]):
+    def __init__(self, face_up_card, hand=None, history=None):
         self.__face_up_card = face_up_card
-        self.__hand = hand
-        self.__history = list(history)
+        if hand is None:
+            self.__hand = Hand()
+        else:
+            self.__hand = hand
+        if history is None:
+            self.__history = []
+        else:
+            self.__history = list(history)
 
     def __deepcopy__(self, memo):
         face_up_card_copy = _deepcopy(self.__face_up_card, memo)

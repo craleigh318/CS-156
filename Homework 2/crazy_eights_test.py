@@ -32,13 +32,13 @@ class StateTest(unittest.TestCase):
 
     def test_legal_moves(self):
         state = StateTest.make_test_state()
-        expected = [crazy_eights.Move.play(1, 3, 0),
-                    crazy_eights.Move.play(1, 7, 0),
-                    crazy_eights.Move.play(1, 7, 1),
-                    crazy_eights.Move.play(1, 7, 2),
-                    crazy_eights.Move.play(1, 7, 3),
+        expected = [crazy_eights.Move.play(1, crazy_eights.Card(crazy_eights.Card.make_deck_index(3, 0))),
+                    crazy_eights.Move.play(1, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 0))),
+                    crazy_eights.Move.play(1, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 1))),
+                    crazy_eights.Move.play(1, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 2))),
+                    crazy_eights.Move.play(1, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 3))),
                     crazy_eights.Move.draw(1, 1)]
-        actual = state._State__legal_moves(state.hand)
+        actual = state.partial_state.legal_moves(state.hand)
         expected = sorted([m.to_tuple() for m in expected])
         actual = sorted([m.to_tuple() for m in actual])
         self.assertEqual(expected, actual)
