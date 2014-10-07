@@ -25,6 +25,9 @@ class CrazyEight(object):
         # Count the most common move in the list.
         list_counter = Counter(possible_moves)
         best_move = list_counter.most_common(1)[0][0]
+
+        print(list_counter)
+
         return best_move
 
     @staticmethod
@@ -320,7 +323,7 @@ class State(object):
         return result_state
 
     def __evaluation(self):
-        num_of_legal_moves = len(self.partial_state.legal_moves(self.hand))
+        num_of_legal_moves = len(self.partial_state.legal_moves(self.hand)) - 1  # Subtract one to not count draw-move.
         weight_of_legal_move = 1.25
         evaluation = num_of_legal_moves * weight_of_legal_move
 
