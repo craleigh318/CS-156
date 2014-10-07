@@ -39,6 +39,7 @@ class HumanPlayer(Player):
 
     @staticmethod
     def __choose_move(partial_state):
+        legal_moves = partial_state.legal_moves(partial_state.hand)
         while True:
             str_input = raw_input()
             user_input = str_input.split()
@@ -55,9 +56,9 @@ class HumanPlayer(Player):
                     suit_input = raw_input()
                     suit_num = int(suit_input)
                     chosen_card = Card(Card.make_deck_index(Card.rank_eight, suit_num))
-                chosen_move = partial_state.last_move.next_play(chosen_card)
+                chosen_move = partial_state.last_move().next_play(chosen_card)
 
-            if chosen_move in partial_state.legal_moves:
+            if chosen_move in legal_moves:
                 return chosen_move
             else:
                 print('You cannot place a [' + CardNames.full_name(chosen_move.face_up_card) +
@@ -113,6 +114,7 @@ def start_game():
     chosen_player_number = choose_human_player_number()
     human_player = HumanPlayer(chosen_player_number)
     ai_player = AIPlayer(chosen_player_number ^ 1)
+
     if chosen_player_number == 0:
         first_player, second_player = human_player, ai_player
     else:
