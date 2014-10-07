@@ -32,12 +32,12 @@ class StateTest(unittest.TestCase):
 
     def test_legal_moves(self):
         state = StateTest.make_test_state()
-        expected = [crazy_eights.Move.play(1, crazy_eights.Card(crazy_eights.Card.make_deck_index(3, 0))),
-                    crazy_eights.Move.play(1, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 0))),
-                    crazy_eights.Move.play(1, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 1))),
-                    crazy_eights.Move.play(1, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 2))),
-                    crazy_eights.Move.play(1, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 3))),
-                    crazy_eights.Move.draw(1, 1)]
+        expected = [crazy_eights.Move.play(0, crazy_eights.Card(crazy_eights.Card.make_deck_index(3, 0))),
+                    crazy_eights.Move.play(0, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 0))),
+                    crazy_eights.Move.play(0, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 1))),
+                    crazy_eights.Move.play(0, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 2))),
+                    crazy_eights.Move.play(0, crazy_eights.Card(crazy_eights.Card.make_deck_index(7, 3))),
+                    crazy_eights.Move.draw(0, 1)]
         actual = state.partial_state.legal_moves(state.hand)
         expected = sorted([m.to_tuple() for m in expected])
         actual = sorted([m.to_tuple() for m in actual])
@@ -45,8 +45,8 @@ class StateTest(unittest.TestCase):
 
     def test_best_move(self):
         state = StateTest.make_test_state()
-        depth_limit = 8
-        expected = (0, 7, 3, 0)
+        depth_limit = 4
+        expected = (0, 3, 0, 0)
         self.assertEqual(expected, state.best_move(depth_limit).to_tuple())
 
     def test_random_state(self):
