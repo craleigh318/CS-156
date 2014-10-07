@@ -161,10 +161,7 @@ class Hand(object):
         if cards_id in memo:
             cards_copy = memo[cards_id]
         else:
-            cards_copy = []
-            for card in self.__cards:
-                cards_copy += _deepcopy([card], memo)
-            memo[cards_id] = cards_copy
+            cards_copy = _deepcopy(self.__cards, memo)
 
         self_id = id(self)
         if self_id in memo:
@@ -225,10 +222,7 @@ class Deck(object):
         if cards_id in memo:
             cards_copy = memo[cards_id]
         else:
-            cards_copy = []
-            for card in self.__cards:
-                cards_copy += _deepcopy([card], memo)
-            memo[cards_id] = cards_copy
+            cards_copy = _deepcopy(self.__cards, memo)
 
         self_id = id(self)
         if self_id in memo:
@@ -458,15 +452,7 @@ class PartialState(object):
     def __deepcopy__(self, memo):
         face_up_card_copy = _deepcopy(self.__face_up_card, memo)
         hand_copy = _deepcopy(self.__hand, memo)
-
-        history_id = id(self.__history)
-        if history_id in memo:
-            history_copy = memo[history_id]
-        else:
-            history_copy = []
-            for move in self.__history:
-                history_copy += _deepcopy([move], memo)
-            memo[history_id] = history_copy
+        history_copy = _deepcopy(self.__history, memo)
 
         self_id = id(self)
         if self_id in memo:
