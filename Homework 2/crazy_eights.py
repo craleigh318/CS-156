@@ -381,6 +381,7 @@ class State(object):
         if self.game_ended() or depth_counter == 0:
             return self.__evaluation(), None
         else:
+            wanted_move = None
             wanted_value = float("-inf")
             legal_moves = self.partial_state.legal_moves(self.hand)
             for move in legal_moves:
@@ -443,7 +444,7 @@ class PartialState(object):
         else:
             self.__hand = hand
         if history is None:
-            self.__history = []
+            self.__history = [Move.play(CrazyEight.first_player_num, face_up_card)]
         else:
             self.__history = list(history)
 
@@ -556,13 +557,7 @@ class PartialState(object):
         return legal_moves
 
     def last_move(self):
-        if len(self.history) == 0:
-            # Pretend a move was made at the start of the game, to take advantage of Move class's methods.
-            second_player_num = CrazyEight.first_player_num ^ 1
-            last_move = Move(second_player_num, self.face_up_card, 0)
-        else:
-            last_move = self.__history[-1]
-        return last_move
+        return self.__history[-1]
 
     def next_turn(self, deck, player_hand, move):
         if move.is_card_draw:
