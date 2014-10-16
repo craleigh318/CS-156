@@ -156,6 +156,10 @@ class CSP(object):
         :return: a CSP object generated from csp_file_name.
         """
         variables = []
+        file_lines = csp_file_name.readlines()
+        for line in file_lines:
+            # TODO: Make variables from words in this line.
+            pass
         return variables
 
     def make_node_consistent(self):
