@@ -1,6 +1,5 @@
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
-
 import sys
 from copy import copy
 
@@ -31,7 +30,7 @@ class Relation(object):
         elif relation == self.equal:
             return lambda x, y: x == y
         elif relation == self.not_equal:
-            return lambda x, y: not x == y
+            return lambda x, y: x != y
         else:
             raise ValueError('"' + relation + '" is not a known relation.')
 
@@ -156,7 +155,8 @@ class CSP(object):
         :param csp_file_name: the name of the CSP file to generate the CSP object from.
         :return: a CSP object generated from csp_file_name.
         """
-        pass
+        variables = []
+        return variables
 
     def make_node_consistent(self):
         """
@@ -194,9 +194,10 @@ class CSP(object):
             return assignment.make_inferences()
         else:
             return Assignment.empty()
-    
+
 
 forward_checking = sys.argv[2]
 with open(sys.argv[1], 'r') as problem_file:
-    print(problem_file.read())
-    print(forward_checking)
+    csp = CSP.from_file(problem_file)
+    solution = csp.solve()
+    print(solution)
