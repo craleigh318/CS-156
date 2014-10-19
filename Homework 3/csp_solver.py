@@ -135,7 +135,8 @@ class Constraints(object):
             first_arg, second_arg = second_value, first_value
             arc = reverse_arg_order_tuple
         else:
-            raise ValueError('There is no relation involving "' + first_var + '" and + "' + second_var + '"!')
+            raise ValueError('There is no relation involving "' + first_var.name +
+                             '" and "' + second_var.name + '"!')
         relation = self.__constraints[arc]
         return relation(first_arg, second_arg)
 
