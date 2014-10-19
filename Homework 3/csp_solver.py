@@ -46,11 +46,6 @@ class Variable(object):
         self.__domain = domain
         self.__constraints = constraints
 
-    # This is called when copy() is called on a Variable, for example: copy(variable_object)
-    def __copy__(self):
-        # We don't need a deep copy, because none of these objects will ever be mutated.
-        return Variable(self.__name, self.__domain, self.__constraints)
-
     def __hash__(self):
         # All variable names are (supposed to be) unique. So we can just hash based on their names.
         return hash(self.name)
@@ -63,15 +58,15 @@ class Variable(object):
         """
         Finds domain values that always violate a constraint on this variable no matter what value from the domain of
         the other variable involved in the constraint is chosen, and thus cannot be involved in a complete assignment.
+        Creates a copy of this variable and removes those useless domain values from its domain.
 
         This is an implementation of REVISE from the book in Figure 3 on page 265, with the alteration that we return
-        both a new copy of this Variable object without any useless domain values and a boolean indicating whether or
-        not there were any useless domain values.
+        both a new copy of this Variable object without any useless domain values or None if we do not revise this
+        variable's domain.
 
-        :return: a (new_variable, has_useless_values) tuple, new_variable being this variable without useless domain
-                 values and has_useless_values being a boolean value indicating if there were any such values. If there
-                 are no useless domain values, new_variable is just a copy of this variable.
+        :return: A copy of this variable with a revised domain, or None if the domain of this variable is not revised.
         """
+        # TODO build up a list of the values that aren't useless. Make a variable copy by passing that to __init__.
         pass
 
     def order_domain_values(self, partial_assignment):
