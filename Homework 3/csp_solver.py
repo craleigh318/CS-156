@@ -16,21 +16,40 @@ class Relation(object):
 
     always_true = lambda x, y: True
 
-    def as_function(self, relation):
+    @staticmethod
+    def as_function(relation, opposite=False):
         """
         :param relation: a string representing a relation.
+        :param opposite: a boolean flag representing if we want to return the opposite of the
+                         relation indicated by the relation-string or not.
         :raises: a ValueError if relation is not one of Relation's enum values.
-        :return: a function that implements the appropriate relation.
+        :return: a function that implements the appropriate relation, or the opposite relation.
         """
 
-        if relation == self.greater_than:
-            return lambda x, y: x > y
-        elif relation == self.less_than:
-            return lambda x, y: x < y
-        elif relation == self.equal:
-            return lambda x, y: x == y
-        elif relation == self.not_equal:
-            return lambda x, y: x != y
+        greater_than = lambda x, y: x > y
+        less_than = lambda x, y: x < y
+        equal = lambda x, y: x == y
+        not_equal = lambda x, y: not equal(x, y)
+        if relation == Relation.greater_than:
+            if not opposite:
+                return greater_than
+            else:
+                return less_than
+        elif relation == Relation.less_than:
+            if not opposite:
+                return less_than
+            else:
+                return greater_than
+        elif relation == Relation.equal:
+            if not opposite:
+                return equal
+            else:
+                return not_equal
+        elif relation == Relation.not_equal:
+            if not opposite:
+                return not_equal
+            else:
+                return equal
         else:
             raise ValueError('"' + relation + '" is not a known relation.')
 
@@ -40,15 +59,14 @@ class Variable(object):
     A variable, which consists of all things relating to variables in the CSP: name, domain, and constraints.
     """
 
-    def __init__(self, name, domain, constraints):
+    def __init__(self, name, domain):
         # The state of these objects should not be mutated.
         self.__name = name
         self.__domain = domain
-        self.__constraints = constraints
 
     def __copy__(self):
         return Variable(self.__name, self.__domain, self.__constraints)
-    
+
     def __hash__(self):
         # All variable names are (supposed to be) unique. So we can just hash based on their names.
         return hash(self.name)
@@ -57,63 +75,13 @@ class Variable(object):
     def name(self):
         return self.__name
 
-    def without_useless_domain_values(self):
-        """
-        Finds domain values that always violate a constraint on this variable no matter what value from the domain of
-        the other variable involved in the constraint is chosen, and thus cannot be involved in a complete assignment.
-        Creates a copy of this variable and removes those useless domain values from its domain.
-
-        This is an implementation of REVISE from the book in Figure 3 on page 265, with the alteration that we return
-        both a new copy of this Variable object without any useless domain values or None if we do not revise this
-        variable's domain.
-
-        :return: A copy of this variable with a revised domain, or None if the domain of this variable is not revised.
-        """
-        # TODO build up a list of the values that aren't useless. Make a variable copy by passing that to __init__.
-        pass
-
-    def order_domain_values(self, partial_assignment):
+    def order_domain_values(self, constraints):
         """
         Orders this variable's domain values based on the least constraining value heuristic.
 
-        :param partial_assignment: the partial assignment that (might) contribute to the constraints on the variable.
-        :return: variable's domain values, ordered according to the least constraining value heuristic.
+        :param constraints: the constraints that this variable is involved in.
+        :return: this variable's domain values, ordered based on the least constraining value heuristic.
         """
-        pass
-
-
-class Assignment(object):
-    """
-    An immutable assignment of variables.
-    """
-
-    def __init__(self, assignments=None):
-        if assignments is None:
-            self.__assignments = {}
-        else:
-            self.__assignments = assignments
-
-    @staticmethod
-    def empty():
-        """
-        Utility method used to make an empty assignment. Just for readability's sake.
-        :return: an empty assignment.
-        """
-        return Assignment()
-
-    def assign(self, variable, value):
-        """
-        :param variable: the variable to assign a value to.
-        :param value: the value to assign to the variable
-        :return: an Assignment updated with the new assignment.
-        """
-        new_assignments = self.__assignments + {variable: value}
-        return Assignment(new_assignments)
-
-    def make_inferences(self):
-        pass
-
-    def is_consistent(self):
         pass
 
 
@@ -122,8 +90,18 @@ class CSP(object):
     A constraint satisfaction problem (CSP).
     """
 
-    def __init__(self, variables):
+    def __init__(self, variables, constraints):
+        """
+        Create this CSP and make sure that it's node consistent upon creation.
+
+        :param variables: a list of Variable objects, representing the variables involved in this CSP
+        :param constraints: a mapping from (var1, var2) tuples to relations, representing the constraints of this CSP.
+        :return: a CSP object.
+        """
         self.__variables = variables
+        self.__constraints = constraints
+
+        # TODO make this CSP node consistent here.
 
     # This will need to be used in solve() in order to maintain immutability.
     def __copy__(self):
@@ -153,19 +131,22 @@ class CSP(object):
         :param csp_file_name: the name of the CSP file to generate the CSP object from.
         :return: a CSP object generated from csp_file_name.
         """
+
+        def add_constraint(constraints, var1, var2, relation_string):
+            arg_order_tuple = (var1, var2)
+            arg_order_relation = Relation.as_function(relation_string)
+            constraints[arg_order_tuple] = arg_order_relation
+
+            reverse_arg_order_tuple = (var2, var1)
+            reverse_arg_order_relation = Relation.as_function(relation_string, opposite=True)
+            constraints[reverse_arg_order_tuple] = reverse_arg_order_relation
+            
         variables = []
         file_lines = csp_file_name.readlines()
         for line in file_lines:
             # TODO: Make variables from words in this line.
             pass
         return variables
-
-    def make_node_consistent(self):
-        """
-        Restricts the domain of all variables with unary constraints so that those
-        constraints are satisfied by all domain values.
-        """
-        pass
 
     # TODO: Use backtracking search!
     # TODO: Don't mutate values like the book does. Use immutable data structures/classes in order to avoid bugs.
@@ -176,11 +157,11 @@ class CSP(object):
         """
         pass
 
-    def __select_unassigned_variable(self, assigned_variables):
+    def __select_unassigned_variable(self, unassigned_vars):
         """
         Selects an unassigned variable using the MRV and degree heuristics.
 
-        :param assigned_variables: variables that have already been assigned.
+        :param unassigned_vars: list of variables that are not assigned.
         :return: a variable that has not yet been assigned.
         """
         pass
@@ -193,13 +174,32 @@ class CSP(object):
                  do any inference.
         """
         if do_forward_checking:
-            return assignment.make_inferences()
+            pass
         else:
-            return Assignment.empty()
+            return {}
+
+    def __minimum_remaining_values(self, unassigned_vars):
+        """
+        An implementation of the minimum remaining values (MRV) heuristic.
+        :param unassigned_vars: list of variables that are not assigned.
+        :return: the variable with the fewest remaining legal values.
+        """
+        pass
+
+    def __degree(self, var, unassigned_vars):
+        """
+        An implementation of the degree heuristic.
+
+        :param var: the variable to find the degree of.
+        :param unassigned_vars: list of variables that are not assigned.
+        :return: the number of constraints that var is involved in with unassigned variables.
+        """
+        pass
 
 
-forward_checking = sys.argv[2]
-with open(sys.argv[1], 'r') as problem_file:
-    csp = CSP.from_file(problem_file)
-    solution = csp.solve()
-    print(solution)
+if __name__ == "__main__":
+    forward_checking = sys.argv[2]
+    with open(sys.argv[1], 'r') as problem_file:
+        csp = CSP.from_file(problem_file)
+        solution = csp.solve()
+        print(solution)
