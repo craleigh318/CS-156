@@ -46,6 +46,9 @@ class Variable(object):
         self.__domain = domain
         self.__constraints = constraints
 
+    def __copy__(self):
+        return Variable(self.__name, self.__domain, self.__constraints)
+    
     def __hash__(self):
         # All variable names are (supposed to be) unique. So we can just hash based on their names.
         return hash(self.name)
