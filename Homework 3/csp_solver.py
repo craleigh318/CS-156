@@ -137,10 +137,11 @@ class CSP(object):
             arg_order_relation = Relation.as_function(relation_string)
             constraints[arg_order_tuple] = arg_order_relation
 
+            # We add both possible relation-tuples to the constraint-map, for simplicity's sake.
             reverse_arg_order_tuple = (var2, var1)
             reverse_arg_order_relation = Relation.as_function(relation_string, opposite=True)
             constraints[reverse_arg_order_tuple] = reverse_arg_order_relation
-            
+
         variables = []
         file_lines = csp_file_name.readlines()
         for line in file_lines:
