@@ -96,14 +96,48 @@ class Constraints(object):
         else:
             self.__constraints = constraints
 
-    def add_constraint(self, first_var, second_var, relation):
+    def add_constraint(self, first_var, relation, second_var):
+        """
+        Adds a constraint to the constraint map.
+
+        :param arc: a tuple consisting of the two variables involved in a constraint, in order.
+        :param relation: the relation that the variables in the arc must satisfy.
+        """
         self.__constraints[(first_var, second_var)] = relation
 
     def arcs_involving(self, var):
+        """
+        Find the arcs involving a variable var.
+
+        :param var: the variable to find the arcs involving it.
+        :return: a list of arcs (tuples of variables) involving the variable.
+        """
         return [arc for arc in self.__constraints.keys() if var in arc]
 
-    def constraint_satisfied(self, arc, first_value, second_value):
-        return self.__constraints[arc](first_value, second_value)
+    def constraint_satisfied(self, first_var, first_value, second_var, second_value):
+        """
+        :param first_var: a variable involved in a constraint.
+        :param first_value: the value of first_var
+        :param second_var: a variable involved in a constraint.
+        :param second_value: the value of second_var
+        :return: True if the constraint between first_var and second_var is satisfied by
+                 the values first_value and second_value, False otherwise.
+        """
+
+        # The arc (tuple) of variables might have been in the reverse order as the
+        # variables were passed in. We need to handle this case.
+        arg_order_tuple = (first_var, second_var)
+        reverse_arg_order_tuple = (second_var, first_var)
+        if arg_order_tuple in self.__constraints:
+            first_arg, second_arg = first_value, second_value
+            arc = arg_order_tuple
+        elif reverse_arg_order_tuple in self.__constraints:
+            first_arg, second_arg = second_value, first_value
+            arc = reverse_arg_order_tuple
+        else:
+            raise ValueError('There is no relation involving "' + first_var + '" and + "' + second_var + '"!')
+        relation = self.__constraints[arc]
+        return relation(first_arg, second_arg)
 
 
 class CSP(object):
