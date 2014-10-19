@@ -85,6 +85,27 @@ class Variable(object):
         pass
 
 
+class Constraints(object):
+    """
+    The constraints of a CSP.
+    """
+
+    def __init__(self, constraints=None):
+        if constraints is None:
+            self.__constraints = {}
+        else:
+            self.__constraints = constraints
+
+    def add_constraint(self, first_var, second_var, relation):
+        self.__constraints[(first_var, second_var)] = relation
+
+    def arcs_involving(self, var):
+        return [arc for arc in self.__constraints.keys() if var in arc]
+
+    def constraint_satisfied(self, arc, first_value, second_value):
+        return self.__constraints[arc](first_value, second_value)
+
+
 class CSP(object):
     """
     A constraint satisfaction problem (CSP).
@@ -131,16 +152,6 @@ class CSP(object):
         :param csp_file_name: the name of the CSP file to generate the CSP object from.
         :return: a CSP object generated from csp_file_name.
         """
-
-        def add_constraint(constraints, var1, var2, relation_string):
-            arg_order_tuple = (var1, var2)
-            arg_order_relation = Relation.as_function(relation_string)
-            constraints[arg_order_tuple] = arg_order_relation
-
-            # We add both possible relation-tuples to the constraint-map, for simplicity's sake.
-            reverse_arg_order_tuple = (var2, var1)
-            reverse_arg_order_relation = Relation.as_function(relation_string, opposite=True)
-            constraints[reverse_arg_order_tuple] = reverse_arg_order_relation
 
         variables = []
         file_lines = csp_file_name.readlines()
