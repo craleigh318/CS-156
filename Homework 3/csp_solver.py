@@ -188,12 +188,17 @@ class CSP(object):
         :return: a CSP object generated from csp_file_name.
         """
 
-        variables = []
+        variable_names = []
         file_lines = csp_file_name.readlines()
         for line in file_lines:
-            # TODO: Make variables from words in this line.
-            pass
-        return variables
+            next_variable_name = line.partition(' ')[0]
+            if next_variable_name not in variable_names:
+                variable_names.append(next_variable_name)
+        variables = []
+        for name in variable_names:
+            variables.append(Variable(name, None))
+        new_csp = CSP(variables, None)
+        return new_csp
 
     # TODO: Use backtracking search!
     # TODO: Don't mutate values like the book does. Use immutable data structures/classes in order to avoid bugs.
@@ -202,7 +207,9 @@ class CSP(object):
         :param do_forward_checking: a boolean flag that indicates whether or not we are to do forward checking.
         :return: a complete assignment for this CSP, or None if it cannot be solved.
         """
-        pass
+
+        # Temporarily returns unsolved list.
+        return list(self.__variables)
 
     def __select_unassigned_variable(self, unassigned_vars):
         """

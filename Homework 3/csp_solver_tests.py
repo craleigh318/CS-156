@@ -1,6 +1,7 @@
 __author__ = 'dash'
 
 import unittest
+
 from csp_solver import *
 
 
@@ -68,6 +69,16 @@ class ConstraintsConstaintSatisfiedHasNoConstraint(unittest.TestCase):
         first_var = Variable("First!", None)
         second_var = Variable("Second!", None)
         self.assertRaises(ValueError, constraints.constraint_satisfied, first_var, 0, second_var, 0)
+
+
+class TestCSPFromFile(unittest.TestCase):
+    def test_this(self):
+        forward_checking = sys.argv[2]
+        with open('test.txt', 'r') as problem_file:
+            csp = CSP.from_file(problem_file)
+            solution = csp.solve(False)
+            for variable in solution:
+                print(variable.name)
 
 
 if __name__ == "__main__":
