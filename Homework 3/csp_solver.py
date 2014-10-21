@@ -75,6 +75,10 @@ class Variable(object):
     def name(self):
         return self.__name
 
+    @property
+    def domain(self):
+        return self.__domain
+
     def order_domain_values(self, constraints):
         """
         Orders this variable's domain values based on the least constraining value heuristic.
@@ -238,7 +242,12 @@ class CSP(object):
         :param unassigned_vars: list of variables that are not assigned.
         :return: the variable with the fewest remaining legal values.
         """
-        pass
+        min_var = None
+        for var in unassigned_vars:
+            if min_var is None:
+                min_var = var
+            elif len(var.domain) < len(min_var.domain):
+                min_var = var
 
     def __degree(self, var, unassigned_vars):
         """
