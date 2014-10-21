@@ -251,9 +251,9 @@ class CSP(object):
         pass
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     forward_checking = sys.argv[2]
     with open(sys.argv[1], 'r') as problem_file:
         csp = CSP.from_file(problem_file)
-        solution = csp.solve()
+        solution = csp.solve(forward_checking)
         print(solution)
