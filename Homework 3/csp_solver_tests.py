@@ -73,12 +73,11 @@ class ConstraintsConstaintSatisfiedHasNoConstraint(unittest.TestCase):
 
 class TestCSPFromFile(unittest.TestCase):
     def test_this(self):
-        forward_checking = sys.argv[2]
-        with open('test.txt', 'r') as problem_file:
+        forward_checking = False
+        with open('Test.txt', 'r') as problem_file:
             csp = CSP.from_file(problem_file)
-            solution = csp.solve(False)
-            for variable in solution:
-                print(variable.name)
+            solution = csp.solve(forward_checking)
+            Assignment.as_string(solution)
 
 
 if __name__ == "__main__":

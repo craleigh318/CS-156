@@ -145,6 +145,24 @@ class Constraints(object):
         return relation(first_arg, second_arg)
 
 
+class Assignment(object):
+    @staticmethod
+    def as_string(assignment):
+        """
+        Converts a dict of {variable: value} assignments to a string. Example:
+
+        x = 2
+        y = 9
+        z = -1
+        
+        :param assignment: the assignment dict to convert to a string.
+        :return: a string representation of the assignment in the above format.
+        """
+
+        lines = [var.name + " = " + str(value) for (var, value) in assignment.items()]
+        return '\n'.join(lines)
+
+
 class CSP(object):
     """
     A constraint satisfaction problem (CSP).
@@ -204,6 +222,7 @@ class CSP(object):
         new_csp = CSP(variables, None)
         return new_csp
 
+
     # TODO: Use backtracking search!
     # TODO: Don't mutate values like the book does. Use immutable data structures/classes in order to avoid bugs.
     def solve(self, do_forward_checking):
@@ -212,8 +231,9 @@ class CSP(object):
         :return: a complete assignment for this CSP, or None if it cannot be solved.
         """
 
-        # Temporarily returns unsolved list.
-        return list(self.__variables)
+        assignment = {}
+        # Temporarily returns empty assignment.
+        return assignment
 
     def __select_unassigned_variable(self, unassigned_vars):
         """
@@ -271,4 +291,4 @@ if __name__ == '__main__':
     with open(sys.argv[1], 'r') as problem_file:
         csp = CSP.from_file(problem_file)
         solution = csp.solve(forward_checking)
-        print(solution)
+        print(CSP.assignment_as_string(solution))
