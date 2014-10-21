@@ -248,7 +248,12 @@ class CSP(object):
         :param unassigned_vars: list of variables that are not assigned.
         :return: the number of constraints that var is involved in with unassigned variables.
         """
-        pass
+        degree = 0
+        involved_vars = self.__constraints.arcs_involving(var)
+        for unassigned_var in unassigned_vars:
+            if unassigned_var in involved_vars:
+                degree += 1
+        return degree
 
 
 if __name__ == '__main__':
