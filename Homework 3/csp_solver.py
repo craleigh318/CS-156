@@ -249,10 +249,11 @@ class CSP(object):
         :return: the number of constraints that var is involved in with unassigned variables.
         """
         degree = 0
-        involved_vars = self.__constraints.arcs_involving(var)
-        for unassigned_var in unassigned_vars:
-            if unassigned_var in involved_vars:
-                degree += 1
+        involved_arcs = self.__constraints.arcs_involving(var)
+        for arc in involved_arcs:
+            for unassigned_var in unassigned_vars:
+                if unassigned_var in arc:
+                    degree += 1
         return degree
 
 
