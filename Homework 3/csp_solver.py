@@ -270,10 +270,11 @@ class CSP(object):
     def __value_consistent_with_assignment(self, var_being_assigned, assigning_value, assignment):
         for arc in self.__constraints.arcs_involving(var_being_assigned):
             other_var = next([v for v in arc if v != var_being_assigned])
-            if not self.__constraints.constraint_satisfied(first_var=var_being_assigned,
-                                                           first_value=assigning_value,
-                                                           second_var=other_var,
-                                                           second_value=assignment[other_var]):
+            if other_var in assignment:
+                if not self.__constraints.constraint_satisfied(first_var=var_being_assigned,
+                                                               first_value=assigning_value,
+                                                               second_var=other_var,
+                                                               second_value=assignment[other_var]):
                     return False
         return True
 
