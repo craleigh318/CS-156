@@ -254,7 +254,7 @@ class CSP(object):
         :param unassigned_vars: list of variables that are not assigned.
         :return: a variable that has not yet been assigned.
         """
-        pass
+        return self.__minimum_remaining_values(unassigned_vars)
 
     def __inferences(self, assignment, do_forward_checking):
         """
@@ -264,6 +264,7 @@ class CSP(object):
                  do any inference.
         """
         if do_forward_checking:
+            # TODO: Add all possible assignments to a new dictionary.
             pass
         else:
             return {}
@@ -280,6 +281,7 @@ class CSP(object):
                 min_var = var
             elif len(var.domain) < len(min_var.domain):
                 min_var = var
+        return min_var
 
     def __degree(self, var, unassigned_vars):
         """
