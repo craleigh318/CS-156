@@ -286,10 +286,12 @@ class CSP(object):
         """
         Selects an unassigned variable using the MRV and degree heuristics.
 
-        :param unassigned_vars: list of variables that are not assigned.
+        :param assignment: a dict containing variable => value assignments.
+
         :return: a variable that has not yet been assigned.
         """
-        return self.__minimum_remaining_values(unassigned_vars)
+        # NOTE: The CSP does not initially know which variables are unassigned.
+        pass
 
     def __inferences(self, assigned_var, assigned_value, do_forward_checking):
         """
