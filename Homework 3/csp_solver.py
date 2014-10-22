@@ -241,18 +241,18 @@ class CSP(object):
             unassigned_vars = [v for v in self.__variables if v not in assignment.keys()]
             var = self.__select_unassigned_variable(unassigned_vars)
             for value in self.__order_domain_values(var, assignment):
-                # Make sure we don't mutate the variable's state across loop iterations.
-                var = copy(var)
-                assignment[var] = value
-                inferences = self.__inferences(var, do_forward_checking)
-                if inferences:
-                    # Note: the book "adds inferences" to the assignment here, but we don't have to because
-                    # all we do when performing inference is delete values from the domains of variables.
-                    recursive_solution = self.__backtracking_search(dict(assignment), do_forward_checking)
-                    if recursive_solution:
-                        return recursive_solution
+                if self.__value_consistent_with_assignment(var, value, assignment):
+                    # Make sure we don't mutate the variable's state across loop iterations.
+                    var = copy(var)
+                    assignment[var] = value
+                    inferences = self.__inferences(var, do_forward_checking)
+                    if inferences:
+                        # Note: the book "adds inferences" to the assignment here, but we don't have to because
+                        # all we do when performing inference is delete values from the domains of variables.
+                        recursive_solution = self.__backtracking_search(dict(assignment), do_forward_checking)
+                        if recursive_solution:
+                            return recursive_solution
             return None
-
 
     def __order_domain_values(self, var, assignment):
         """
@@ -265,10 +265,15 @@ class CSP(object):
         pass
 
     def __assignment_is_complete(self, assignment):
-        for var in self.__variables:
-            for arc in self.__constraints.arcs_involving(var):
-                other_var = next([v for v in arc if v != var])
-                if not self.__constraints.constraint_satisfied(var, other_var):
+        return len(assignment) == len(self.__variables)
+
+    def __value_consistent_with_assignment(self, var_being_assigned, assigning_value, assignment):
+        for arc in self.__constraints.arcs_involving(var_being_assigned):
+            other_var = next([v for v in arc if v != var_being_assigned])
+            if not self.__constraints.constraint_satisfied(first_var=var_being_assigned,
+                                                           first_value=assigning_value,
+                                                           second_var=other_var,
+                                                           second_value=assignment[other_var]):
                     return False
         return True
 
