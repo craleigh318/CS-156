@@ -248,7 +248,7 @@ class CSP(object):
                     # Make sure we don't mutate the variable's state across loop iterations.
                     var = copy(var)
                     assignment[var] = value
-                    inferences = self.__inferences(var, do_forward_checking)
+                    inferences = self.__inferences(var, value, assignment, do_forward_checking)
                     if inferences:
                         # Note: the book "adds inferences" to the assignment here, but we don't have to because
                         # all we do when performing inference is delete values from the domains of variables.
@@ -293,17 +293,38 @@ class CSP(object):
         mrv = self.__minimum_remaining_values(unassigned_vars)
         return mrv
 
-    def __inferences(self, assigned_var, assigned_value, do_forward_checking):
+    def __forward_check(self, assigned_var, assigned_value, assignment):
+        """
+        Implements forward checking, which establishes arc consistency for a recently-assigned variable.
+
+        :param assigned_var: the recently-assigned variable to forward check.
+        :param assigned_value: the value assigned to the variable.
+        :param assignment: a dictionary mapping variables tp values.
+        :return: True if no inconsistencies are found. False if otherwise.
+        """
+        # Return false if inconsistent.
+        if not self.__value_consistent_with_assignment(assigned_var, assigned_value, assignment):
+            return False
+        # If consistent, create new parameters for recursion.
+        new_assignment = assignment.copy()
+        new_assignment[assigned_var] = assigned_value
+        next_var = self.__select_unassigned_variable(new_assignment)
+        # TODO: Find a way to get a new value.
+        next_value = None
+        return self.__forward_check(next_var, next_value, new_assignment, True)
+
+    def __inferences(self, assigned_var, assigned_value, assignment, do_forward_checking):
         """
         Implements forward checking, which establishes arc consistency for a recently-assigned variable.
 
         :param assigned_var: the recently-assigned variable to do forward checking on.
         :param assigned_value: the value assigned to the variable.
         :param do_forward_checking: flag that determines whether or not we do forward checking.
+        :param assignment: a dict containing variable => value assignments.
         :return: True if we didn't find an inconsistency in the assignment, False otherwise.
         """
         if do_forward_checking:
-            pass
+            return self.__forward_check(assigned_var, assigned_value, assignment)
         else:
             return True
 
