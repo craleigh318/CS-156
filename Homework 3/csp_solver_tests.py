@@ -20,7 +20,7 @@ class ConstraintsArcsInvolvingHasArcs(unittest.TestCase):
         constraints = Constraints()
         first_var = Variable("First!", None)
         second_var = Variable("Second!", None)
-        constraints.add_constraint(first_var, None, second_var)
+        constraints.add_binary_constraint(first_var, None, second_var)
 
         expected = [(first_var, second_var)]
         actual = constraints.arcs_involving(first_var)
@@ -45,7 +45,7 @@ class ConstraintsConstraintSatisfiedHasConstraint(unittest.TestCase):
         first_var = Variable("First!", None)
         second_var = Variable("Second!", None)
         relation = Relation.as_function(Relation.greater_than)
-        constraints.add_constraint(first_var, relation, second_var)
+        constraints.add_binary_constraint(first_var, relation, second_var)
 
         result = constraints.constraint_satisfied(first_var, 9999999999999, second_var, 0)
         self.assertTrue(result)
@@ -57,7 +57,7 @@ class ConstraintsConstraintNotSatisfiedHasConstraint(unittest.TestCase):
         first_var = Variable("First!", None)
         second_var = Variable("Second!", None)
         relation = Relation.as_function(Relation.greater_than)
-        constraints.add_constraint(first_var, relation, second_var)
+        constraints.add_binary_constraint(first_var, relation, second_var)
 
         result = constraints.constraint_satisfied(first_var, 0, second_var, 48932749874)
         self.assertFalse(result)
@@ -73,13 +73,22 @@ class ConstraintsConstraintSatisfiedHasNoConstraint(unittest.TestCase):
 
 class AssignmentAsString(unittest.TestCase):
     def test_assignment_as_string(self):
-        testAssignment = {
+        test_assignment = {
             Variable("X", None): 5,
             Variable("Y", None): 20
         }
-        expected = "Y = 20\nX = 5"
-        actual = Assignment.as_string(testAssignment)
-        self.assertEqual(expected, actual)
+        expected = "X = 5\nY = 20"
+        or_expected = "Y = 20\nX = 5"  # Ordering seems to be non-deterministic.
+        actual = Assignment.as_string(test_assignment)
+        self.assertTrue(expected == actual or or_expected == actual)
+
+
+class CSPSolveEmptyCSP(unittest.TestCase):
+    def test_csp_solve_empty_csp(self):
+        test_csp = CSP([], Constraints())
+        expected = {}
+        actual = test_csp.solve(False)
+        self.assertDictEqual(expected, actual)
 
 
 class TestCSPFromFile(unittest.TestCase):
