@@ -315,7 +315,7 @@ class CSP(object):
 
     def __inferences(self, assigned_var, assigned_value, assignment, do_forward_checking):
         """
-        Implements forward checking, which establishes arc consistency for a recently-assigned variable.
+        Checks for consistent inferences, forward checking if the flag is set.
 
         :param assigned_var: the recently-assigned variable to do forward checking on.
         :param assigned_value: the value assigned to the variable.
