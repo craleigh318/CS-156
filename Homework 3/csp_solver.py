@@ -65,7 +65,7 @@ class Variable(object):
         self.__domain = domain
 
     def __copy__(self):
-        return Variable(self.__name, self.__domain, self.__constraints)
+        return Variable(self.__name, self.__domain)
 
     def __hash__(self):
         # All variable names are (supposed to be) unique. So we can just hash based on their names.
@@ -81,15 +81,6 @@ class Variable(object):
     @property
     def domain(self):
         return self.__domain
-
-    def order_domain_values(self, constraints):
-        """
-        Orders this variable's domain values based on the least constraining value heuristic.
-
-        :param constraints: the constraints that this variable is involved in.
-        :return: this variable's domain values, ordered based on the least constraining value heuristic.
-        """
-        pass
 
 
 class Constraints(object):
@@ -176,7 +167,6 @@ class Assignment(object):
         return '\n'.join(lines)
 
 
-
 class CSP(object):
     """
     A constraint satisfaction problem (CSP).
@@ -245,7 +235,42 @@ class CSP(object):
         return self.__backtracking_search({}, do_forward_checking)
 
     def __backtracking_search(self, assignment, do_forward_checking):
-        return assignment
+        if self.__assignment_is_complete(assignment):
+            return assignment
+        else:
+            unassigned_vars = [v for v in self.__variables if v not in assignment.keys()]
+            var = self.__select_unassigned_variable(unassigned_vars)
+            for value in self.__order_domain_values(var, assignment):
+                # Make sure we don't mutate the variable's state across loop iterations.
+                var = copy(var)
+                assignment[var] = value
+                inferences = self.__inferences(var, do_forward_checking)
+                if inferences:
+                    # Note: the book "adds inferences" to the assignment here, but we don't have to because
+                    # all we do when performing inference is delete values from the domains of variables.
+                    recursive_solution = self.__backtracking_search(dict(assignment), do_forward_checking)
+                    if recursive_solution:
+                        return recursive_solution
+            return None
+
+
+    def __order_domain_values(self, var, assignment):
+        """
+        Orders this variable's domain values based on the least constraining value heuristic.
+
+        :param var: the variable who's domain values are being ordered.
+        :param assignment: the current assignment being considered by CSP.solve().
+        :return: this variable's domain values, ordered based on the least constraining value heuristic.
+        """
+        pass
+
+    def __assignment_is_complete(self, assignment):
+        for var in self.__variables:
+            for arc in self.__constraints.arcs_involving(var):
+                other_var = next([v for v in arc if v != var])
+                if not self.__constraints.constraint_satisfied(var, other_var):
+                    return False
+        return True
 
     def __select_unassigned_variable(self, unassigned_vars):
         """
@@ -256,17 +281,16 @@ class CSP(object):
         """
         pass
 
-    def __inferences(self, assignment, do_forward_checking):
+    def __inferences(self, var, do_forward_checking):
         """
-        :param assignment: a dict containing variable => value assignments.
+        :param var: the variable to do forward checking on.
         :param do_forward_checking: flag that determines whether or not we do forward checking.
-        :return: an assignment, reflecting the inferences that were made or an empty list if we are not to
-                 do any inference.
+        :return: True if we didn't find an inconsistency in the assignment, False otherwise.
         """
         if do_forward_checking:
             pass
         else:
-            return {}
+            return True
 
     def __minimum_remaining_values(self, unassigned_vars):
         """
