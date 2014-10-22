@@ -281,14 +281,16 @@ class CSP(object):
         """
         return self.__minimum_remaining_values(unassigned_vars)
 
-    def __inferences(self, var, do_forward_checking):
+    def __inferences(self, assigned_var, assigned_value, do_forward_checking):
         """
-        :param var: the variable to do forward checking on.
+        Implements forward checking, which establishes arc consistency for a recently-assigned variable.
+
+        :param assigned_var: the recently-assigned variable to do forward checking on.
+        :param assigned_value: the value assigned to the variable.
         :param do_forward_checking: flag that determines whether or not we do forward checking.
         :return: True if we didn't find an inconsistency in the assignment, False otherwise.
         """
         if do_forward_checking:
-            # TODO: Add all possible assignments to a new dictionary.
             pass
         else:
             return True
