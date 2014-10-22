@@ -176,7 +176,6 @@ class Assignment(object):
         return '\n'.join(lines)
 
 
-
 class CSP(object):
     """
     A constraint satisfaction problem (CSP).
@@ -242,19 +241,35 @@ class CSP(object):
         :param do_forward_checking: a boolean flag that indicates whether or not we are to do forward checking.
         :return: a complete assignment for this CSP, or None if it cannot be solved.
         """
-        return self.__backtracking_search({}, do_forward_checking)
+        if do_forward_checking:
+            # TODO: Use forward checking algorithm.
+            pass
+        else:
+            return self.__backtracking_search({})
 
-    def __backtracking_search(self, assignment, do_forward_checking):
-        return assignment
+    def __backtracking_search(self, assignment):
+        next_var = self.__select_unassigned_variable(assignment)
+        if next_var is None:
+            return assignment
+        for value in next_var.order_domain_values(assignment):
+            # If value is consistent with contraints.
+            assignment[next_var] = value
+            result = self.__backtracking_search(assignment)
+            if result is not None:
+                return result
+            assignment.pop(next_var)
+        return None
 
-    def __select_unassigned_variable(self, unassigned_vars):
+    def __select_unassigned_variable(self, assignment):
         """
         Selects an unassigned variable using the MRV and degree heuristics.
 
-        :param unassigned_vars: list of variables that are not assigned.
+        :param assignment: a dict containing variable => value assignments.
+
         :return: a variable that has not yet been assigned.
         """
-        return self.__minimum_remaining_values(unassigned_vars)
+        # NOTE: The CSP does not initially know which variables are unassigned.
+        pass
 
     def __inferences(self, assignment, do_forward_checking):
         """
