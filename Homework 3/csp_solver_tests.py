@@ -63,7 +63,7 @@ class ConstraintsConstraintNotSatisfiedHasConstraint(unittest.TestCase):
         self.assertFalse(result)
 
 
-class ConstraintsConstaintSatisfiedHasNoConstraint(unittest.TestCase):
+class ConstraintsConstraintSatisfiedHasNoConstraint(unittest.TestCase):
     def test_constraints_satisfied_raises_value_error_when_has_no_constraint(self):
         constraints = Constraints()
         first_var = Variable("First!", None)
