@@ -71,6 +71,17 @@ class ConstraintsConstraintSatisfiedHasNoConstraint(unittest.TestCase):
         self.assertRaises(ValueError, constraints.constraint_satisfied, first_var, 0, second_var, 0)
 
 
+class AssignmentAsString(unittest.TestCase):
+    def test_assignment_as_string(self):
+        testAssignment = {
+            Variable("X", None): 5,
+            Variable("Y", None): 20
+        }
+        expected = "Y = 20\nX = 5"
+        actual = Assignment.as_string(testAssignment)
+        self.assertEqual(expected, actual)
+
+
 class TestCSPFromFile(unittest.TestCase):
     def test_this(self):
         forward_checking = False
