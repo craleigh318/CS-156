@@ -210,10 +210,14 @@ class CSP(object):
             bob eq 27
             Ewoks lt Yoda
 
+        The domain of all variables in a CSP is equal to max(D, V), where D is the number of distinct variables in the
+        CSP and V is the maximum value out of all integers used in constraints in the CSP.
+
         :param csp_file_name: the name of the CSP file to generate the CSP object from.
         :return: a CSP object generated from csp_file_name.
         """
 
+        # TODO compute variable domains (should probably be represented as set(range(0, max(D, V))))
         variable_names = []
         file_lines = csp_file_name.readlines()
         for line in file_lines:
