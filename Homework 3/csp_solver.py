@@ -242,8 +242,7 @@ class CSP(object):
         if self.__assignment_is_complete(assignment):
             return assignment
         else:
-            unassigned_vars = [v for v in self.__variables if v not in assignment.keys()]
-            var = self.__select_unassigned_variable(unassigned_vars)
+            var = self.__select_unassigned_variable(assignment)
             for value in self.__order_domain_values(var, assignment):
                 if self.__value_consistent_with_assignment(var, value, assignment):
                     # Make sure we don't mutate the variable's state across loop iterations.
@@ -282,7 +281,7 @@ class CSP(object):
                     return False
         return True
 
-    def __select_unassigned_variable(self, unassigned_vars):
+    def __select_unassigned_variable(self, assignment):
         """
         Selects an unassigned variable using the MRV and degree heuristics.
 
@@ -290,8 +289,9 @@ class CSP(object):
 
         :return: a variable that has not yet been assigned.
         """
-        # NOTE: The CSP does not initially know which variables are unassigned.
-        pass
+        unassigned_vars = [v for v in self.__variables if v not in assignment.keys()]
+        mrv = self.__minimum_remaining_values(unassigned_vars)
+        return mrv
 
     def __inferences(self, assigned_var, assigned_value, do_forward_checking):
         """
