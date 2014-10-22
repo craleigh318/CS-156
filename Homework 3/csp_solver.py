@@ -71,6 +71,9 @@ class Variable(object):
         # All variable names are (supposed to be) unique. So we can just hash based on their names.
         return hash(self.name)
 
+    def __eq__(self, other):
+        return self.name == other.name
+
     @property
     def name(self):
         return self.__name
@@ -100,7 +103,17 @@ class Constraints(object):
         else:
             self.__constraints = constraints
 
-    def add_constraint(self, first_var, relation, second_var):
+    def add_unary_constraint(self, var, relation, integer):
+        """
+        Adds a unary constraint to the constraint map.
+
+        :param var: the variable to add the unary constraint to
+        :param relation: the relation involved in the unary constraint
+        :param integer: the integer involved in the unary constraint
+        """
+        self.__constraints[var] = lambda x: relation(x, integer)
+
+    def add_binary_constraint(self, first_var, relation, second_var):
         """
         Adds a constraint to the constraint map.
 
@@ -163,6 +176,7 @@ class Assignment(object):
         return '\n'.join(lines)
 
 
+
 class CSP(object):
     """
     A constraint satisfaction problem (CSP).
@@ -222,17 +236,15 @@ class CSP(object):
         new_csp = CSP(variables, None)
         return new_csp
 
-
-    # TODO: Use backtracking search!
     # TODO: Don't mutate values like the book does. Use immutable data structures/classes in order to avoid bugs.
     def solve(self, do_forward_checking):
         """
         :param do_forward_checking: a boolean flag that indicates whether or not we are to do forward checking.
         :return: a complete assignment for this CSP, or None if it cannot be solved.
         """
+        return self.__backtracking_search({}, do_forward_checking)
 
-        assignment = {}
-        # Temporarily returns empty assignment.
+    def __backtracking_search(self, assignment, do_forward_checking):
         return assignment
 
     def __select_unassigned_variable(self, unassigned_vars):
