@@ -77,7 +77,7 @@ class TestCSPFromFile(unittest.TestCase):
         with open('Test.txt', 'r') as problem_file:
             csp = CSP.from_file(problem_file)
             solution = csp.solve(forward_checking)
-            Assignment.as_string(solution)
+            print(Assignment.as_string(solution))
 
 
 if __name__ == "__main__":
