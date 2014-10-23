@@ -384,12 +384,13 @@ class CSP(object):
         :param assignment: a dictionary mapping variables to values.
         :return: True if no inconsistencies are found. False if otherwise.
         """
-        for unassigned_var in self.__unassigned_variables(assignment):
-            consistent_values = self.__consistent_domain_values(assigned_var, assigned_value, unassigned_var)
+        unassigned_vars = self.__unassigned_variables(assignment)
+        for unassigned_neighbor in self.__unassigned_neighbors(assigned_var, unassigned_vars):
+            consistent_values = self.__consistent_domain_values(assigned_var, assigned_value, unassigned_neighbor)
             if len(consistent_values) == 0:
                 return False
             else:
-                unassigned_var.domain(consistent_values)
+                unassigned_neighbor.domain(consistent_values)
         return True
 
     def __inferences(self, assigned_var, assigned_value, assignment, do_forward_checking):
