@@ -17,11 +17,18 @@ class Relation(object):
     @staticmethod
     def as_function(relation, opposite=False):
         """
+        Converts one of the relation-strings defined on Relation as enum-like values to
+        a lambda that implements the relation that the relation-string signifies.
+
+        :type relation: str
+        :type opposite: bool
+        :rtype: lambda(int, int) -> bool
+
         :param relation: a string representing a relation.
         :param opposite: a boolean flag representing if we want to return the opposite of the
                          relation indicated by the relation-string or not.
-        :raises: a ValueError if relation is not one of Relation's enum values.
         :return: a function that implements the appropriate relation, or the opposite relation.
+        :raises: a ValueError if relation is not one of Relation's enum values.
         """
 
         greater_than = lambda x, y: x > y
@@ -70,6 +77,7 @@ class Variable(object):
         return hash(self.name)
 
     def __eq__(self, other):
+
         return self.name == other.name
 
     @property
@@ -96,6 +104,10 @@ class Constraints(object):
         """
         Adds a unary constraint to the constraint map.
 
+        :type var: Variable
+        :type relation: lambda(int, int) -> bool
+        :type integer: int
+
         :param var: the variable to add the unary constraint to
         :param relation: the relation involved in the unary constraint
         :param integer: the integer involved in the unary constraint
@@ -106,15 +118,22 @@ class Constraints(object):
         """
         Adds a constraint to the constraint map.
 
+        :type left_var: Variable
+        :type relation: lambda(int, int) -> bool
+        :type: right_var: Variable
+
         :param left_var: the first variable involved in the constraint.
-        :param right_var: the second variable involved in the constraint.
         :param relation: the relation that the two variables must satisfy.
+        :param right_var: the second variable involved in the constraint.
         """
         self.__constraints[(left_var, right_var)] = relation
 
     def arcs_involving(self, var):
         """
         Find the arcs involving a variable var.
+
+        :type var: Variable
+        :rtype: list
 
         :param var: the variable to find the arcs involving it.
         :return: a list of arcs (tuples of variables) involving the variable.
@@ -123,6 +142,15 @@ class Constraints(object):
 
     def constraint_satisfied(self, left_var, left_value, right_var, right_value):
         """
+
+        Checks whether an assignment to two variables satisfies a binary constraint.
+
+        :type left_var: Variable
+        :type left_value: int
+        :type right_var: Variable
+        :type right_value: int
+        :rtype: bool
+
         :param left_var: a variable involved in a constraint.
         :param left_value: the value of first_var
         :param right_var: a variable involved in a constraint.
@@ -157,7 +185,10 @@ class Assignment(object):
         x = 2
         y = 9
         z = -1
-        
+
+        :type assignment: dict
+        :rtype: str
+
         :param assignment: the assignment dict to convert to a string.
         :return: a string representation of the assignment in the above format.
         """
@@ -175,9 +206,13 @@ class CSP(object):
         """
         Create this CSP and make sure that it's node consistent upon creation.
 
+        :type variables: list
+        :type constraints: Constraints
+        :rtype: CSP
+
         :param variables: a list of Variable objects, representing the variables involved in this CSP
         :param constraints: a mapping from (var1, var2) tuples to relations, representing the constraints of this CSP.
-        :return: a CSP object.
+        :return: a node consistent CSP object.
         """
         self.__variables = variables
         self.__constraints = constraints
@@ -212,6 +247,9 @@ class CSP(object):
         The domain of all variables in a CSP is equal to max(D, V), where D is the number of distinct variables in the
         CSP and V is the maximum value out of all integers used in constraints in the CSP.
 
+        :type csp_file_name: file
+        :rtype: CSP
+
         :param csp_file_name: the name of the CSP file to generate the CSP object from.
         :return: a CSP object generated from csp_file_name.
         """
@@ -232,6 +270,9 @@ class CSP(object):
     # TODO: Don't mutate values like the book does. Use immutable data structures/classes in order to avoid bugs.
     def solve(self, do_forward_checking):
         """
+        :type do_forward_checking: bool
+        :rtype: dict
+
         :param do_forward_checking: a boolean flag that indicates whether or not we are to do forward checking.
         :return: a complete assignment for this CSP, or None if it cannot be solved.
         """
@@ -260,6 +301,10 @@ class CSP(object):
         """
         Orders this variable's domain values based on the least constraining value heuristic.
 
+        :type var: Variable
+        :type assignment: dict
+        :rtype: list
+
         :param var: the variable who's domain values are being ordered.
         :param assignment: the current assignment being considered by CSP.solve().
         :return: this variable's domain values, ordered based on the least constraining value heuristic.
@@ -284,8 +329,10 @@ class CSP(object):
         """
         Selects an unassigned variable using the MRV and degree heuristics.
 
-        :param assignment: a dict containing variable => value assignments.
+        :type assignment: dict
+        :rtype: Variable
 
+        :param assignment: a dict containing variable => value assignments.
         :return: a variable that has not yet been assigned.
         """
         unassigned_vars = [v for v in self.__variables if v not in assignment.keys()]
@@ -296,9 +343,14 @@ class CSP(object):
         """
         Implements forward checking, which establishes arc consistency for a recently-assigned variable.
 
+        :type assigned_var: Variable
+        :type assigned_value: int
+        :type assignment: dict
+        :rtype: bool
+
         :param assigned_var: the recently-assigned variable to forward check.
         :param assigned_value: the value assigned to the variable.
-        :param assignment: a dictionary mapping variables tp values.
+        :param assignment: a dictionary mapping variables to values.
         :return: True if no inconsistencies are found. False if otherwise.
         """
         # Return false if inconsistent.
@@ -321,6 +373,12 @@ class CSP(object):
         """
         Checks for consistent inferences, forward checking if the flag is set.
 
+        :type assigned_var: Variable
+        :type assigned_value: int
+        :type do_forward_checking: bool
+        :type assignment: dict
+        :rtype: bool
+
         :param assigned_var: the recently-assigned variable to do forward checking on.
         :param assigned_value: the value assigned to the variable.
         :param do_forward_checking: flag that determines whether or not we do forward checking.
@@ -335,6 +393,10 @@ class CSP(object):
     def __minimum_remaining_values(self, unassigned_vars):
         """
         An implementation of the minimum remaining values (MRV) heuristic.
+
+        :type unassigned_vars: list
+        :rtype: Variable
+
         :param unassigned_vars: list of variables that are not assigned.
         :return: the variable with the fewest remaining legal values.
         """
@@ -349,6 +411,10 @@ class CSP(object):
     def __degree(self, var, unassigned_vars):
         """
         An implementation of the degree heuristic.
+
+        :type var: Variable
+        :type unassigned_vars: list
+        :rtype: int
 
         :param var: the variable to find the degree of.
         :param unassigned_vars: list of variables that are not assigned.
