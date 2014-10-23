@@ -309,9 +309,11 @@ class CSP(object):
         new_assignment = assignment.copy()
         new_assignment[assigned_var] = assigned_value
         next_var = self.__select_unassigned_variable(new_assignment)
-        # TODO: Find a way to get a new value.
-        next_value = None
-        return self.__forward_check(next_var, next_value, new_assignment, True)
+        # Loop to check for possible value to assign to variable.
+        for next_value in next_var.domain:
+            if self.__forward_check(next_var, next_value, new_assignment):
+                return True
+        return False
 
     def __inferences(self, assigned_var, assigned_value, assignment, do_forward_checking):
         """
