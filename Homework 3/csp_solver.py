@@ -311,7 +311,34 @@ class CSP(object):
         :param assignment: the current assignment being considered by CSP.solve().
         :return: this variable's domain values, ordered based on the least constraining value heuristic.
         """
-        pass
+        values_to_inconsistencies = {}
+        unassigned_vars = self.__unassigned_variables(assignment)
+        unassigned_neighbors = self.__unassigned_neighbors(var, unassigned_vars)
+        for value in var.domain:
+            inconsistent_value_count = 0
+            for unassigned_neighbor in unassigned_neighbors:
+                consistent_domain_values = self.__consistent_domain_values(var, value, unassigned_neighbor)
+                inconsistencies = unassigned_neighbor.domain.difference(consistent_domain_values)
+                inconsistent_value_count += len(inconsistencies)
+            values_to_inconsistencies[value] = inconsistent_value_count
+
+        ordered_values = sorted(values_to_inconsistencies, values_to_inconsistencies.get)
+        return ordered_values
+
+    def __consistent_domain_values(self, var, var_assigned_value, neighbor_var):
+        return {val for val in neighbor_var.domain
+                if self.__constraints.constraint_satisfied(
+                    left_var=var,
+                    left_value=var_assigned_value,
+                    right_var=neighbor_var,
+                    right_value=val)}
+
+    def __unassigned_neighbors(self, var, unassigned_vars):
+        var_neighbors = self.__constraints.neighbors(var)
+        return set(unassigned_vars).intersection(set(var_neighbors))
+
+    def __unassigned_variables(self, assignment):
+        return [v for v in self.__variables if v not in assignment.keys()]
 
     def __assignment_is_complete(self, assignment):
         return len(assignment) == len(self.__variables)
@@ -336,7 +363,7 @@ class CSP(object):
         :param assignment: a dict containing variable => value assignments.
         :return: a variable that has not yet been assigned.
         """
-        unassigned_vars = [v for v in self.__variables if v not in assignment.keys()]
+        unassigned_vars = self.__unassigned_variables(assignment)
         mrv = self.__minimum_remaining_values(unassigned_vars)
         return mrv
 
@@ -421,13 +448,7 @@ class CSP(object):
         :param unassigned_vars: list of variables that are not assigned.
         :return: the number of constraints that var is involved in with unassigned variables.
         """
-        degree = 0
-        neighbors = self.__constraints.neighbors(var)
-        for neighbor in neighbors:
-            for unassigned_var in unassigned_vars:
-                if unassigned_var == neighbor:
-                    degree += 1
-        return degree
+        return len(self.__unassigned_neighbors(var, unassigned_vars))
 
 
 if __name__ == '__main__':
