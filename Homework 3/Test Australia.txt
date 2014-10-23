@@ -1,0 +1,14 @@
+red eq 0
+green eq 1
+blue eq 2
+WA eq red
+T eq red
+WA ne NT
+WA ne SA
+NT ne Q
+NT ne SA
+SA ne Q
+SA ne NSW
+SA ne V
+Q ne NSW
+NSW ne V
