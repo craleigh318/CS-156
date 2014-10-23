@@ -65,7 +65,6 @@ class Variable(object):
     """
 
     def __init__(self, name, domain):
-        # The state of these objects should not be mutated.
         self.__name = name
         self.__domain = domain
 
@@ -87,6 +86,10 @@ class Variable(object):
     @property
     def domain(self):
         return self.__domain
+
+    @domain.setter
+    def domain(self, new_domain):
+        self.__domain = new_domain
 
 
 class Constraints(object):
@@ -381,21 +384,12 @@ class CSP(object):
         :param assignment: a dictionary mapping variables to values.
         :return: True if no inconsistencies are found. False if otherwise.
         """
-        # Return false if inconsistent.
-        if not self.__value_consistent_with_assignment(assigned_var, assigned_value, assignment):
-            return False
-        # If consistent, create new parameters for recursion.
-        new_assignment = assignment.copy()
-        new_assignment[assigned_var] = assigned_value
-        next_var = self.__select_unassigned_variable(new_assignment)
-        # Return true if all variables have been forward checked.
-        if next_var is None:
-            return True
-        # Loop to check for possible value to assign to variable.
-        for next_value in next_var.domain:
-            if self.__forward_check(next_var, next_value, new_assignment):
-                return True
-        return False
+        for unassigned_var in self.__unassigned_variables(assignment):
+            consistent_values = self.__consistent_domain_values(assigned_var, assigned_value, unassigned_var)
+            if len(consistent_values) == 0:
+                return False
+            else:
+                unassigned_var.domain(consistent_values)
 
     def __inferences(self, assigned_var, assigned_value, assignment, do_forward_checking):
         """
