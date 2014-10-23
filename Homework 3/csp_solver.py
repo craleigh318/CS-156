@@ -376,12 +376,12 @@ class CSP(object):
 
         :type assigned_var: Variable
         :type assigned_value: int
-        :type assignment: dict
+        :type unassigned_vars: list
         :rtype: bool
 
         :param assigned_var: the recently-assigned variable to forward check.
         :param assigned_value: the value assigned to the variable.
-        :param assignment: a dictionary mapping variables to values.
+        :param unassigned_vars: a list of unassigned variables.
         :return: True if no inconsistencies are found. False if otherwise.
         """
         for unassigned_neighbor in self.__unassigned_neighbors(assigned_var, unassigned_vars):
@@ -399,13 +399,13 @@ class CSP(object):
         :type assigned_var: Variable
         :type assigned_value: int
         :type do_forward_checking: bool
-        :type assignment: dict
+        :type unassigned_vars: list
         :rtype: bool
 
         :param assigned_var: the recently-assigned variable to do forward checking on.
         :param assigned_value: the value assigned to the variable.
         :param do_forward_checking: flag that determines whether or not we do forward checking.
-        :param assignment: a dict containing variable => value assignments.
+        :param unassigned_vars: a list of unassigned variables.
         :return: True if we didn't find an inconsistency in the assignment, False otherwise.
         """
         if do_forward_checking:
