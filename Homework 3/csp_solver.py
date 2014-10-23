@@ -102,14 +102,15 @@ class Constraints(object):
         """
         self.__constraints[var] = lambda x: relation(x, integer)
 
-    def add_binary_constraint(self, first_var, relation, second_var):
+    def add_binary_constraint(self, left_var, relation, right_var):
         """
         Adds a constraint to the constraint map.
 
-        :param arc: a tuple consisting of the two variables involved in a constraint, in order.
-        :param relation: the relation that the variables in the arc must satisfy.
+        :param left_var: the first variable involved in the constraint.
+        :param right_var: the second variable involved in the constraint.
+        :param relation: the relation that the two variables must satisfy.
         """
-        self.__constraints[(first_var, second_var)] = relation
+        self.__constraints[(left_var, right_var)] = relation
 
     def arcs_involving(self, var):
         """
@@ -120,31 +121,31 @@ class Constraints(object):
         """
         return [arc for arc in self.__constraints.keys() if var in arc]
 
-    def constraint_satisfied(self, first_var, first_value, second_var, second_value):
+    def constraint_satisfied(self, left_var, left_value, right_var, right_value):
         """
-        :param first_var: a variable involved in a constraint.
-        :param first_value: the value of first_var
-        :param second_var: a variable involved in a constraint.
-        :param second_value: the value of second_var
+        :param left_var: a variable involved in a constraint.
+        :param left_value: the value of first_var
+        :param right_var: a variable involved in a constraint.
+        :param right_value: the value of second_var
         :return: True if the constraint between first_var and second_var is satisfied by
                  the values first_value and second_value, False otherwise.
         """
 
         # The arc (tuple) of variables might have been in the reverse order as the
         # variables were passed in. We need to handle this case.
-        arg_order_tuple = (first_var, second_var)
-        reverse_arg_order_tuple = (second_var, first_var)
+        arg_order_tuple = (left_var, right_var)
+        reverse_arg_order_tuple = (right_var, left_var)
         if arg_order_tuple in self.__constraints:
-            first_arg, second_arg = first_value, second_value
+            left_arg, right_arg = left_value, right_value
             arc = arg_order_tuple
         elif reverse_arg_order_tuple in self.__constraints:
-            first_arg, second_arg = second_value, first_value
+            left_arg, right_arg = right_value, left_value
             arc = reverse_arg_order_tuple
         else:
-            raise ValueError('There is no relation involving "' + first_var.name +
-                             '" and "' + second_var.name + '"!')
+            raise ValueError('There is no relation involving "' + left_var.name +
+                             '" and "' + right_var.name + '"!')
         relation = self.__constraints[arc]
-        return relation(first_arg, second_arg)
+        return relation(left_arg, right_arg)
 
 
 class Assignment(object):
@@ -272,10 +273,10 @@ class CSP(object):
         for arc in self.__constraints.arcs_involving(var_being_assigned):
             other_var = next([v for v in arc if v != var_being_assigned])
             if other_var in assignment:
-                if not self.__constraints.constraint_satisfied(first_var=var_being_assigned,
-                                                               first_value=assigning_value,
-                                                               second_var=other_var,
-                                                               second_value=assignment[other_var]):
+                if not self.__constraints.constraint_satisfied(left_var=var_being_assigned,
+                                                               left_value=assigning_value,
+                                                               right_var=other_var,
+                                                               right_value=assignment[other_var]):
                     return False
         return True
 
