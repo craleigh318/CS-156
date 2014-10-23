@@ -390,6 +390,7 @@ class CSP(object):
                 return False
             else:
                 unassigned_var.domain(consistent_values)
+        return True
 
     def __inferences(self, assigned_var, assigned_value, assignment, do_forward_checking):
         """
