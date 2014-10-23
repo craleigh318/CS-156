@@ -22,11 +22,12 @@ class ConstraintsArcsInvolvingHasArcs(unittest.TestCase):
         second_var = Variable("Second!", None)
         constraints.add_binary_constraint(first_var, None, second_var)
 
-        expected = [(first_var, second_var)]
-        actual = constraints.arcs_involving(first_var)
+        expected = [second_var]
+        actual = constraints.neighbors(first_var)
         self.assertSequenceEqual(expected, actual)
 
-        actual = constraints.arcs_involving(second_var)
+        expected = [first_var]
+        actual = constraints.neighbors(second_var)
         self.assertSequenceEqual(expected, actual)
 
 
@@ -35,7 +36,7 @@ class ConstraintsArcsInvolvingHasNoArcs(unittest.TestCase):
         constraints = Constraints()
         unconstrained_var = Variable("Not Constrained", None)
         expected = []
-        actual = constraints.arcs_involving(unconstrained_var)
+        actual = constraints.neighbors(unconstrained_var)
         self.assertSequenceEqual(expected, actual)
 
 

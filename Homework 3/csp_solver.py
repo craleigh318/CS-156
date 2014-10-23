@@ -128,17 +128,19 @@ class Constraints(object):
         """
         self.__constraints[(left_var, right_var)] = relation
 
-    def arcs_involving(self, var):
+    def neighbors(self, var):
         """
-        Find the arcs involving a variable var.
+        Find the neighbors of a variables.
 
         :type var: Variable
         :rtype: list
 
-        :param var: the variable to find the arcs involving it.
-        :return: a list of arcs (tuples of variables) involving the variable.
+        :param var: the variable to find the neighbors of.
+        :return: a list of neighbors of the variable.
         """
-        return [arc for arc in self.__constraints.keys() if var in arc]
+        arcs_involving_var = [arc for arc in self.__constraints.keys() if var in arc]
+        flattened_arcs = [neighbor for arc in arcs_involving_var for neighbor in arc]
+        return [v for v in flattened_arcs if v != var]
 
     def constraint_satisfied(self, left_var, left_value, right_var, right_value):
         """
@@ -315,13 +317,12 @@ class CSP(object):
         return len(assignment) == len(self.__variables)
 
     def __value_consistent_with_assignment(self, var_being_assigned, assigning_value, assignment):
-        for arc in self.__constraints.arcs_involving(var_being_assigned):
-            other_var = next([v for v in arc if v != var_being_assigned])
-            if other_var in assignment:
+        for neighbor in self.__constraints.neighbors(var_being_assigned):
+            if neighbor in assignment:
                 if not self.__constraints.constraint_satisfied(left_var=var_being_assigned,
                                                                left_value=assigning_value,
-                                                               right_var=other_var,
-                                                               right_value=assignment[other_var]):
+                                                               right_var=neighbor,
+                                                               right_value=assignment[neighbor]):
                     return False
         return True
 
@@ -421,10 +422,10 @@ class CSP(object):
         :return: the number of constraints that var is involved in with unassigned variables.
         """
         degree = 0
-        involved_arcs = self.__constraints.arcs_involving(var)
-        for arc in involved_arcs:
+        neighbors = self.__constraints.neighbors(var)
+        for neighbor in neighbors:
             for unassigned_var in unassigned_vars:
-                if unassigned_var in arc:
+                if unassigned_var == neighbor:
                     degree += 1
         return degree
 
