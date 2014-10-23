@@ -309,6 +309,9 @@ class CSP(object):
         new_assignment = assignment.copy()
         new_assignment[assigned_var] = assigned_value
         next_var = self.__select_unassigned_variable(new_assignment)
+        # Return true if all variables have been forward checked.
+        if next_var is None:
+            return True
         # Loop to check for possible value to assign to variable.
         for next_value in next_var.domain:
             if self.__forward_check(next_var, next_value, new_assignment):
