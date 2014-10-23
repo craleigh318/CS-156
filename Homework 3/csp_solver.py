@@ -14,8 +14,6 @@ class Relation(object):
     equal = 'eq'
     not_equal = 'ne'
 
-    always_true = lambda x, y: True
-
     @staticmethod
     def as_function(relation, opposite=False):
         """
