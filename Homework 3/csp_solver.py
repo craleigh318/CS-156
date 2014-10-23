@@ -287,13 +287,14 @@ class CSP(object):
         if self.__assignment_is_complete(assignment):
             return assignment
         else:
-            var = self.__select_unassigned_variable(assignment)
+            unassigned_vars = self.__unassigned_variables(assignment)
+            var, unassigned_vars = self.__select_unassigned_variable(unassigned_vars)
             for value in self.__order_domain_values(var, assignment):
                 if self.__value_consistent_with_assignment(var, value, assignment):
                     # Make sure we don't mutate the variable's state across loop iterations.
                     var = copy(var)
                     assignment[var] = value
-                    inferences = self.__inferences(var, value, assignment, do_forward_checking)
+                    inferences = self.__inferences(var, value, unassigned_vars, do_forward_checking)
                     if inferences:
                         # Note: the book "adds inferences" to the assignment here, but we don't have to because
                         # all we do when performing inference is delete values from the domains of variables.
@@ -356,21 +357,20 @@ class CSP(object):
                     return False
         return True
 
-    def __select_unassigned_variable(self, assignment):
+    def __select_unassigned_variable(self, unassigned_vars):
         """
         Selects an unassigned variable using the MRV and degree heuristics.
 
-        :type assignment: dict
-        :rtype: Variable
+        :type unassigned_vars: list
+        :rtype: (Variable, list)
 
-        :param assignment: a dict containing variable => value assignments.
+        :param unassigned_vars: variables not yet assigned.
         :return: a variable that has not yet been assigned.
         """
-        unassigned_vars = self.__unassigned_variables(assignment)
         mrv = self.__minimum_remaining_values(unassigned_vars)
-        return mrv
+        return mrv, unassigned_vars.remove(mrv)
 
-    def __forward_check(self, assigned_var, assigned_value, assignment):
+    def __forward_check(self, assigned_var, assigned_value, unassigned_vars):
         """
         Implements forward checking, which establishes arc consistency for a recently-assigned variable.
 
@@ -384,7 +384,6 @@ class CSP(object):
         :param assignment: a dictionary mapping variables to values.
         :return: True if no inconsistencies are found. False if otherwise.
         """
-        unassigned_vars = self.__unassigned_variables(assignment)
         for unassigned_neighbor in self.__unassigned_neighbors(assigned_var, unassigned_vars):
             consistent_values = self.__consistent_domain_values(assigned_var, assigned_value, unassigned_neighbor)
             if len(consistent_values) == 0:
@@ -393,7 +392,7 @@ class CSP(object):
                 unassigned_neighbor.domain(consistent_values)
         return True
 
-    def __inferences(self, assigned_var, assigned_value, assignment, do_forward_checking):
+    def __inferences(self, assigned_var, assigned_value, unassigned_vars, do_forward_checking):
         """
         Checks for consistent inferences, forward checking if the flag is set.
 
@@ -410,7 +409,7 @@ class CSP(object):
         :return: True if we didn't find an inconsistency in the assignment, False otherwise.
         """
         if do_forward_checking:
-            return self.__forward_check(assigned_var, assigned_value, assignment)
+            return self.__forward_check(assigned_var, assigned_value, unassigned_vars)
         else:
             return True
 
