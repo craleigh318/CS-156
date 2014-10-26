@@ -431,7 +431,7 @@ class CSP(object):
             if len(consistent_values) == 0:
                 return False
             else:
-                unassigned_neighbor.domain(consistent_values)
+                unassigned_neighbor.domain = consistent_values
         return True
 
     def __inferences(self, assigned_var, assigned_value, unassigned_vars, do_forward_checking):
