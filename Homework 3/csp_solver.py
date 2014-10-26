@@ -76,7 +76,6 @@ class Variable(object):
         return hash(self.name)
 
     def __eq__(self, other):
-
         return self.name == other.name
 
     @property
@@ -102,6 +101,13 @@ class Constraints(object):
             self.__constraints = {}
         else:
             self.__constraints = constraints
+
+    def add_constraint(self, var, relation, right_value):
+        """Automatically chooses add_unary_constraint or add_binary_constraint"""
+        if right_value.isdigit():
+            self.add_unary_constraint(self, var, relation, right_value)
+        else:
+            self.add_binary_constraint(self, var, relation, right_value)
 
     def add_unary_constraint(self, var, relation, integer):
         """
@@ -260,17 +266,32 @@ class CSP(object):
         """
 
         # TODO compute variable domains (should probably be represented as set(range(0, max(D, V) + 1)))
-        variable_names = []
         file_lines = csp_file_name.readlines()
+        variables = {}
+        constraints = Constraints()
+        # Make a list of variable names.
         for line in file_lines:
-            next_variable_name = line.partition(' ')[0]
-            if next_variable_name not in variable_names:
-                variable_names.append(next_variable_name)
-        variables = []
-        for name in variable_names:
-            variables.append(Variable(name, None))
-        new_csp = CSP(variables, None)
+            next_variable = CSP.__get_variable_from_dictionary(variables, line.partition(' ')[0])
+            next_relation = Relation.as_function(line.partition(' ')[2])
+            next_value = line.partition(' ')[4]
+            if next_value.isdigit():
+                constraints.add_unary_constraint(next_variable, next_relation, next_value)
+            else:
+                next_value = CSP.__get_variable_from_dictionary(variables, next_value)
+                constraints.add_binary_constraint(next_variable, next_relation, next_value)
+        new_csp = CSP(variables.values(), constraints)
         return new_csp
+
+    @staticmethod
+    def __get_variable_from_dictionary(dictionary, variable_name):
+        """Gets a Variable object from a dictionary, creating a new Variable if necessary."""
+        if variable_name not in dictionary.keys():
+            dictionary[variable_name] = Variable(variable_name, None)
+        return dictionary.get(variable_name)
+
+    def __line_to_variable(self):
+        """Adds one line from a file to the CSP."""
+        pass
 
     # TODO: Don't mutate values like the book does. Use immutable data structures/classes in order to avoid bugs.
     def solve(self, do_forward_checking):
@@ -332,10 +353,10 @@ class CSP(object):
     def __consistent_domain_values(self, var, var_assigned_value, neighbor_var):
         return {val for val in neighbor_var.domain
                 if self.__constraints.constraint_satisfied(
-                    left_var=var,
-                    left_value=var_assigned_value,
-                    right_var=neighbor_var,
-                    right_value=val)}
+            left_var=var,
+            left_value=var_assigned_value,
+            right_var=neighbor_var,
+            right_value=val)}
 
     def __unassigned_neighbors(self, var, unassigned_vars):
         var_neighbors = self.__constraints.neighbors(var)
