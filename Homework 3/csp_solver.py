@@ -288,6 +288,7 @@ class CSP(object):
         file_lines = csp_file_name.readlines()
         variables = {}
         constraints = Constraints()
+        largest_value = 0
         # Make a list of variable names.
         for line in file_lines:
             words = line.split()
@@ -295,10 +296,19 @@ class CSP(object):
             next_relation = Relation.as_function(words[1])
             next_value = words[2]
             if next_value.isdigit():
-                constraints.add_unary_constraint(next_variable, next_relation, int(next_value))
+                next_value = int(next_value)
+                if next_value > largest_value:
+                    largest_value = next_value
+                constraints.add_unary_constraint(next_variable, next_relation, next_value)
             else:
                 next_value = CSP.__get_variable_from_dictionary(variables, next_value)
                 constraints.add_binary_constraint(next_variable, next_relation, next_value)
+        # Find d and v.
+        d = len(variables)
+        v = largest_value
+        # Set domains.
+        for var in variables.values():
+            var.domain = xrange(max(d, (v - 1)))
         new_csp = CSP(variables.values(), constraints)
         return new_csp
 
