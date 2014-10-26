@@ -408,7 +408,9 @@ class CSP(object):
         :return: a variable that has not yet been assigned.
         """
         mrv = self.__minimum_remaining_values(unassigned_vars)
-        return mrv, unassigned_vars.remove(mrv)
+        copy_unassied_vars = list(unassigned_vars)
+        copy_unassied_vars.remove(mrv)
+        return mrv, copy_unassied_vars
 
     def __forward_check(self, assigned_var, assigned_value, unassigned_vars):
         """
