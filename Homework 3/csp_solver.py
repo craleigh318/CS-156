@@ -61,7 +61,7 @@ class Relation(object):
 
 class Variable(object):
     """
-    A variable, which consists of all things relating to variables in the CSP: name, domain, and constraints.
+    A variable that knows its name and domain.
     """
 
     def __init__(self, name, domain):
