@@ -105,9 +105,9 @@ class Constraints(object):
     def add_constraint(self, var, relation, right_value):
         """Automatically chooses add_unary_constraint or add_binary_constraint"""
         if right_value.isdigit():
-            self.add_unary_constraint(self, var, relation, right_value)
+            self.add_unary_constraint(var, relation, right_value)
         else:
-            self.add_binary_constraint(self, var, relation, right_value)
+            self.add_binary_constraint(var, relation, right_value)
 
     def add_unary_constraint(self, var, relation, integer):
         """
@@ -151,7 +151,7 @@ class Constraints(object):
             relation = self.__constraints[var](var_assigned_value)
             return relation(var_assigned_value)
         else:
-            raise ValueError('There is no variable by the name of "' + var + '"!')
+            raise ValueError('There is no variable by the name of "' + var.name + '"!')
 
     def binary_constraint_satisfied(self, left_var, left_value, right_var, right_value):
         """
@@ -290,11 +290,12 @@ class CSP(object):
         constraints = Constraints()
         # Make a list of variable names.
         for line in file_lines:
-            next_variable = CSP.__get_variable_from_dictionary(variables, line.partition(' ')[0])
-            next_relation = Relation.as_function(line.partition(' ')[2])
-            next_value = line.partition(' ')[4]
+            words = line.split()
+            next_variable = CSP.__get_variable_from_dictionary(variables, words[0])
+            next_relation = Relation.as_function(words[1])
+            next_value = words[2]
             if next_value.isdigit():
-                constraints.add_unary_constraint(next_variable, next_relation, next_value)
+                constraints.add_unary_constraint(next_variable, next_relation, int(next_value))
             else:
                 next_value = CSP.__get_variable_from_dictionary(variables, next_value)
                 constraints.add_binary_constraint(next_variable, next_relation, next_value)
