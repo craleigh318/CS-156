@@ -391,9 +391,9 @@ class CSP(object):
         for neighbor in self.__constraints.neighbors(var_being_assigned):
             if neighbor in assignment:
                 if not self.__constraints.binary_constraint_satisfied(left_var=var_being_assigned,
-                                                               left_value=assigning_value,
-                                                               right_var=neighbor,
-                                                               right_value=assignment[neighbor]):
+                                                                      left_value=assigning_value,
+                                                                      right_var=neighbor,
+                                                                      right_value=assignment[neighbor]):
                     return False
         return True
 
