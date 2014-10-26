@@ -293,7 +293,7 @@ class CSP(object):
         """Adds one line from a file to the CSP."""
         pass
 
-    # TODO: Don't mutate values like the book does. Use immutable data structures/classes in order to avoid bugs.
+    # Don't mutate values like the book does. Use immutable data structures/classes in order to avoid bugs.
     def solve(self, do_forward_checking):
         """
         :type do_forward_checking: bool
