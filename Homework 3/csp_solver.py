@@ -207,7 +207,10 @@ class Assignment(object):
     @staticmethod
     def as_string(assignment):
         """
-        Converts a dict of {variable: value} assignments to a string. Example:
+        Converts a dict of {variable: value} assignments to a string, listing the values assigned
+        to each variable in lexicographic order of variable names.
+
+        Example:
 
         x = 2
         y = 9
@@ -219,8 +222,8 @@ class Assignment(object):
         :param assignment: the assignment dict to convert to a string.
         :return: a string representation of the assignment in the above format.
         """
-
-        lines = [var.name + " = " + str(value) for (var, value) in assignment.items()]
+        sorted_assignment = sorted(assignment.items(), key=lambda key_value: key_value[0].name)
+        lines = [var.name + " = " + str(value) for (var, value) in sorted_assignment]
         return '\n'.join(lines)
 
 

@@ -79,9 +79,8 @@ class AssignmentAsString(unittest.TestCase):
             Variable("Y", None): 20
         }
         expected = "X = 5\nY = 20"
-        or_expected = "Y = 20\nX = 5"  # Ordering seems to be non-deterministic.
         actual = Assignment.as_string(test_assignment)
-        self.assertTrue(expected == actual or or_expected == actual)
+        self.assertEqual(expected, actual)
 
 
 class CSPSolveEmptyCSP(unittest.TestCase):
