@@ -15,8 +15,8 @@ class VariableHashing(unittest.TestCase):
         self.assertEqual(name_hash, var_hash, "You're not hashing Variables based on their names!")
 
 
-class ConstraintsArcsInvolvingHasArcs(unittest.TestCase):
-    def test_arcs_involving_returns_arcs_when_has_arcs(self):
+class ConstraintsNeighborsHasNeighbors(unittest.TestCase):
+    def test_constraints_neighbors_has_neighbors(self):
         constraints = Constraints()
         first_var = Variable("First!", None)
         second_var = Variable("Second!", None)
@@ -31,8 +31,8 @@ class ConstraintsArcsInvolvingHasArcs(unittest.TestCase):
         self.assertSequenceEqual(expected, actual)
 
 
-class ConstraintsArcsInvolvingHasNoArcs(unittest.TestCase):
-    def test_arcs_involving_returns_no_arcs_when_has_no_arcs(self):
+class ConstraintsNeighborsHasNoNeighbors(unittest.TestCase):
+    def test_constraints_neighbors_has_no_neighbors(self):
         constraints = Constraints()
         unconstrained_var = Variable("Not Constrained", None)
         expected = []
@@ -89,6 +89,110 @@ class CSPSolveEmptyCSP(unittest.TestCase):
         expected = {}
         actual = test_csp.solve(False)
         self.assertDictEqual(expected, actual)
+
+
+def all_variables_assigned(variables, solution_assignment):
+    key = lambda v: v.name
+    return sorted(variables, key=key) == sorted(solution_assignment.keys(), key=key)
+
+
+def domain_values_assigned(domain, solution_assignment):
+    return set(solution_assignment.values()).issubset(set(domain))
+
+
+def all_constraints_satisfied(variables, constraints, solution_assignment):
+    for var in variables:
+        for neighbor in constraints.neighbors(var):
+            if not constraints.binary_constraint_satisfied(left_var=var,
+                                                           left_value=solution_assignment[var],
+                                                           right_var=neighbor,
+                                                           right_value=solution_assignment[neighbor]):
+                return False
+    return True
+
+
+class CSPSolveOneBinaryConstraintNoForwardChecking(unittest.TestCase):
+    def test_csp_solve_one_binary_constraint_no_forward_checking(self):
+        var_1 = Variable("X", set(range(0, 2)))
+        var_2 = Variable("Y", set(range(0, 2)))
+        relation = lambda x, y: x > y
+        constraints = Constraints()
+        constraints.add_binary_constraint(var_1, relation, var_2)
+        variables = [var_1, var_2]
+        test_csp = CSP(variables, constraints)
+        solution_assignment = test_csp.solve(False)
+
+        self.assertTrue(all_variables_assigned(variables, solution_assignment))
+        self.assertTrue(domain_values_assigned(set(range(0, 2)), solution_assignment))
+        self.assertTrue(all_constraints_satisfied(variables, constraints, solution_assignment))
+
+
+class CSPSolveOneBinaryConstraintWithForwardChecking(unittest.TestCase):
+    def test_csp_solve_one_binary_constraint_with_forward_checking(self):
+        var_1 = Variable("X", set(range(0, 2)))
+        var_2 = Variable("Y", set(range(0, 2)))
+        relation = lambda x, y: x > y
+        constraints = Constraints()
+        constraints.add_binary_constraint(var_1, relation, var_2)
+        variables = [var_1, var_2]
+        test_csp = CSP(variables, constraints)
+        solution_assignment = test_csp.solve(True)
+
+        self.assertTrue(all_variables_assigned(variables, solution_assignment))
+        self.assertTrue(domain_values_assigned(set(range(0, 2)), solution_assignment))
+        self.assertTrue(all_constraints_satisfied(variables, constraints, solution_assignment))
+
+
+class CSPSolveSeveralBinaryConstraintsNoForwardChecking(unittest.TestCase):
+    def test_csp_solve_several_binary_constraints_no_forward_checking(self):
+        num_variables = 4
+        var_1 = Variable("W", set(range(0, num_variables)))
+        var_2 = Variable("X", set(range(0, num_variables)))
+        var_3 = Variable("Y", set(range(0, num_variables)))
+        var_4 = Variable("Z", set(range(0, num_variables)))
+
+        relation = lambda x, y: x > y
+        constraints = Constraints()
+        constraints.add_binary_constraint(var_1, relation, var_2)
+        constraints.add_binary_constraint(var_1, relation, var_3)
+        constraints.add_binary_constraint(var_1, relation, var_4)
+        relation = lambda x, y: x != y
+        constraints.add_binary_constraint(var_2, relation, var_3)
+        constraints.add_binary_constraint(var_3, relation, var_4)
+
+        variables = [var_1, var_2, var_3, var_4]
+        test_csp = CSP(variables, constraints)
+        test_solution = test_csp.solve(False)
+
+        self.assertTrue(all_variables_assigned(variables, test_solution))
+        self.assertTrue(domain_values_assigned(set(range(0, num_variables)), test_solution))
+        self.assertTrue(all_constraints_satisfied(variables, constraints, test_solution))
+
+
+class CSPSolveSeveralBinaryConstraintsWithForwardChecking(unittest.TestCase):
+    def test_csp_solve_several_binary_constraints_with_forward_checking(self):
+        num_variables = 4
+        var_1 = Variable("W", set(range(0, num_variables)))
+        var_2 = Variable("X", set(range(0, num_variables)))
+        var_3 = Variable("Y", set(range(0, num_variables)))
+        var_4 = Variable("Z", set(range(0, num_variables)))
+
+        relation = lambda x, y: x > y
+        constraints = Constraints()
+        constraints.add_binary_constraint(var_1, relation, var_2)
+        constraints.add_binary_constraint(var_1, relation, var_3)
+        constraints.add_binary_constraint(var_1, relation, var_4)
+        relation = lambda x, y: x != y
+        constraints.add_binary_constraint(var_2, relation, var_3)
+        constraints.add_binary_constraint(var_3, relation, var_4)
+
+        variables = [var_1, var_2, var_3, var_4]
+        test_csp = CSP(variables, constraints)
+        test_solution = test_csp.solve(True)
+
+        self.assertTrue(all_variables_assigned(variables, test_solution))
+        self.assertTrue(domain_values_assigned(set(range(0, num_variables)), test_solution))
+        self.assertTrue(all_constraints_satisfied(variables, constraints, test_solution))
 
 
 class TestCSPFromFile(unittest.TestCase):
