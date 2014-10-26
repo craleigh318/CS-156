@@ -48,7 +48,7 @@ class ConstraintsConstraintSatisfiedHasConstraint(unittest.TestCase):
         relation = Relation.as_function(Relation.greater_than)
         constraints.add_binary_constraint(first_var, relation, second_var)
 
-        result = constraints.constraint_satisfied(first_var, 9999999999999, second_var, 0)
+        result = constraints.binary_constraint_satisfied(first_var, 9999999999999, second_var, 0)
         self.assertTrue(result)
 
 
@@ -60,7 +60,7 @@ class ConstraintsConstraintNotSatisfiedHasConstraint(unittest.TestCase):
         relation = Relation.as_function(Relation.greater_than)
         constraints.add_binary_constraint(first_var, relation, second_var)
 
-        result = constraints.constraint_satisfied(first_var, 0, second_var, 48932749874)
+        result = constraints.binary_constraint_satisfied(first_var, 0, second_var, 48932749874)
         self.assertFalse(result)
 
 
@@ -69,7 +69,7 @@ class ConstraintsConstraintSatisfiedHasNoConstraint(unittest.TestCase):
         constraints = Constraints()
         first_var = Variable("First!", None)
         second_var = Variable("Second!", None)
-        self.assertRaises(ValueError, constraints.constraint_satisfied, first_var, 0, second_var, 0)
+        self.assertRaises(ValueError, constraints.binary_constraint_satisfied, first_var, 0, second_var, 0)
 
 
 class AssignmentAsString(unittest.TestCase):

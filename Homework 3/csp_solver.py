@@ -137,21 +137,23 @@ class Constraints(object):
         """
         self.__constraints[(left_var, right_var)] = relation
 
-    def neighbors(self, var):
+    def unary_constraint_satisfied(self, var, var_assigned_value):
         """
-        Find the neighbors of a variables.
-
         :type var: Variable
-        :rtype: list
+        :type var_assigned_value: int
+        :rtype: bool
 
-        :param var: the variable to find the neighbors of.
-        :return: a list of neighbors of the variable.
+        :param var: the variable involved in a unary constraint
+        :param var_assigned_value: the value assigned to var.
+        :return: True if the assigned value satisfies the unary constraint, False otherwise.
         """
-        arcs_involving_var = [arc for arc in self.__constraints.keys() if var in arc]
-        flattened_arcs = [neighbor for arc in arcs_involving_var for neighbor in arc]
-        return [v for v in flattened_arcs if v != var]
+        if var in self.__constraints:
+            relation = self.__constraints[var](var_assigned_value)
+            return relation(var_assigned_value)
+        else:
+            raise ValueError('There is no variable by the name of "' + var + '"!')
 
-    def constraint_satisfied(self, left_var, left_value, right_var, right_value):
+    def binary_constraint_satisfied(self, left_var, left_value, right_var, right_value):
         """
 
         Checks whether an assignment to two variables satisfies a binary constraint.
@@ -185,6 +187,20 @@ class Constraints(object):
                              '" and "' + right_var.name + '"!')
         relation = self.__constraints[arc]
         return relation(left_arg, right_arg)
+
+    def neighbors(self, var):
+        """
+        Find the neighbors of a variables.
+
+        :type var: Variable
+        :rtype: list
+
+        :param var: the variable to find the neighbors of.
+        :return: a list of neighbors of the variable.
+        """
+        arcs_involving_var = [arc for arc in self.__constraints.keys() if var in arc]
+        flattened_arcs = [neighbor for arc in arcs_involving_var for neighbor in arc]
+        return [v for v in flattened_arcs if v != var]
 
 
 class Assignment(object):
@@ -352,7 +368,7 @@ class CSP(object):
 
     def __consistent_domain_values(self, var, var_assigned_value, neighbor_var):
         return {val for val in neighbor_var.domain
-                if self.__constraints.constraint_satisfied(
+                if self.__constraints.binary_constraint_satisfied(
             left_var=var,
             left_value=var_assigned_value,
             right_var=neighbor_var,
@@ -371,7 +387,7 @@ class CSP(object):
     def __value_consistent_with_assignment(self, var_being_assigned, assigning_value, assignment):
         for neighbor in self.__constraints.neighbors(var_being_assigned):
             if neighbor in assignment:
-                if not self.__constraints.constraint_satisfied(left_var=var_being_assigned,
+                if not self.__constraints.binary_constraint_satisfied(left_var=var_being_assigned,
                                                                left_value=assigning_value,
                                                                right_var=neighbor,
                                                                right_value=assignment[neighbor]):
