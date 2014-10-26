@@ -366,7 +366,7 @@ class CSP(object):
                 inconsistent_value_count += len(inconsistencies)
             values_to_inconsistencies[value] = inconsistent_value_count
 
-        ordered_values = sorted(values_to_inconsistencies, values_to_inconsistencies.get)
+        ordered_values = sorted(values_to_inconsistencies, key=values_to_inconsistencies.get)
         return ordered_values
 
     def __consistent_domain_values(self, var, var_assigned_value, neighbor_var):
