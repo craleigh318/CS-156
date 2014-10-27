@@ -371,7 +371,6 @@ class CSP(object):
             dictionary[variable_name] = Variable(variable_name, None)
         return dictionary.get(variable_name)
 
-    # Don't mutate values like the book does. Use immutable data structures/classes in order to avoid bugs.
     def solve(self, do_forward_checking):
         """
         :type do_forward_checking: bool
