@@ -245,7 +245,7 @@ class Assignment(object):
         :return: a string representation of the assignment in the above format.
         """
         sorted_assignment = sorted(assignment.items(), key=lambda key_value: key_value[0].name)
-        lines = [var.name + " = " + str(value) for (var, value) in sorted_assignment]
+        lines = [var.name + "=" + str(value) for (var, value) in sorted_assignment]
         return '\n'.join(lines)
 
 

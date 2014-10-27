@@ -244,6 +244,13 @@ class CSPSolveAllConstraintsNoForwardChecking(unittest.TestCase):
         self.assertTrue(all_constraints_satisfied(variables, constraints, test_solution))
 
 
+class TCSPFromFileUland(unittest.TestCase):
+    def test_csp_from_file_uland(self):
+        actual = solve_csp('test_uland.txt', '0')
+        expected = 'ME'
+        self.assertEqual(test)
+
+
 class TestCSPFromFile(unittest.TestCase):
     def test_this(self):
         forward_checking = False
