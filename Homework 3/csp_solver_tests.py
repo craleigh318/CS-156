@@ -244,7 +244,7 @@ class CSPSolveAllConstraintsNoForwardChecking(unittest.TestCase):
         self.assertTrue(all_constraints_satisfied(variables, constraints, test_solution))
 
 
-class TCSPFromFileUland(unittest.TestCase):
+class CSPSolveUlandNoForwardChecking(unittest.TestCase):
     def test_csp_from_file_uland(self):
         actual = solve_csp('test_uland.txt', '0')
         # Doesn't output exactly what the assignment says it should, but it's still technically correct.
