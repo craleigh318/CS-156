@@ -342,7 +342,7 @@ class CSP(object):
         v = largest_value
         # Set domains.
         for var in variables.values():
-            var.domain = xrange(max(d, (v - 1)))
+            var.domain = set(xrange(max(d, v - 1)))
         new_csp = CSP(variables.values(), constraints)
         return new_csp
 
