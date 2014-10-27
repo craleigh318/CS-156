@@ -319,6 +319,5 @@ class TestCSPFromFile(unittest.TestCase):
         print(Solution.as_string(solution))
 
 
-
 if __name__ == "__main__":
     unittest.main()
