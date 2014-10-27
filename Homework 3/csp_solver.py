@@ -202,6 +202,28 @@ class Constraints(object):
         flattened_arcs = [neighbor for arc in arcs_involving_var for neighbor in arc]
         return [v for v in flattened_arcs if v != var]
 
+    def has_unary_constraint(self, var):
+        """
+        Returns True if the variable has a unary constraint, False otherwise.
+
+        :type var: Variable
+        :rtype: bool
+
+        :param var: the variable to check for unary constraints on.
+        :return: True if var is constrained by a unary constraint, False otherwise.
+        """
+        return var in self.__constraints
+
+    def remove_unary_constraint(self, var):
+        """
+        Removes a unary constraint.
+
+        :type var: Variable
+        :param var: the variable that has a unary constraint on it that we want to remove.
+        """
+
+        del self.__constraints[var]
+
 
 class Assignment(object):
     @staticmethod
@@ -247,7 +269,14 @@ class CSP(object):
         self.__variables = variables
         self.__constraints = constraints
 
-        # TODO make this CSP node consistent here.
+        self.__make_node_consistent()
+         
+    def __make_node_consistent(self):
+        vars_with_unary_constraints = [v for v in self.__variables if self.__constraints.has_unary_constraint(v)]
+        for var in vars_with_unary_constraints:
+            domain_no_inconsistencies = \
+                [val for val in var.domain if self.__constraints.unary_constraint_satisfied(var, val)]
+            var.domain = domain_no_inconsistencies
 
     # This will need to be used in solve() in order to maintain immutability.
     def __copy__(self):
