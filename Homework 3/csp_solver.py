@@ -326,7 +326,7 @@ class CSP(object):
             bob eq 27
             Ewoks lt Yoda
 
-        The domain of all variables in a CSP is equal to max(D, V), where D is the number of distinct variables in the
+        The domain of all variables in a CSP is equal to max(D, V - 1), where D is the number of distinct variables in the
         CSP and V is the maximum value out of all integers used in constraints in the CSP.
 
         :type csp_file_name: str
