@@ -260,13 +260,18 @@ class CSPSolveUlandNoForwardChecking(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 
+class CSPSolveAustraliaMapColoringWithForwardChecking(unittest.TestCase):
+    def test_csp_solve_australia_map_coloring_with_forward_checking(self):
+        test_csp = CSP.from_file()
+
+
 class TestCSPFromFile(unittest.TestCase):
     def test_this(self):
         forward_checking = False
-        with open('Test.txt', 'r') as problem_file:
-            csp = CSP.from_file(problem_file)
-            solution = csp.solve(forward_checking)
-            print(Solution.as_string(solution))
+        csp = CSP.from_file('Test.txt')
+        solution = csp.solve(forward_checking)
+        print(Solution.as_string(solution))
+
 
 
 if __name__ == "__main__":

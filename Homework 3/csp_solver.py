@@ -318,7 +318,8 @@ class CSP(object):
         """
 
         # TODO compute variable domains (should probably be represented as set(range(0, max(D, V - 1) + 1)))
-        file_lines = csp_file_name.readlines()
+        with open(csp_file_name, 'r') as problem_file:
+            file_lines = problem_file.readlines()
         variables = {}
         constraints = Constraints()
         largest_value = 0
@@ -530,10 +531,8 @@ class CSP(object):
 
 def solve_csp(problem_filename, use_forward_checking_str):
     forward_checking = use_forward_checking_str == "1"
-    with open(problem_filename) as problem_file:
-        csp = CSP.from_file(problem_file)
-        solution = csp.solve(forward_checking)
-
+    csp = CSP.from_file(problem_filename)
+    solution = csp.solve(forward_checking)
     return Solution.as_string(solution)
 
 
