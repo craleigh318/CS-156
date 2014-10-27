@@ -329,7 +329,7 @@ class CSP(object):
         The domain of all variables in a CSP is equal to max(D, V), where D is the number of distinct variables in the
         CSP and V is the maximum value out of all integers used in constraints in the CSP.
 
-        :type csp_file_name: file
+        :type csp_file_name: str
         :rtype: CSP
 
         :param csp_file_name: the name of the CSP file to generate the CSP object from.
