@@ -317,7 +317,6 @@ class CSP(object):
         :return: a CSP object generated from csp_file_name.
         """
 
-        # TODO compute variable domains (should probably be represented as set(range(0, max(D, V - 1) + 1)))
         with open(csp_file_name, 'r') as problem_file:
             file_lines = problem_file.readlines()
         variables = {}
