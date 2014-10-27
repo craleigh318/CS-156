@@ -78,7 +78,7 @@ class AssignmentAsString(unittest.TestCase):
             Variable("X", None): 5,
             Variable("Y", None): 20
         }
-        expected = "X = 5\nY = 20"
+        expected = "X=5\nY=20"
         actual = Solution.as_string(test_assignment)
         self.assertEqual(expected, actual)
 
