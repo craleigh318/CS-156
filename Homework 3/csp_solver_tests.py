@@ -1,4 +1,4 @@
-__author__ = 'dash'
+__author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 import unittest
 
