@@ -79,7 +79,7 @@ class AssignmentAsString(unittest.TestCase):
             Variable("Y", None): 20
         }
         expected = "X = 5\nY = 20"
-        actual = Assignment.as_string(test_assignment)
+        actual = Solution.as_string(test_assignment)
         self.assertEqual(expected, actual)
 
 
@@ -258,7 +258,7 @@ class TestCSPFromFile(unittest.TestCase):
         with open('Test.txt', 'r') as problem_file:
             csp = CSP.from_file(problem_file)
             solution = csp.solve(forward_checking)
-            print(Assignment.as_string(solution))
+            print(Solution.as_string(solution))
 
 
 if __name__ == "__main__":

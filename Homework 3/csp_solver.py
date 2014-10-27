@@ -225,7 +225,7 @@ class Constraints(object):
         del self.__constraints[var]
 
 
-class Assignment(object):
+class Solution(object):
     @staticmethod
     def as_string(assignment):
         """
@@ -234,19 +234,22 @@ class Assignment(object):
 
         Example:
 
-        x = 2
-        y = 9
-        z = -1
+        x=2
+        y=9
+        z=-1
 
         :type assignment: dict
         :rtype: str
 
         :param assignment: the assignment dict to convert to a string.
-        :return: a string representation of the assignment in the above format.
+        :return: a string representation of the assignment in the above format, or 'NO SOLUTION' if assignment is None.
         """
-        sorted_assignment = sorted(assignment.items(), key=lambda key_value: key_value[0].name)
-        lines = [var.name + "=" + str(value) for (var, value) in sorted_assignment]
-        return '\n'.join(lines)
+        if assignment is None:
+            return 'NO SOLUTION'
+        else:
+            sorted_assignment = sorted(assignment.items(), key=lambda key_value: key_value[0].name)
+            lines = [var.name + "=" + str(value) for (var, value) in sorted_assignment]
+            return '\n'.join(lines)
 
 
 class CSP(object):
@@ -531,10 +534,7 @@ def solve_csp(problem_filename, use_forward_checking_str):
         csp = CSP.from_file(problem_file)
         solution = csp.solve(forward_checking)
 
-    if solution is None:
-        return "NO SOLUTION"
-    else:
-        return Assignment.as_string(solution)
+    return Solution.as_string(solution)
 
 
 if __name__ == '__main__':
