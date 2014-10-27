@@ -1,8 +1,7 @@
 red eq 0
 green eq 1
 blue eq 2
-WA eq red
-T eq red
+T ne V
 WA ne NT
 WA ne SA
 NT ne Q
