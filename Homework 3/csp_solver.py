@@ -430,11 +430,10 @@ class CSP(object):
 
     def __consistent_domain_values(self, var, var_assigned_value, neighbor_var):
         return {val for val in neighbor_var.domain
-                if self.__constraints.binary_constraint_satisfied(
-            left_var=var,
-            left_value=var_assigned_value,
-            right_var=neighbor_var,
-            right_value=val)}
+                if self.__constraints.binary_constraint_satisfied(left_var=var,
+                                                                  left_value=var_assigned_value,
+                                                                  right_var=neighbor_var,
+                                                                  right_value=val)}
 
     def __unassigned_neighbors(self, var, unassigned_vars):
         var_neighbors = self.__constraints.neighbors(var)
