@@ -198,7 +198,10 @@ class Constraints(object):
         :param var: the variable to find the neighbors of.
         :return: a list of neighbors of the variable.
         """
-        arcs_involving_var = [arc for arc in self.__constraints.keys() if var in arc]
+        # This is just to make this method technically correct in all contexts we want to support (i.e., we need to
+        # account for the possibility that there will be unary constraints).
+        arcs = [key for key in self.__constraints.keys() if not isinstance(key, Variable)]
+        arcs_involving_var = [arc for arc in arcs if var in arc]
         flattened_arcs = [neighbor for arc in arcs_involving_var for neighbor in arc]
         return [v for v in flattened_arcs if v != var]
 
