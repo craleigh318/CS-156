@@ -525,9 +525,18 @@ class CSP(object):
         return len(self.__unassigned_neighbors(var, unassigned_vars))
 
 
-if __name__ == '__main__':
-    forward_checking = sys.argv[2] == "1"
-    with open(sys.argv[1], 'r') as problem_file:
+def solve_csp(problem_filename, use_forward_checking_str):
+    forward_checking = use_forward_checking_str == "1"
+    with open(problem_filename) as problem_file:
         csp = CSP.from_file(problem_file)
         solution = csp.solve(forward_checking)
-        print(CSP.assignment_as_string(solution))
+
+    if solution is None:
+        return "NO SOLUTION"
+    else:
+        return Assignment.as_string(solution)
+
+
+if __name__ == '__main__':
+    solution_string = solve_csp(sys.argv[1], sys.argv[2])
+    print(solution_string)
