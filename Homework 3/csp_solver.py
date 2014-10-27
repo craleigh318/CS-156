@@ -190,7 +190,7 @@ class Constraints(object):
 
     def neighbors(self, var):
         """
-        Find the neighbors of a variables.
+        Find the neighbors of a variable.
 
         :type var: Variable
         :rtype: list
