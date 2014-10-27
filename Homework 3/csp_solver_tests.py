@@ -311,6 +311,57 @@ class CSPSolveAustraliaMapColoringWithForwardChecking(unittest.TestCase):
         self.assertTrue(all_constraints_satisfied(variables, constraints, solution))
 
 
+class CSPSolveAustraliaMapColoringNoForwardChecking(unittest.TestCase):
+    def test_csp_solve_australia_map_coloring_no_forward_checking(self):
+        test_csp = CSP.from_file('Test Australia.txt')
+        solution = test_csp.solve(False)
+
+        # Variable-related assertions.
+        num_of_vars = 10  # We're counting the color-variables too.
+        domain_upper_bound = num_of_vars - 1
+        var_domain = set(xrange(domain_upper_bound))
+        red = Variable('red', var_domain)
+        green = Variable('green', var_domain)
+        blue = Variable('blue', var_domain)
+        wa = Variable('WA', var_domain)
+        t = Variable('T', var_domain)
+        nt = Variable('NT', var_domain)
+        sa = Variable('SA', var_domain)
+        q = Variable('Q', var_domain)
+        nsw = Variable('NSW', var_domain)
+        v = Variable('V', var_domain)
+        variables = [red, green,
+                     blue, wa,
+                     t, nt,
+                     sa, q,
+                     nsw, v]
+        self.assertTrue(all_variables_assigned(variables, solution))
+        self.assertTrue(domain_values_assigned(set(range(0, domain_upper_bound)), solution))
+
+        # Constraint-related assertion.
+        constraints = Constraints()
+        eq = lambda x, y: x == y
+        constraints.add_unary_constraint(red, eq, 0)
+        constraints.add_unary_constraint(green, eq, 1)
+        constraints.add_unary_constraint(blue, eq, 2)
+
+        ne = lambda x, y: x != y
+        # We're assuming that the Tasmanians are 'patriotic', as the book mentions.
+        # This is just so we don't have to arbitrarily choose our own color for the variable T.
+        # (If we did neither, it wouldn't be present in the CSP formulation at all).
+        constraints.add_binary_constraint(t, ne, v)
+        constraints.add_binary_constraint(wa, ne, nt)
+        constraints.add_binary_constraint(wa, ne, sa)
+        constraints.add_binary_constraint(nt, ne, q)
+        constraints.add_binary_constraint(nt, ne, sa)
+        constraints.add_binary_constraint(sa, ne, q)
+        constraints.add_binary_constraint(sa, ne, nsw)
+        constraints.add_binary_constraint(sa, ne, v)
+        constraints.add_binary_constraint(q, ne, nsw)
+        constraints.add_binary_constraint(nsw, ne, v)
+        self.assertTrue(all_constraints_satisfied(variables, constraints, solution))
+
+
 class TestCSPFromFile(unittest.TestCase):
     def test_this(self):
         forward_checking = False
