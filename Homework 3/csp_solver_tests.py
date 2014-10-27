@@ -111,6 +111,21 @@ def all_constraints_satisfied(variables, constraints, solution_assignment):
     return True
 
 
+class CSPSolveOneUnaryConstraintNoForwardChecking(unittest.TestCase):
+    def test_csp_solve_one_unary_constraint_no_forward_checking(self):
+        var_1 = Variable("X", set(range(0, 2)))
+        var_2 = Variable("Y", set(range(0, 2)))
+        constraints = Constraints()
+        constraints.add_unary_constraint(var_1, lambda x, y: x < y, 1)
+        variables = [var_1, var_2]
+        test_csp = CSP(variables, constraints)
+        solution_assignment = test_csp.solve(False)
+
+        self.assertTrue(all_variables_assigned(variables, solution_assignment))
+        self.assertTrue(domain_values_assigned(set(range(0, 2)), solution_assignment))
+        self.assertTrue(all_constraints_satisfied(variables, constraints, solution_assignment))
+
+
 class CSPSolveOneBinaryConstraintNoForwardChecking(unittest.TestCase):
     def test_csp_solve_one_binary_constraint_no_forward_checking(self):
         var_1 = Variable("X", set(range(0, 2)))
@@ -192,6 +207,40 @@ class CSPSolveSeveralBinaryConstraintsWithForwardChecking(unittest.TestCase):
 
         self.assertTrue(all_variables_assigned(variables, test_solution))
         self.assertTrue(domain_values_assigned(set(range(0, num_variables)), test_solution))
+        self.assertTrue(all_constraints_satisfied(variables, constraints, test_solution))
+
+
+class CSPSolveAllConstraintsNoForwardChecking(unittest.TestCase):
+    def test_csp_solve_all_constraints_no_forward_checking(self):
+        max_value = 24
+        domain_upper_bound = max_value + 1
+        var_1 = Variable("W", set(range(0, domain_upper_bound)))
+        var_2 = Variable("X", set(range(0, domain_upper_bound)))
+        var_3 = Variable("Y", set(range(0, domain_upper_bound)))
+        var_4 = Variable("Z", set(range(0, domain_upper_bound)))
+
+        constraints = Constraints()
+        # Unary constraint additions.
+        relation = lambda x, y: x == y
+        constraints.add_unary_constraint(var_1, relation, max_value)
+        relation = lambda x, y: x < y
+        constraints.add_unary_constraint(var_2, relation, 3)
+
+        # Binary constraint additions.
+        relation = lambda x, y: x > y
+        constraints.add_binary_constraint(var_1, relation, var_2)
+        constraints.add_binary_constraint(var_1, relation, var_3)
+        constraints.add_binary_constraint(var_1, relation, var_4)
+        relation = lambda x, y: x == y
+        constraints.add_binary_constraint(var_2, relation, var_3)
+        constraints.add_binary_constraint(var_3, relation, var_4)
+
+        variables = [var_1, var_2, var_3, var_4]
+        test_csp = CSP(variables, constraints)
+        test_solution = test_csp.solve(True)
+
+        self.assertTrue(all_variables_assigned(variables, test_solution))
+        self.assertTrue(domain_values_assigned(set(range(0, domain_upper_bound)), test_solution))
         self.assertTrue(all_constraints_satisfied(variables, constraints, test_solution))
 
 
