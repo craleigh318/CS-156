@@ -94,6 +94,12 @@ class Variable(object):
 class Constraints(object):
     """
     The constraints of a CSP.
+
+    Constraints are represented using a dictionary. The dictionary may have
+    {Variable: relation_lambda} entries for unary constraints, and
+    {(Variable, Variable): relation_lambda} entries for binary constraints.
+
+    relation_lambda is a lambda implementing a relation as returned by Relation.as_function().
     """
 
     def __init__(self, constraints=None):
@@ -102,12 +108,22 @@ class Constraints(object):
         else:
             self.__constraints = constraints
 
-    def add_constraint(self, var, relation, right_value):
-        """Automatically chooses add_unary_constraint or add_binary_constraint"""
-        if right_value.isdigit():
-            self.add_unary_constraint(var, relation, right_value)
+    def add_constraint(self, left_var, relation, right_var_or_value):
+        """
+        Automatically chooses add_unary_constraint or add_binary_constraint.
+
+        :type left_var: Variable
+        :type relation: lambda(int, int) -> bool
+        :type right_var_or_value: int or Variable
+
+        :param left_var: the variable on the left side of the relation
+        :param relation: the relation between the two variables (or the variable and the value).
+        :param right_var_or_value: the variable or value that appears on the right side of the relation.
+        """
+        if right_var_or_value.isdigit():
+            self.add_unary_constraint(left_var, relation, right_var_or_value)
         else:
-            self.add_binary_constraint(var, relation, right_value)
+            self.add_binary_constraint(left_var, relation, right_var_or_value)
 
     def add_unary_constraint(self, var, relation, integer):
         """
