@@ -84,7 +84,7 @@ class Variable(object):
 
     @property
     def domain(self):
-        return self.__domain
+        return set(self.__domain)
 
     @domain.setter
     def domain(self, new_domain):
@@ -148,7 +148,7 @@ class Constraints(object):
         :return: True if the assigned value satisfies the unary constraint, False otherwise.
         """
         if var in self.__constraints:
-            relation = self.__constraints[var](var_assigned_value)
+            relation = self.__constraints[var]
             return relation(var_assigned_value)
         else:
             raise ValueError('There is no variable by the name of "' + var.name + '"!')
@@ -270,13 +270,14 @@ class CSP(object):
         self.__constraints = constraints
 
         self.__make_node_consistent()
-         
+
     def __make_node_consistent(self):
         vars_with_unary_constraints = [v for v in self.__variables if self.__constraints.has_unary_constraint(v)]
         for var in vars_with_unary_constraints:
             domain_no_inconsistencies = \
                 [val for val in var.domain if self.__constraints.unary_constraint_satisfied(var, val)]
             var.domain = domain_no_inconsistencies
+            self.__constraints.remove_unary_constraint(var)
 
     # This will need to be used in solve() in order to maintain immutability.
     def __copy__(self):
