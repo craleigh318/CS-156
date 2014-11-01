@@ -1,6 +1,13 @@
 red eq 0
 green eq 1
 blue eq 2
+T lt 3
+V lt 3
+NSW lt 3
+Q lt 3
+SA lt 3
+NT lt 3
+WA lt 3
 T ne V
 WA ne NT
 WA ne SA
