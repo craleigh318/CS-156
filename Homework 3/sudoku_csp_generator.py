@@ -8,6 +8,7 @@ NUM_SUDOKU_ROWS = 9
 NUM_SUDOKU_COLUMNS = NUM_SUDOKU_ROWS
 NUM_BOX_ROWS = 3
 
+EQUAL_STRING = 'eq'
 NOT_EQUAL_STRING = 'ne'
 LESS_THAN_STRING = 'lt'
 
@@ -24,6 +25,10 @@ def cell(cell_letter, cell_number):
 
 def constraint(left_cell, constraint_str, right_cell_or_num):
     return left_cell + ' ' + constraint_str + ' ' + str(right_cell_or_num)
+
+
+def equal_constraint(left_cell, num):
+    return constraint(left_cell, EQUAL_STRING, num)
 
 
 def less_than_constraint(left_cell, right_cell_or_num):
@@ -85,7 +90,7 @@ def flat_list(list_maker_function, iterable):
     return list_2d_to_1d(list_2d)
 
 
-def generate_sudoku_csp():
+def general_constraints():
     rows = flat_list(lambda x: row_list(x), xrange(1, NUM_SUDOKU_COLUMNS + 1))
     columns = flat_list(lambda x: column_list(x), xrange(1, NUM_SUDOKU_ROWS + 1))
     boxes = flat_list(lambda x: box_list(x), xrange(1, NUM_BOX_ROWS + 1))
@@ -101,13 +106,66 @@ def generate_sudoku_csp():
 
     sudoku_domain_constraints = [less_than_constraint(cell, MAX_SUDOKU_CELL_VALUE + 1) for cell in rows]
 
-    sudoku_constraints = []
-    sudoku_constraints.extend(sudoku_domain_constraints)
-    sudoku_constraints.extend(sudoku_diffs)
-    return '\n'.join(sudoku_constraints)
+    result = []
+    result.extend(sudoku_domain_constraints)
+    result.extend(sudoku_diffs)
+    return result
+
+
+# These are taken from the book, page 269, figure 4.
+def given_cell_assignments():
+    return [
+        equal_constraint('A3', 3),
+        equal_constraint('A5', 2),
+        equal_constraint('A7', 6),
+    
+        equal_constraint('B1', 9),
+        equal_constraint('B4', 3),
+        equal_constraint('B6', 5),
+        equal_constraint('B9', 1),
+    
+        equal_constraint('C3', 1),
+        equal_constraint('C4', 8),
+        equal_constraint('C6', 6),
+        equal_constraint('C7', 4),
+    
+        equal_constraint('D3', 8),
+        equal_constraint('D4', 1),
+        equal_constraint('D6', 2),
+        equal_constraint('D7', 9),
+    
+        equal_constraint('E1', 7),
+        equal_constraint('E9', 8),
+    
+        equal_constraint('F3', 6),
+        equal_constraint('F4', 7),
+        equal_constraint('F6', 8),
+        equal_constraint('F7', 2),
+    
+        equal_constraint('G3', 2),
+        equal_constraint('G4', 6),
+        equal_constraint('G6', 9),
+        equal_constraint('G7', 5),
+    
+        equal_constraint('H1', 8),
+        equal_constraint('H4', 2),
+        equal_constraint('H6', 3),
+        equal_constraint('H9', 9),
+    
+        equal_constraint('I3', 5),
+        equal_constraint('I5', 1),
+        equal_constraint('I7', 3)
+    ]
+
+
+def generate_sudoku_csp():
+    constraints = general_constraints()
+    constraints.extend(given_cell_assignments())
+
+    return '\n'.join(constraints)
 
 
 if __name__ == '__main__':
     sudoku_csp_string = generate_sudoku_csp()
-    with open('Sudoku Test.txt', 'w') as sudoku_csp_file:
+    with open('Sudoku Test.txt', 'w+') as sudoku_csp_file:
         sudoku_csp_file.write(sudoku_csp_string)
