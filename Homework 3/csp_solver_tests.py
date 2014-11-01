@@ -293,7 +293,16 @@ class CSPSolveAustraliaMapColoringWithForwardChecking(unittest.TestCase):
         constraints.add_unary_constraint(red, eq, 0)
         constraints.add_unary_constraint(green, eq, 1)
         constraints.add_unary_constraint(blue, eq, 2)
-        
+
+        lt = lambda x, y: x < y
+        constraints.add_unary_constraint(t, lt, 3)
+        constraints.add_unary_constraint(wa, lt, 3)
+        constraints.add_unary_constraint(nt, lt, 3)
+        constraints.add_unary_constraint(sa, lt, 3)
+        constraints.add_unary_constraint(q, lt, 3)
+        constraints.add_unary_constraint(nsw, lt, 3)
+        constraints.add_unary_constraint(v, lt, 3)
+
         ne = lambda x, y: x != y
         # We're assuming that the Tasmanians are 'patriotic', as the book mentions.
         # This is just so we don't have to arbitrarily choose our own color for the variable T.
