@@ -78,6 +78,12 @@ class Variable(object):
     def __eq__(self, other):
         return self.name == other.name
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __str__(self):
+        return self.name
+
     @property
     def name(self):
         return self.__name
@@ -216,7 +222,7 @@ class Constraints(object):
         """
         # This is just to make this method technically correct in all contexts we want to support (i.e., we need to
         # account for the possibility that there will be unary constraints).
-        arcs = [key for key in self.__constraints.keys() if not isinstance(key, Variable)]
+        arcs = [key for key in self.__constraints.keys() if type(key) is not Variable]
         arcs_involving_var = [arc for arc in arcs if var in arc]
         flattened_arcs = [neighbor for arc in arcs_involving_var for neighbor in arc]
         return [v for v in flattened_arcs if v != var]
@@ -552,6 +558,16 @@ def solve_csp(problem_filename, use_forward_checking_str):
     return Solution.as_string(solution)
 
 
+def benchmark_function():
+    solve_csp('Test Australia.txt', '0')
+
+
 if __name__ == '__main__':
     solution_string = solve_csp(sys.argv[1], sys.argv[2])
     print(solution_string)
+
+    # Benchmarking stuff
+    '''
+    import timeit
+    benchmark_lambda = lambda: solve_csp(sys.argv[1], sys.argv[2])
+    print(timeit.timeit("benchmark_function()", setup="from __main__ import benchmark_function", number=500)/500)'''
