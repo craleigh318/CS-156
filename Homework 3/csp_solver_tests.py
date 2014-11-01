@@ -380,6 +380,299 @@ class CSPSolveAustraliaMapColoringNoForwardChecking(unittest.TestCase):
         self.assertTrue(all_constraints_satisfied(variables, constraints, solution))
 
 
+class CSPSolveSudokuNoForwardChecking(unittest.TestCase):
+    def test_csp_solve_sudoku_no_forward_checking(self):
+        test_csp = CSP.from_file('Sudoku Test.txt')
+        solution = test_csp.solve(False)
+
+        expected_solution = {
+            Variable('A1', None): 4,
+            Variable('A2', None): 8,
+            Variable('A3', None): 3,
+            Variable('A4', None): 9,
+            Variable('A5', None): 2,
+            Variable('A6', None): 1,
+            Variable('A7', None): 6,
+            Variable('A8', None): 5,
+            Variable('A9', None): 7,
+
+            Variable('B1', None): 9,
+            Variable('B2', None): 6,
+            Variable('B3', None): 7,
+            Variable('B4', None): 3,
+            Variable('B5', None): 4,
+            Variable('B6', None): 5,
+            Variable('B7', None): 8,
+            Variable('B8', None): 2,
+            Variable('B9', None): 1,
+
+            Variable('C1', None): 2,
+            Variable('C2', None): 5,
+            Variable('C3', None): 1,
+            Variable('C4', None): 8,
+            Variable('C5', None): 7,
+            Variable('C6', None): 6,
+            Variable('C7', None): 4,
+            Variable('C8', None): 9,
+            Variable('C9', None): 3,
+
+            Variable('D1', None): 5,
+            Variable('D2', None): 4,
+            Variable('D3', None): 8,
+            Variable('D4', None): 1,
+            Variable('D5', None): 3,
+            Variable('D6', None): 2,
+            Variable('D7', None): 9,
+            Variable('D8', None): 7,
+            Variable('D9', None): 6,
+
+            Variable('E1', None): 7,
+            Variable('E2', None): 2,
+            Variable('E3', None): 9,
+            Variable('E4', None): 5,
+            Variable('E5', None): 6,
+            Variable('E6', None): 4,
+            Variable('E7', None): 1,
+            Variable('E8', None): 3,
+            Variable('E9', None): 8,
+
+            Variable('F1', None): 1,
+            Variable('F2', None): 3,
+            Variable('F3', None): 6,
+            Variable('F4', None): 7,
+            Variable('F5', None): 9,
+            Variable('F6', None): 8,
+            Variable('F7', None): 2,
+            Variable('F8', None): 4,
+            Variable('F9', None): 5,
+
+            Variable('G1', None): 3,
+            Variable('G2', None): 7,
+            Variable('G3', None): 2,
+            Variable('G4', None): 6,
+            Variable('G5', None): 8,
+            Variable('G6', None): 9,
+            Variable('G7', None): 5,
+            Variable('G8', None): 1,
+            Variable('G9', None): 4,
+
+            Variable('H1', None): 8,
+            Variable('H2', None): 1,
+            Variable('H3', None): 4,
+            Variable('H4', None): 2,
+            Variable('H5', None): 5,
+            Variable('H6', None): 3,
+            Variable('H7', None): 7,
+            Variable('H8', None): 6,
+            Variable('H9', None): 9,
+
+            Variable('I1', None): 6,
+            Variable('I2', None): 9,
+            Variable('I3', None): 5,
+            Variable('I4', None): 4,
+            Variable('I5', None): 1,
+            Variable('I6', None): 7,
+            Variable('I7', None): 3,
+            Variable('I8', None): 8,
+            Variable('I9', None): 2
+        }
+        self.assertDictEqual(solution, expected_solution)
+
+
+class CSPSolveSudokuWithForwardChecking(unittest.TestCase):
+    def test_csp_solve_sudoku_with_forward_checking(self):
+        test_csp = CSP.from_file('Sudoku Test.txt')
+        solution = test_csp.solve(True)
+
+        expected_solution = {
+            Variable('A1', None): 4,
+            Variable('A2', None): 8,
+            Variable('A3', None): 3,
+            Variable('A4', None): 9,
+            Variable('A5', None): 2,
+            Variable('A6', None): 1,
+            Variable('A7', None): 6,
+            Variable('A8', None): 5,
+            Variable('A9', None): 7,
+
+            Variable('B1', None): 9,
+            Variable('B2', None): 6,
+            Variable('B3', None): 7,
+            Variable('B4', None): 3,
+            Variable('B5', None): 4,
+            Variable('B6', None): 5,
+            Variable('B7', None): 8,
+            Variable('B8', None): 2,
+            Variable('B9', None): 1,
+
+            Variable('C1', None): 2,
+            Variable('C2', None): 5,
+            Variable('C3', None): 1,
+            Variable('C4', None): 8,
+            Variable('C5', None): 7,
+            Variable('C6', None): 6,
+            Variable('C7', None): 4,
+            Variable('C8', None): 9,
+            Variable('C9', None): 3,
+
+            Variable('D1', None): 5,
+            Variable('D2', None): 4,
+            Variable('D3', None): 8,
+            Variable('D4', None): 1,
+            Variable('D5', None): 3,
+            Variable('D6', None): 2,
+            Variable('D7', None): 9,
+            Variable('D8', None): 7,
+            Variable('D9', None): 6,
+
+            Variable('E1', None): 7,
+            Variable('E2', None): 2,
+            Variable('E3', None): 9,
+            Variable('E4', None): 5,
+            Variable('E5', None): 6,
+            Variable('E6', None): 4,
+            Variable('E7', None): 1,
+            Variable('E8', None): 3,
+            Variable('E9', None): 8,
+
+            Variable('F1', None): 1,
+            Variable('F2', None): 3,
+            Variable('F3', None): 6,
+            Variable('F4', None): 7,
+            Variable('F5', None): 9,
+            Variable('F6', None): 8,
+            Variable('F7', None): 2,
+            Variable('F8', None): 4,
+            Variable('F9', None): 5,
+
+            Variable('G1', None): 3,
+            Variable('G2', None): 7,
+            Variable('G3', None): 2,
+            Variable('G4', None): 6,
+            Variable('G5', None): 8,
+            Variable('G6', None): 9,
+            Variable('G7', None): 5,
+            Variable('G8', None): 1,
+            Variable('G9', None): 4,
+
+            Variable('H1', None): 8,
+            Variable('H2', None): 1,
+            Variable('H3', None): 4,
+            Variable('H4', None): 2,
+            Variable('H5', None): 5,
+            Variable('H6', None): 3,
+            Variable('H7', None): 7,
+            Variable('H8', None): 6,
+            Variable('H9', None): 9,
+
+            Variable('I1', None): 6,
+            Variable('I2', None): 9,
+            Variable('I3', None): 5,
+            Variable('I4', None): 4,
+            Variable('I5', None): 1, def test_csp_solve_sudoku_no_forward_checking(self):
+        test_csp = CSP.from_file('Sudoku Test.txt')
+        solution = test_csp.solve(False)
+
+        expected_solution = {
+            Variable('A1', None): 4,
+            Variable('A2', None): 8,
+            Variable('A3', None): 3,
+            Variable('A4', None): 9,
+            Variable('A5', None): 2,
+            Variable('A6', None): 1,
+            Variable('A7', None): 6,
+            Variable('A8', None): 5,
+            Variable('A9', None): 7,
+
+            Variable('B1', None): 9,
+            Variable('B2', None): 6,
+            Variable('B3', None): 7,
+            Variable('B4', None): 3,
+            Variable('B5', None): 4,
+            Variable('B6', None): 5,
+            Variable('B7', None): 8,
+            Variable('B8', None): 2,
+            Variable('B9', None): 1,
+
+            Variable('C1', None): 2,
+            Variable('C2', None): 5,
+            Variable('C3', None): 1,
+            Variable('C4', None): 8,
+            Variable('C5', None): 7,
+            Variable('C6', None): 6,
+            Variable('C7', None): 4,
+            Variable('C8', None): 9,
+            Variable('C9', None): 3,
+
+            Variable('D1', None): 5,
+            Variable('D2', None): 4,
+            Variable('D3', None): 8,
+            Variable('D4', None): 1,
+            Variable('D5', None): 3,
+            Variable('D6', None): 2,
+            Variable('D7', None): 9,
+            Variable('D8', None): 7,
+            Variable('D9', None): 6,
+
+            Variable('E1', None): 7,
+            Variable('E2', None): 2,
+            Variable('E3', None): 9,
+            Variable('E4', None): 5,
+            Variable('E5', None): 6,
+            Variable('E6', None): 4,
+            Variable('E7', None): 1,
+            Variable('E8', None): 3,
+            Variable('E9', None): 8,
+
+            Variable('F1', None): 1,
+            Variable('F2', None): 3,
+            Variable('F3', None): 6,
+            Variable('F4', None): 7,
+            Variable('F5', None): 9,
+            Variable('F6', None): 8,
+            Variable('F7', None): 2,
+            Variable('F8', None): 4,
+            Variable('F9', None): 5,
+
+            Variable('G1', None): 3,
+            Variable('G2', None): 7,
+            Variable('G3', None): 2,
+            Variable('G4', None): 6,
+            Variable('G5', None): 8,
+            Variable('G6', None): 9,
+            Variable('G7', None): 5,
+            Variable('G8', None): 1,
+            Variable('G9', None): 4,
+
+            Variable('H1', None): 8,
+            Variable('H2', None): 1,
+            Variable('H3', None): 4,
+            Variable('H4', None): 2,
+            Variable('H5', None): 5,
+            Variable('H6', None): 3,
+            Variable('H7', None): 7,
+            Variable('H8', None): 6,
+            Variable('H9', None): 9,
+
+            Variable('I1', None): 6,
+            Variable('I2', None): 9,
+            Variable('I3', None): 5,
+            Variable('I4', None): 4,
+            Variable('I5', None): 1,
+            Variable('I6', None): 7,
+            Variable('I7', None): 3,
+            Variable('I8', None): 8,
+            Variable('I9', None): 2
+        }
+        self.assertDictEqual(solution, expected_solution)
+            Variable('I6', None): 7,
+            Variable('I7', None): 3,
+            Variable('I8', None): 8,
+            Variable('I9', None): 2
+        }
+        self.assertDictEqual(solution, expected_solution)
+
+
 class TestCSPFromFile(unittest.TestCase):
     def test_this(self):
         forward_checking = False
