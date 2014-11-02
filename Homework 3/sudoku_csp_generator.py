@@ -91,20 +91,22 @@ def flat_list(list_maker_function, iterable):
 
 
 def general_constraints():
-    rows = flat_list(lambda x: row_list(x), xrange(1, NUM_SUDOKU_COLUMNS + 1))
-    columns = flat_list(lambda x: column_list(x), xrange(1, NUM_SUDOKU_ROWS + 1))
-    boxes = flat_list(lambda x: box_list(x), xrange(1, NUM_BOX_ROWS + 1))
+    rows = [row_list(row_num) for row_num in xrange(1, NUM_SUDOKU_COLUMNS + 1)]
+    columns = [column_list(col_num) for col_num in xrange(1, NUM_SUDOKU_ROWS + 1)]
+    boxes = [box_list(box_num) for box_num in xrange(1, NUM_BOX_ROWS + 1)]
 
-    rows_alldiff = alldiff_list(rows)
-    columns_alldiff = alldiff_list(columns)
-    boxes_alldiff = alldiff_list(boxes)
+    alldiff_lambda = lambda cells: alldiff_list(cells)
+    rows_alldiff = flat_list(alldiff_lambda, rows)
+    columns_alldiff = flat_list(alldiff_lambda, columns)
+    boxes_alldiff = flat_list(alldiff_lambda, boxes)
 
     sudoku_diffs = []
     sudoku_diffs.extend(rows_alldiff)
     sudoku_diffs.extend(columns_alldiff)
     sudoku_diffs.extend(boxes_alldiff)
 
-    sudoku_domain_constraints = [less_than_constraint(cell, MAX_SUDOKU_CELL_VALUE + 1) for cell in rows]
+    flat_row_list = list_2d_to_1d(rows)
+    sudoku_domain_constraints = [less_than_constraint(cell, MAX_SUDOKU_CELL_VALUE + 1) for cell in flat_row_list]
 
     result = []
     result.extend(sudoku_domain_constraints)
