@@ -11,7 +11,9 @@ NUM_BOX_ROWS = 3
 EQUAL_STRING = 'eq'
 NOT_EQUAL_STRING = 'ne'
 LESS_THAN_STRING = 'lt'
+GREATER_THAN_STRING = 'gt'
 
+MIN_SUDOKU_CELL_VALUE = 1
 MAX_SUDOKU_CELL_VALUE = 9
 
 _last_sudoku_row_letter = 'I'
@@ -29,6 +31,10 @@ def constraint(left_cell, constraint_str, right_cell_or_num):
 
 def equal_constraint(left_cell, num):
     return constraint(left_cell, EQUAL_STRING, num)
+
+
+def greater_than_constraint(left_cell, right_cell_or_num):
+    return constraint(left_cell, GREATER_THAN_STRING, right_cell_or_num)
 
 
 def less_than_constraint(left_cell, right_cell_or_num):
@@ -70,9 +76,9 @@ def column_list(column_num):
 
 def box_list(box_num):
     box_row_num = (box_num // NUM_BOX_ROWS) + 1
-    box_letters = SUDOKU_ROW_LETTERS[box_row_num - 1: (box_row_num - 1) * 3]
+    box_letters = SUDOKU_ROW_LETTERS[(box_row_num - 1) * 3: box_row_num * 3]
     box_column_num = box_num - box_row_num + 1
-    box_numbers = xrange((box_column_num - 1), (box_column_num - 1) * 3)
+    box_numbers = xrange(((box_column_num - 1) * 3) + 1, (box_column_num * 3) + 1)
 
     l = []
     for letter in box_letters:
@@ -88,6 +94,12 @@ def list_2d_to_1d(list_2d):
 def flat_list(list_maker_function, iterable):
     list_2d = [list_maker_function(elem) for elem in iterable]
     return list_2d_to_1d(list_2d)
+
+
+def domain_constraints(flat_row_list):
+    constraints = [less_than_constraint(cell, MAX_SUDOKU_CELL_VALUE + 1) for cell in flat_row_list]
+    constraints.extend([greater_than_constraint(cell, MIN_SUDOKU_CELL_VALUE - 1) for cell in flat_row_list])
+    return constraints
 
 
 def general_constraints():
@@ -106,10 +118,9 @@ def general_constraints():
     sudoku_diffs.extend(boxes_alldiff)
 
     flat_row_list = list_2d_to_1d(rows)
-    sudoku_domain_constraints = [less_than_constraint(cell, MAX_SUDOKU_CELL_VALUE + 1) for cell in flat_row_list]
 
     result = []
-    result.extend(sudoku_domain_constraints)
+    result.extend(domain_constraints(flat_row_list))
     result.extend(sudoku_diffs)
     return result
 
