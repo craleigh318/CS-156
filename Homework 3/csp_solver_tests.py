@@ -480,9 +480,9 @@ class CSPSolveSudokuNoForwardChecking(unittest.TestCase):
 
 
 class CSPSolveSudokuWithForwardChecking(unittest.TestCase):
-    def test_csp_solve_sudoku_no_forward_checking(self):
+    def test_csp_solve_sudoku_with_forward_checking(self):
         test_csp = CSP.from_file('Sudoku Test.txt')
-        solution = test_csp.solve(False)
+        solution = test_csp.solve(True)
 
         expected_solution = {
             Variable('A1', None): 4,
