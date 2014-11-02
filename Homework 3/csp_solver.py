@@ -146,7 +146,11 @@ class Constraints(object):
         :param relation: the relation involved in the unary constraint
         :param integer: the integer involved in the unary constraint
         """
-        self.__constraints[var] = lambda x: relation(x, integer)
+        constraint = lambda left_value: relation(left_value, integer)
+        if var in self.__constraints:
+            self.__constraints[var].append(constraint)
+        else:
+            self.__constraints[var] = [constraint]
 
     def add_binary_constraint(self, left_var, relation, right_var):
         """
@@ -162,7 +166,7 @@ class Constraints(object):
         """
         self.__constraints[(left_var, right_var)] = relation
 
-    def unary_constraint_satisfied(self, var, var_assigned_value):
+    def unary_constraints_satisfied(self, var, var_assigned_value):
         """
         :type var: Variable
         :type var_assigned_value: int
@@ -173,8 +177,8 @@ class Constraints(object):
         :return: True if the assigned value satisfies the unary constraint, False otherwise.
         """
         if var in self.__constraints:
-            relation = self.__constraints[var]
-            return relation(var_assigned_value)
+            constraint_list = self.__constraints[var]
+            return all(constraint(var_assigned_value) for constraint in constraint_list)
         else:
             raise ValueError('There is no variable by the name of "' + var.name + '"!')
 
@@ -314,7 +318,7 @@ class CSP(object):
         vars_with_unary_constraints = [v for v in self.__variables if self.__constraints.has_unary_constraint(v)]
         for var in vars_with_unary_constraints:
             domain_no_inconsistencies = \
-                [val for val in var.domain if self.__constraints.unary_constraint_satisfied(var, val)]
+                [val for val in var.domain if self.__constraints.unary_constraints_satisfied(var, val)]
             var.domain = domain_no_inconsistencies
             self.__constraints.remove_unary_constraint(var)
 
