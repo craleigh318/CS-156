@@ -114,6 +114,9 @@ class Constraints(object):
         else:
             self.__constraints = constraints
 
+    def __copy__(self):
+        return Constraints(dict(self.__constraints))
+
     def add_constraint(self, left_var, relation, right_var_or_value):
         """
         Automatically chooses add_unary_constraint or add_binary_constraint.
@@ -298,6 +301,14 @@ class CSP(object):
         self.__constraints = constraints
 
         self.__make_node_consistent()
+
+    @property
+    def variables(self):
+        return list(self.__variables)
+
+    @property
+    def constraints(self):
+        return copy(self.__constraints)
 
     def __make_node_consistent(self):
         vars_with_unary_constraints = [v for v in self.__variables if self.__constraints.has_unary_constraint(v)]
