@@ -860,13 +860,5 @@ class CSPFromFileSudoku(ConstraintTestCase):
         self.assert_all_constraints_satisfied(actual_variables, csp.constraints, solution_assignment)
 
 
-class TestCSPFromFile(unittest.TestCase):
-    def test_this(self):
-        forward_checking = False
-        csp = CSP.from_file('Test.txt')
-        solution = csp.solve(forward_checking)
-        print(Solution.as_string(solution))
-
-
 if __name__ == "__main__":
     unittest.main()
