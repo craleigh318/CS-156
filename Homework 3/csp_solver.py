@@ -322,11 +322,6 @@ class CSP(object):
             var.domain = domain_no_inconsistencies
             self.__constraints.remove_unary_constraint(var)
 
-    # This will need to be used in solve() in order to maintain immutability.
-    def __copy__(self):
-        new_variables = [copy(var) for var in self.__variables]
-        return CSP(new_variables)
-
     @staticmethod
     def from_file(csp_file_name):
         """
@@ -578,11 +573,11 @@ def benchmark_function():
 
 
 if __name__ == '__main__':
+
     solution_string = solve_csp(sys.argv[1], sys.argv[2])
     print(solution_string)
 
+'''
     # Benchmarking stuff
-    '''
     import timeit
-    benchmark_lambda = lambda: solve_csp(sys.argv[1], sys.argv[2])
     print(timeit.timeit("benchmark_function()", setup="from __main__ import benchmark_function", number=500)/500)'''
