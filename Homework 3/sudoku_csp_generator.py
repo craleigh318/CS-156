@@ -75,9 +75,9 @@ def column_list(column_num):
 
 
 def box_list(box_num):
-    box_row_num = (box_num // NUM_BOX_ROWS) + 1
+    box_row_num = ((box_num - 1) // NUM_BOX_ROWS) + 1
     box_letters = SUDOKU_ROW_LETTERS[(box_row_num - 1) * 3: box_row_num * 3]
-    box_column_num = box_num - box_row_num + 1
+    box_column_num = (box_num - ((box_row_num - 1) * NUM_BOX_ROWS))
     box_numbers = xrange(((box_column_num - 1) * 3) + 1, (box_column_num * 3) + 1)
 
     l = []
@@ -105,7 +105,7 @@ def domain_constraints(flat_row_list):
 def general_constraints():
     rows = [row_list(row_num) for row_num in xrange(1, NUM_SUDOKU_COLUMNS + 1)]
     columns = [column_list(col_num) for col_num in xrange(1, NUM_SUDOKU_ROWS + 1)]
-    boxes = [box_list(box_num) for box_num in xrange(1, NUM_BOX_ROWS + 1)]
+    boxes = [box_list(box_num) for box_num in xrange(1, NUM_BOX_ROWS**2 + 1)]
 
     alldiff_lambda = lambda cells: alldiff_list(cells)
     rows_alldiff = flat_list(alldiff_lambda, rows)
