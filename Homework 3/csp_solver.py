@@ -568,16 +568,6 @@ def solve_csp(problem_filename, use_forward_checking_str):
     return Solution.as_string(solution)
 
 
-def benchmark_function():
-    solve_csp('Test Australia.txt', '0')
-
-
 if __name__ == '__main__':
-
     solution_string = solve_csp(sys.argv[1], sys.argv[2])
     print(solution_string)
-
-'''
-    # Benchmarking stuff
-    import timeit
-    print(timeit.timeit("benchmark_function()", setup="from __main__ import benchmark_function", number=500)/500)'''
