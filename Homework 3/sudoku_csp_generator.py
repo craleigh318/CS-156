@@ -1,6 +1,5 @@
 __author__ = 'Anthony Ferrero'
 
-
 import string
 
 
@@ -105,7 +104,7 @@ def domain_constraints(flat_row_list):
 def general_constraints():
     rows = [row_list(row_num) for row_num in xrange(1, NUM_SUDOKU_COLUMNS + 1)]
     columns = [column_list(col_num) for col_num in xrange(1, NUM_SUDOKU_ROWS + 1)]
-    boxes = [box_list(box_num) for box_num in xrange(1, NUM_BOX_ROWS**2 + 1)]
+    boxes = [box_list(box_num) for box_num in xrange(1, NUM_BOX_ROWS ** 2 + 1)]
 
     alldiff_lambda = lambda cells: alldiff_list(cells)
     rows_alldiff = flat_list(alldiff_lambda, rows)
@@ -131,40 +130,40 @@ def given_cell_assignments():
         equal_constraint('A3', 3),
         equal_constraint('A5', 2),
         equal_constraint('A7', 6),
-    
+
         equal_constraint('B1', 9),
         equal_constraint('B4', 3),
         equal_constraint('B6', 5),
         equal_constraint('B9', 1),
-    
+
         equal_constraint('C3', 1),
         equal_constraint('C4', 8),
         equal_constraint('C6', 6),
         equal_constraint('C7', 4),
-    
+
         equal_constraint('D3', 8),
         equal_constraint('D4', 1),
         equal_constraint('D6', 2),
         equal_constraint('D7', 9),
-    
+
         equal_constraint('E1', 7),
         equal_constraint('E9', 8),
-    
+
         equal_constraint('F3', 6),
         equal_constraint('F4', 7),
         equal_constraint('F6', 8),
         equal_constraint('F7', 2),
-    
+
         equal_constraint('G3', 2),
         equal_constraint('G4', 6),
         equal_constraint('G6', 9),
         equal_constraint('G7', 5),
-    
+
         equal_constraint('H1', 8),
         equal_constraint('H4', 2),
         equal_constraint('H6', 3),
         equal_constraint('H9', 9),
-    
+
         equal_constraint('I3', 5),
         equal_constraint('I5', 1),
         equal_constraint('I7', 3)

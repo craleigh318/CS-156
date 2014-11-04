@@ -622,7 +622,7 @@ class SolveCSPSudokuWithForwardChecking(ConstraintTestCase):
 class CSPFromFileSudoku(ConstraintTestCase):
     def test_csp_from_file_sudoku(self):
         csp = CSP.from_file('Test Sudoku.txt')
-        
+
         expected_variable_names = [
             'A1',
             'A2',
@@ -760,12 +760,12 @@ class CSPFromFileSudoku(ConstraintTestCase):
             Variable('I7', set([3]))
         ]
         actual_variables = csp.variables
-        
+
         for given_var in given_variables:
             for actual_var in actual_variables:
                 if actual_var.name == given_var.name:
                     self.assertSetEqual(actual_var.domain, given_var.domain)
-        
+
         solution_assignment = {
             Variable('A1', None): 4,
             Variable('A2', None): 8,
