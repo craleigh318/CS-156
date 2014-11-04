@@ -180,5 +180,5 @@ def generate_sudoku_csp():
 
 if __name__ == '__main__':
     sudoku_csp_string = generate_sudoku_csp()
-    with open('Sudoku Test.txt', 'w+') as sudoku_csp_file:
+    with open('Test Sudoku.txt', 'w+') as sudoku_csp_file:
         sudoku_csp_file.write(sudoku_csp_string)

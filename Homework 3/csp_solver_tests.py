@@ -443,7 +443,7 @@ class CSPSolveAustraliaMapColoringNoForwardChecking(unittest.TestCase):
 
 class SolveCSPSudokuWithForwardChecking(ConstraintTestCase):
     def test_solve_csp_sudoku_with_forward_checking(self):
-        actual_solution_string = solve_csp('Sudoku Test.txt', '0')
+        actual_solution_string = solve_csp('Test Sudoku.txt', '0')
         expected_solution_string = (
             'A1=4\n'
             'A2=8\n'
@@ -532,7 +532,7 @@ class SolveCSPSudokuWithForwardChecking(ConstraintTestCase):
 
 class SolveCSPSudokuWithForwardChecking(ConstraintTestCase):
     def test_solve_csp_sudoku_with_forward_checking(self):
-        actual_solution_string = solve_csp('Sudoku Test.txt', '1')
+        actual_solution_string = solve_csp('Test Sudoku.txt', '1')
         expected_solution_string = (
             'A1=4\n'
             'A2=8\n'
@@ -621,7 +621,7 @@ class SolveCSPSudokuWithForwardChecking(ConstraintTestCase):
 
 class CSPFromFileSudoku(ConstraintTestCase):
     def test_csp_from_file_sudoku(self):
-        csp = CSP.from_file('Sudoku Test.txt')
+        csp = CSP.from_file('Test Sudoku.txt')
         
         expected_variable_names = [
             'A1',
