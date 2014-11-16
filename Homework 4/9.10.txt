@@ -1,0 +1,1 @@
+﻿¬∃Brother(i) ∧ ¬∃Sister(i) ∧ (Father(m) ↔ Son(Father(i)))
