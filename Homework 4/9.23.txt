@@ -1,0 +1,32 @@
+﻿a)
+
+Premise:
+Horse(x) → Animal(x)
+
+Conclusion:
+HeadOf(h, Horse(x)) → HeadOf(h, Animal(x))
+
+
+b)
+
+Premise:
+Horse(x) → Animal(x)
+¬(Horse(x) ∧ ¬Animal(x))
+¬Horse(x) ∨ Animal(x)
+
+Conclusion:
+HeadOf(h, Horse(x)) → HeadOf(h, Animal(x))
+¬HeadOf(h, Animal(x)) → ¬HeadOf(h, Horse(x))
+HeadOf(h, Animal(x)) ∨ ¬HeadOf(h, Horse(x))
+
+
+c)
+
+Conclusion:
+HeadOf(h, Animal(x)) ∨ ¬HeadOf(h, Horse(x))
+
+Resolution:
+(Horse(x) → Animal(x)) ∧ (HeadOf(h, Horse(x)) → HeadOf(h, Animal(x)))
+HeadOf(h, Animal(x)) → HeadOf(h, Animal(x))
+¬HeadOf(h, Animal(x)) ∨ HeadOf(h, Animal(x))
+True
