@@ -1,0 +1,5 @@
+﻿Republican(Nixon) Λ Quaker(Nixon)
+Republican(x) : Warlike(x) Λ ¬Moderate(x) Λ ¬Pacifist(x)/Warlike(x) Λ ¬Moderate(x) Λ ¬Pacifist(x)
+Quaker(x) : ¬Warlike(x) Λ ¬Moderate(x) Λ Pacifist(x)/¬Warlike(x) Λ ¬Moderate(x) Λ Pacifist(x)
+Republican(Nixon) Λ Quaker(Nixon) : ¬Warlike(x) Λ Moderate(x) Λ ¬Pacifist(x)/¬Warlike(x) Λ Moderate(x) Λ ¬Pacifist(x)
+
