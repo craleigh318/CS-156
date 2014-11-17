@@ -27,6 +27,7 @@ HeadOf(h, Animal(x)) ∨ ¬HeadOf(h, Horse(x))
 
 Resolution:
 (Horse(x) → Animal(x)) ∧ (HeadOf(h, Horse(x)) → HeadOf(h, Animal(x)))
-HeadOf(h, Animal(x)) → HeadOf(h, Animal(x))
+HeadOf(h, Animal(x)) → HeadOf(h, Animal(x))	(Replace "Horse(x)" with "Animal(x)".)
 ¬HeadOf(h, Animal(x)) ∨ HeadOf(h, Animal(x))
+¬t ∨ t
 True

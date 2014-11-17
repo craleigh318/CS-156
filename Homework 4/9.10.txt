@@ -1,1 +1,15 @@
-﻿¬∃Brother(i) ∧ ¬∃Sister(i) ∧ (Father(m) ↔ Son(Father(i)))
+﻿i = riddle teller
+(¬∃b,s Brother(b, i) ∨ Sister(s, i)) ∧ (∃m Son(Father(m), Father(i)))
+(∀b,s ¬Brother(b, i) ∧ ¬Sister(s, i)) ∧ (∃m Son(Father(m), Father(i)))
+∀b∀s∃m ¬Brother(b, i) ∧ ¬Sister(s, i) ∧ Son(Father(m), Father(i))	(Prenex Normal Form)
+∀b∀s∃m ¬Brother(b, i) ∧ ¬Sister(s, i) ∧ Father(Son(m, i))
+∀b∀s∃m ((b ≠ i) ∧ (s ≠ i)) → (¬Son(b, Father(i)) ∧ ¬Daughter(s, Father(i)) ∧ Son(Father(m), Father(i)))
+∀b∀s∃m ((b = i) ∨ (s = i)) ∨ (¬Son(b, Father(i)) ∧ ¬Daughter(s, Father(i)) ∧ Son(Father(m), Father(i)))
+∀s∃m (s = i) ∨ (¬Child(s, Father(i)) ∧ Son(Father(m), Father(i)))
+∀s∃m (s = i) ∨ (s ≠ Father(m))
+∀s∃m (s = i) ∨ (i = Father(m))
+Son(m, i)
+
+The man (m) is the riddle teller's (i) son.
+
+This riddle may confuse children, and even adults, because "That man's father is my father's son," can be confused as "That man is my father's son."  Two relationships are being compared (Father(m) and Father(i)), not a person (m) and one relationship Father(i).  People process direct comparisons better than indirect ones.
