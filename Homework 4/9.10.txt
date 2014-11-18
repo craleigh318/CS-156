@@ -2,12 +2,14 @@
 (¬∃b,s Brother(b, i) ∨ Sister(s, i)) ∧ (∃m Son(Father(m), Father(i)))
 (∀b,s ¬Brother(b, i) ∧ ¬Sister(s, i)) ∧ (∃m Son(Father(m), Father(i)))
 ∀b∀s∃m ¬Brother(b, i) ∧ ¬Sister(s, i) ∧ Son(Father(m), Father(i))	(Prenex Normal Form)
-∀b∀s∃m ¬Brother(b, i) ∧ ¬Sister(s, i) ∧ Father(Son(m, i))
-∀b∀s∃m ((b ≠ i) ∧ (s ≠ i)) → (¬Son(b, Father(i)) ∧ ¬Daughter(s, Father(i)) ∧ Son(Father(m), Father(i)))
-∀b∀s∃m ((b = i) ∨ (s = i)) ∨ (¬Son(b, Father(i)) ∧ ¬Daughter(s, Father(i)) ∧ Son(Father(m), Father(i)))
-∀s∃m (s = i) ∨ (¬Child(s, Father(i)) ∧ Son(Father(m), Father(i)))
-∀s∃m (s = i) ∨ (s ≠ Father(m))
-∀s∃m (s = i) ∨ (i = Father(m))
+
+∀b∀s∃m Male(b) ∧ Female(s) ∧ ¬Sibling(b, i) ∧ ¬Sibling(s, i) ∧ Son(Father(m), Father(i))
+∀b∀s∃m ((s ≠ i) ∧ (b ≠ i)) → (Male(b) ∧ Female(s) ∧ (Father(s) ≠ Father(i)) ∧ (Father(b) ≠ Father(i)) ∧ Son(Father(m), Father(i)))
+∀b∀s∃m ((s = i) ∨ (b = i)) ∨ ((Father(s) ≠ Father(i)) ∧ (Father(b) ≠ Father(i) ∧ (i = Father(m)) ∧ Son(Father(m), Father(i)) ∧ Male(b) ∧ Female(s))
+∀b∀s∃m ((s = i) ∨ (b = i)) ∨ (Son(i, Father(i)) ∧ (i = Father(m)) ∧ Male(b) ∧ Female(s))
+∀b∀s∃m ((s = i) ∨ (b = i)) ∨ (Son(i, Father(i)) ∧ (i = Father(m)))
+Son(i, Father(i)) ∧ (i = Father(m))
+i = Father(m)
 Son(m, i)
 
 The man (m) is the riddle teller's (i) son.

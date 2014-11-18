@@ -1,0 +1,3 @@
+﻿The precondition for Move is:
+
+On(b, x) ∧ Clear(b) ∧ Clear(y) ∧ Block(b) ∧ Block(y) ∧ (b ≠ x) ∧ (b ≠ y) ∧ (x ≠ y)

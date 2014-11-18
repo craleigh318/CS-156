@@ -16,7 +16,7 @@ Horse(x) → Animal(x)
 
 Conclusion:
 HeadOf(h, Horse(x)) → HeadOf(h, Animal(x))
-¬HeadOf(h, Animal(x)) → ¬HeadOf(h, Horse(x))
+¬HeadOf(h, Animal(x)) → ¬HeadOf(h, Horse(x))	(Negation)
 HeadOf(h, Animal(x)) ∨ ¬HeadOf(h, Horse(x))
 
 
