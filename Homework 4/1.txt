@@ -1,3 +1,21 @@
 ﻿The precondition for Move is:
 
 On(b, x) ∧ Clear(b) ∧ Clear(y) ∧ Block(b) ∧ Block(y) ∧ (b ≠ x) ∧ (b ≠ y) ∧ (x ≠ y)
+
+The precondition for MoveToTable is:
+
+On(b, x) ∧ Clear(b) ∧ Block(b) ∧ (b ≠ x)
+
+The set of Move's preconditions that are not MoveToTable's preconditions is:
+
+Clear(y) ∧ Block(y) ∧ (b ≠ y) ∧ (x ≠ y)
+
+If this complement is false, then MoveToTable must be performed instead.  Otherwise, Move can be performed.
+
+¬(Clear(y) ∧ Block(y) ∧ (b ≠ y) ∧ (x ≠ y)) → MoveToTable(b, x)
+
+(Clear(y) ∧ Block(y) ∧ (b ≠ y) ∧ (x ≠ y)) ∨ MoveToTable(b, x)
+
+Move is then added to the left set of conditions.
+
+(Move(b, x, y) ∧ Clear(y) ∧ Block(y) ∧ (b ≠ y) ∧ (x ≠ y)) ∨ MoveToTable(b, x)
