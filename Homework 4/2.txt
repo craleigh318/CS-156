@@ -1,0 +1,3 @@
+PDDL has the notion of a state, which is a conjunction of fluents, and actions, which are described as having effects. Effects are conjunctions of literals that are asserted as true after the action takes place. PDDL solves the frame problem by mentioning what changes as a result of an action in the action's effect sentence, and assuming that nothing else about the state changes, keeping track of what doesn't change through the state PDDL mantains.  
+
+
