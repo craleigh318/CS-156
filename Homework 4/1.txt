@@ -16,6 +16,12 @@ If this complement is false, then MoveToTable must be performed instead.  Otherw
 
 (Clear(y) ∧ Block(y) ∧ (b ≠ y) ∧ (x ≠ y)) ∨ MoveToTable(b, x)
 
-Move is then added to the left set of conditions.
+Move is then added to the left set of conditions, which satisfy it.
 
 (Move(b, x, y) ∧ Clear(y) ∧ Block(y) ∧ (b ≠ y) ∧ (x ≠ y)) ∨ MoveToTable(b, x)
+
+Adding back MoveToTable's preconditions, we get the final formula.
+
+∃b∃x∃y (On(b, x) ∧ Clear(b) ∧ Block(b) ∧ (b ≠ x)) ∧ ((Move(b, x, y) ∧ Clear(y) ∧ Block(y) ∧ (b ≠ y) ∧ (x ≠ y)) ∨ MoveToTable(b, x))
+
+The answer, as shown in the book, is [MoveToTable(C, A), Move(B, Table, C), Move(A, Table, B)].
