@@ -3,3 +3,28 @@ Republican(x) : Warlike(x) Λ ¬Moderate(x) Λ ¬Pacifist(x)/Warlike(x) Λ ¬Mod
 Quaker(x) : ¬Warlike(x) Λ ¬Moderate(x) Λ Pacifist(x)/¬Warlike(x) Λ ¬Moderate(x) Λ Pacifist(x)
 Republican(x) Λ Quaker(x) : ¬Warlike(x) Λ Moderate(x) Λ ¬Pacifist(x)/¬Warlike(x) Λ Moderate(x) Λ ¬Pacifist(x)
 
+Let W, M, and P be the three possible extensions of the system.
+
+W = {Republican(Nixon) Λ Quaker(Nixon), Warlike(x) Λ ¬Moderate(x) Λ ¬Pacifist(x)}
+
+The elements of the extension are trivially consistent with each other, as the two sentences in it share no members nor does the second element contain a contradiction by virtue of the fact that it does not contain a literal and the negation of the same literal in it.
+
+By repeated and-elimination on default rule 1's conclusion Warlike(x) Λ ¬Moderate(x) Λ ¬Pacifist(x), we can derive Warlike(x), which is inconsistent with the justification of both default rules 2 and 3 because the literal ¬Warlike(x) appears in both. Therefore, W is a maximal set of consequences of the default rules.
+
+
+M = {Republican(Nixon) Λ Quaker(Nixon), ¬Warlike(x) Λ ¬Moderate(x) Λ Pacifist(x)}
+
+The elements of the extension are trivially consistent, as above. 
+
+Using the same kind of and-elimination on rule 2's default rules, we can derive from rule 2's conclusion ¬Warlike(x) Λ ¬Moderate(x) Λ Pacifist(x) the literal Pacifist(x). Pacifist(x) is negated in both of the justifications for the other default rules, so those default rules cannot be applied. Thus, M is a maximal set of consequences of the theory. 
+
+
+P = {Republican(Nixon) Λ Quaker(Nixon), ¬Warlike(x) Λ Moderate(x) Λ ¬Pacifist(x)}
+
+The elements of the extension are trivially consistent, as above.
+
+Repeated and-elimination on ¬Warlike(x) Λ Moderate(x) Λ ¬Pacifist(x) allows us to derive Moderate(x), which appears negated in the conjunctions that are the justifications of the other default rules. So P is a maximal set of consequences of the theory.
+
+
+
+
