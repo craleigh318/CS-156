@@ -1,6 +1,12 @@
 import sys
 
+import abstract_classes
+from algorithms import DecisionTree
+
+
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
+
+abstract_classes.Tree.register(DecisionTree)
 
 
 def train(training_file_name):

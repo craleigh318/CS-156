@@ -3,6 +3,20 @@ import abc
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 
+class Attribute:
+    """
+    An attribute has a certain value of importance.
+    """
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractproperty
+    def importance(self):
+        """
+        :return: the importance of this attribute
+        """
+
+
 class Example:
     """
     An example has a classification.
