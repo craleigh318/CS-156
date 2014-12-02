@@ -13,12 +13,12 @@ def __share_classification(examples):
     """
 
     matching_classification = None
-    for example in examples:
+    for e in examples:
         # If this is the first example
         if matching_classification is None:
-            matching_classification = example.classification
+            matching_classification = e.classification
         # If this is after the first example, but this classification does not match
-        elif matching_classification is not example.classification:
+        elif matching_classification is not e.classification:
             return None
     return matching_classification
 
