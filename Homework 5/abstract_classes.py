@@ -1,56 +1,51 @@
-import abc
-
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 
-class Attribute:
+class Attribute(object):
     """
-    An attribute has a certain value of importance.
+    An attribute has associated values.
     """
 
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractproperty
-    def importance(self):
+    @property
+    def values(self):
         """
-        :return: the importance of this attribute
+        :return: the values of this attribute
         """
+        pass
 
 
-class Example:
+class Example(object):
     """
     An example has a classification.
     """
 
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractproperty
+    @property
     def classification(self):
         """
         :return: classification of this example
         """
+        pass
 
 
-class Tree:
+class Tree(object):
     """
     A tree has a node with a label and may have child nodes.
     """
 
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractproperty
+    @property
     def label(self):
         """
         :return: the label of this tree's root
         """
+        pass
 
-    @abc.abstractproperty
+    @property
     def children(self):
         """
         :return: a tuple of the subtrees of this tree's root
         """
+        pass
 
-    @abc.abstractmethod
     def add_branch(self, new_branch):
         """
         Clones this tree and adds the specified branch to the clone.  This original object is unmodified.
@@ -58,3 +53,4 @@ class Tree:
         :param new_branch: a tree to add as a branch
         :return: a tree with the new branch added as a child node.
         """
+        pass

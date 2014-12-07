@@ -23,7 +23,18 @@ def __share_classification(examples):
     return matching_classification
 
 
-def max_importance(attributes):
+def importance(a, examples):
+    """
+    Judges the importance of an attribute
+
+    :param a: an attribute
+    :param examples: examples for the attribute
+    :return: the attributes importance
+    """
+    pass
+
+
+def max_importance(attributes, examples):
     """
     Finds and returns the most important attribute of a collection.
 
@@ -32,21 +43,35 @@ def max_importance(attributes):
     """
     max_a = None
     for a in attributes:
-        if (max_a is None) or (a.importance > max_a.importance):
+        if (max_a is None) or (importance(a, examples) > importance(max_a, examples)):
             max_a = a
     return max_a
 
 
+def tuple_without_e(original_collection, e):
+    """
+    Copies a collection without element e.
+    :param original_collection: the collection to derive
+    :param e: the element to exclude
+    :return: a new tuple
+    """
+    new_list = list(original_collection)
+    new_list.pop(e)
+    return_tuple = tuple(new_list)
+    return return_tuple
+
+
 def __build_decision_tree(examples, attributes):
-    A = max_importance()
+    A = max_importance(attributes, examples)
+    attributes_minus_A = tuple_without_e(attributes, A)
     tree = DecisionTree(A)
-    for v_k in A:
+    for v_k in A.values:
         exs = {}
         for e in examples:
-            exs[e.A] = v_k
-        subtree = decision_tree_learning(exs, attributes - A, examples)
+            exs[e] = v_k
+        subtree = decision_tree_learning(exs, attributes_minus_A, examples)
         tree = tree.add_branch(subtree)
-    return None
+    return tree
 
 
 def decision_tree_learning(examples, attributes, parent_examples):
@@ -92,6 +117,6 @@ class DecisionTree(object):
         :param new_branch: a tree to add as a branch
         :return: a tree with the new branch added as a child node.
         """
-        new_children = self.__children + (new_branch)
+        new_children = self.__children + tuple(new_branch)
         new_tree = DecisionTree(self.__label, new_children)
         return new_tree
