@@ -7,8 +7,11 @@ __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 
 class Grid(abstract_classes.Example):
-    def __init__(self, matrix=(), classification=None):
-        self.__matrix = matrix
+    def __init__(self, matrix=None, classification=None):
+        if matrix:
+            self.__matrix = matrix
+        else:
+            self.__matrix = ()
         self.__classification = classification
         # self.__matrix = [[0 for i in range(Grid.__get_grid_length())]
         # for j in range(Grid.__get_grid_length())]
