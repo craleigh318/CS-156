@@ -15,8 +15,6 @@ class Grid(abstract_classes.Example):
         else:
             self.__matrix = ()
         self.__classification = classification
-        # self.__matrix = [[0 for i in range(Grid.__get_grid_length())]
-        # for j in range(Grid.__get_grid_length())]
 
     @staticmethod
     def get_grid_length():
@@ -52,12 +50,11 @@ class Grid(abstract_classes.Example):
         return self.__classification
 
 
-def file_to_string_collection(file_name):
+def file_to_string_collection(opened_file):
     string_list = []
-    with open(file_name) as file:
-        file_lines = file.readlines()
-        for line in file_lines:
-            string_list.append(line)
+    file_lines = opened_file.readlines()
+    for line in file_lines:
+        string_list.append(line)
     return string_list
 
 
@@ -75,6 +72,16 @@ def pop_grid(collection):
     new_grid = Grid.from_string_collection(lines_for_new_grid)
     return new_grid
 
+def file_to_grids(opened_file) :
+    """
+    Creates Grid objects from an opened file.
+
+    :param opened_file: the opened file
+    :return: a list of Grids
+    """
+    grid_list = []
+    return grid_list
+
 
 def train(training_file_name):
     return_string = ''
@@ -91,9 +98,17 @@ def random_training_set(min_size=5, max_size=5000):
 
 
 if __name__ == '__main__':
+    file_name = sys.argv[1]
+    print_these = []
+    with open(file_name) as opened_file:
+        print_these = file_to_grids()
+    for grid in print_these:
+        print grid
+
     grid_data = file_to_string_collection(sys.argv[1])
     # Loop until all grids in file are parsed.
     print_this = pop_grid(grid_data)
     for row in print_this.matrix:
         print row
     print 'Classification: ' + print_this.classification
+    print grid_data
