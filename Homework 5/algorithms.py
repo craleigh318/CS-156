@@ -62,14 +62,14 @@ def tuple_without_e(original_collection, e):
 
 
 def __build_decision_tree(examples, attributes):
-    A = max_importance(attributes, examples)
-    attributes_minus_A = tuple_without_e(attributes, A)
-    tree = DecisionTree(A)
-    for v_k in A.values:
+    big_a = max_importance(attributes, examples)
+    attributes_minus_big_a = tuple_without_e(attributes, big_a)
+    tree = DecisionTree(big_a)
+    for v_k in big_a.values:
         exs = {}
         for e in examples:
             exs[e] = v_k
-        subtree = decision_tree_learning(exs, attributes_minus_A, examples)
+        subtree = decision_tree_learning(exs, attributes_minus_big_a, examples)
         tree = tree.add_branch(subtree)
     return tree
 
