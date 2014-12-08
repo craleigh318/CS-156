@@ -15,7 +15,7 @@ class Grid(abstract_classes.Example):
         self.__classification = classification
 
     @staticmethod
-    def get_grid_length():
+    def get_matrix_length():
         return 5
 
     @staticmethod
@@ -49,19 +49,31 @@ def file_to_string_collection(opened_file):
 
 def pop_grid(collection):
     """
-    Pops the last six elements of the specified collection
+    Pops the first six elements of the specified collection.
+
     :param collection: the collection to pop
     :return: a Grid object
     """
-    lines_for_new_grid = []
-    for x in xrange(Grid.get_grid_length() + 1):
-        next_line = collection.pop()
-        lines_for_new_grid.append(next_line)
-    lines_for_new_grid.reverse()
-    new_grid = Grid.from_string_collection(lines_for_new_grid)
+    # Exit if not enough lines for grid.
+    if len(collection) <= Grid.get_matrix_length():
+        return None
+    new_grid = Grid.from_string_collection(collection)
     return new_grid
 
-def file_to_grids(opened_file) :
+
+def append_to_grid_list(grid_list, lines_for_next_grid):
+    """
+    Appends the next grid to the list, if possible.
+
+    :param grid_list: the grid list
+    :param lines_for_next_grid: the lines for a new grid
+    """
+    next_grid = pop_grid(lines_for_next_grid)
+    if next_grid is not None:
+        grid_list.append(next_grid)
+
+
+def file_to_grids(opened_file):
     """
     Creates Grid objects from an opened file.
 
@@ -69,6 +81,16 @@ def file_to_grids(opened_file) :
     :return: a list of Grids
     """
     grid_list = []
+    file_lines = opened_file.readlines()
+    # Loop to parse all grids in file.
+    lines_for_next_grid = []
+    for line in file_lines:
+        if line == '\n':
+            append_to_grid_list(grid_list, lines_for_next_grid)
+            lines_for_next_grid = []
+        else:
+            lines_for_next_grid.append(line)
+    append_to_grid_list(grid_list, lines_for_next_grid)
     return grid_list
 
 
@@ -81,18 +103,15 @@ def train(training_file_name):
     return return_string
 
 
-if __name__ == '__main__':
+def main():
     file_name = sys.argv[1]
-    print_these = []
     with open(file_name) as opened_file:
-        print_these = file_to_grids()
-    for grid in print_these:
-        print grid
+        print_these = file_to_grids(opened_file)
+        for grid in print_these:
+            for row in grid.matrix:
+                print row
+            print grid.classification
 
-    grid_data = file_to_string_collection(sys.argv[1])
-    # Loop until all grids in file are parsed.
-    print_this = pop_grid(grid_data)
-    for row in print_this.matrix:
-        print row
-    print 'Classification: ' + print_this.classification
-    print grid_data
+
+if __name__ == '__main__':
+    main()
