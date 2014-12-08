@@ -7,9 +7,11 @@ __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 
 class Grid(abstract_classes.Example):
-    def __init__(self):
-        self.__matrix = [[0 for i in range(Grid.__get_grid_length())]
-                         for j in range(Grid.__get_grid_length())]
+    def __init__(self, matrix=(), classification=None):
+        self.__matrix = matrix
+        self.__classification = classification
+        # self.__matrix = [[0 for i in range(Grid.__get_grid_length())]
+        # for j in range(Grid.__get_grid_length())]
 
     @staticmethod
     def __get_grid_length():
@@ -17,8 +19,23 @@ class Grid(abstract_classes.Example):
 
     @staticmethod
     def from_string_collection(collection):
-        new_grid = Grid()
-        # Assign each number to the grid.
+        new_matrix = []
+        for s in collection:
+            new_list = s.split()
+            new_matrix.append(new_list)
+        # Separate classification
+        new_classification = new_matrix.pop()
+        new_grid = Grid(tuple(new_matrix), new_classification)
+        return new_grid
+
+    @property
+    def matrix(self):
+        return self.__matrix
+
+
+    @property
+    def classification(self):
+        return self.__classification
 
 
 def file_to_string_collection(file_name):
@@ -41,5 +58,8 @@ def train(training_file_name):
 
 
 if __name__ == '__main__':
-    print_this = train(sys.argv[1])
-    print(print_this)
+    grid_data = file_to_string_collection(sys.argv[1])
+    print_this = Grid.from_string_collection(grid_data)
+    for row in print_this.matrix:
+        print row
+    print print_this.classification
