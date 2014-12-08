@@ -35,11 +35,11 @@ class Grid(abstract_classes.Example):
         """Generates a random grid."""
 
         def random_row():
-            random_bit_row = [random.randrange(0, 2) for _ in xrange(Grid.get_grid_length())]
+            random_bit_row = tuple(random.randrange(0, 2) for _ in xrange(Grid.get_matrix_length()))
             grid_values = ['X', 'O']
-            return map(lambda bit: grid_values[bit], random_bit_row)
+            return tuple(map(lambda bit: grid_values[bit], random_bit_row))
 
-        return Grid([random_row() for _ in xrange(Grid.get_grid_length())])
+        return tuple(random_row() for _ in xrange(Grid.get_matrix_length()))
 
     @property
     def matrix(self):
@@ -116,7 +116,7 @@ def train(training_file_name):
 
 def random_training_set(min_size=5, max_size=5000):
     random_size = random.randrange(min_size, max_size + 1)
-    return [Grid.random() for _ in xrange(random_size)]
+    return tuple(Grid.random() for _ in xrange(random_size))
 
 
 def main():
