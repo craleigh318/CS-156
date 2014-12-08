@@ -1,12 +1,14 @@
 import sys
 
 import abstract_classes
+import random
 
 
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 
 class Grid(abstract_classes.Example):
+
     def __init__(self, matrix=None, classification=None):
         if matrix:
             self.__matrix = matrix
@@ -31,10 +33,19 @@ class Grid(abstract_classes.Example):
         new_grid = Grid(tuple(new_matrix), new_classification)
         return new_grid
 
+    @staticmethod
+    def random():
+        """Generates a random grid."""
+
+        def random_row():
+            random_bit_row = [random.randrange(0, 2) for _ in xrange(Grid.get_grid_length())]
+            grid_values = ['X', 'O']
+            return map(lambda bit: grid_values[bit], random_bit_row)
+        return [random_row() for _ in xrange(Grid.get_grid_length())]
+
     @property
     def matrix(self):
         return self.__matrix
-
 
     @property
     def classification(self):
@@ -72,6 +83,11 @@ def train(training_file_name):
         for line in file_lines:
             return_string += line
     return return_string
+
+
+def random_training_set(min_size=5, max_size=5000):
+    random_size = random.randrange(min_size, max_size + 1)
+    return [Grid.random() for _ in xrange(random_size)]
 
 
 if __name__ == '__main__':
