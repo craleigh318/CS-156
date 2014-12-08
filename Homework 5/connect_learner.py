@@ -39,7 +39,7 @@ class Grid(abstract_classes.Example):
             grid_values = ['X', 'O']
             return tuple(map(lambda bit: grid_values[bit], random_bit_row))
 
-        return tuple(random_row() for _ in xrange(Grid.get_matrix_length()))
+        return Grid(tuple(random_row() for _ in xrange(Grid.get_matrix_length())))
 
     @property
     def matrix(self):
