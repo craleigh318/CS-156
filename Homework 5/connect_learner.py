@@ -14,7 +14,7 @@ class Grid(abstract_classes.Example):
         # for j in range(Grid.__get_grid_length())]
 
     @staticmethod
-    def __get_grid_length():
+    def get_grid_length():
         return 5
 
     @staticmethod
@@ -24,7 +24,7 @@ class Grid(abstract_classes.Example):
             new_list = s.split()
             new_matrix.append(new_list)
         # Separate classification
-        new_classification = new_matrix.pop()
+        new_classification = new_matrix.pop()[0]
         new_grid = Grid(tuple(new_matrix), new_classification)
         return new_grid
 
@@ -44,8 +44,22 @@ def file_to_string_collection(file_name):
         file_lines = file.readlines()
         for line in file_lines:
             string_list.append(line)
-    string_tuple = tuple(string_list)
-    return string_tuple
+    return string_list
+
+
+def pop_grid(collection):
+    """
+    Pops the last six elements of the specified collection
+    :param collection: the collection to pop
+    :return: a Grid object
+    """
+    lines_for_new_grid = []
+    for x in xrange(Grid.get_grid_length() + 1):
+        next_line = collection.pop()
+        lines_for_new_grid.append(next_line)
+    lines_for_new_grid.reverse()
+    new_grid = Grid.from_string_collection(lines_for_new_grid)
+    return new_grid
 
 
 def train(training_file_name):
@@ -59,7 +73,8 @@ def train(training_file_name):
 
 if __name__ == '__main__':
     grid_data = file_to_string_collection(sys.argv[1])
-    print_this = Grid.from_string_collection(grid_data)
+    # Loop until all grids in file are parsed.
+    print_this = pop_grid(grid_data)
     for row in print_this.matrix:
         print row
-    print print_this.classification
+    print 'Classification: ' + print_this.classification
