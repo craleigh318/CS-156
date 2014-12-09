@@ -68,6 +68,7 @@ class Grid(abstract_classes.Example):
 
             return adjacents
 
+        # WARNING: first_o_coords might not be initialized yet!
         if first_o_coords is not None:
             adjacent_o_coordinates = [first_o_coords]
             frontier_coords = [first_o_coords]
@@ -119,8 +120,10 @@ def classification_to_is_connected(classification):
     """
     if classification == 'CONNECTED':
         return True
-    else:
+    elif classification == 'DISCONNECTED':
         return False
+    else:
+        return None
 
 
 def is_connected_to_classification(is_connected):
