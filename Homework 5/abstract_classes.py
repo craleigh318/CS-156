@@ -20,7 +20,7 @@ class Example(object):
     """
 
     @property
-    def classification(self):
+    def is_connected(self):
         """
         :return: classification of this example
         """

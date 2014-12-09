@@ -13,7 +13,7 @@ class Grid(abstract_classes.Example):
             self.__matrix = matrix
         else:
             self.__matrix = ()
-        self.__classification = classification
+        self.__is_connected = classification
 
     @staticmethod
     def get_matrix_length():
@@ -46,8 +46,22 @@ class Grid(abstract_classes.Example):
         return self.__matrix
 
     @property
-    def classification(self):
-        return self.__classification
+    def is_connected(self):
+        return self.__is_connected
+
+    def __str__(self):
+        grid_str = ''
+
+        for row in self.matrix:
+            grid_str += ' '.join(row)
+            grid_str += '\n'
+
+        if self.is_connected:
+            grid_str += 'CONNECTED'
+        else:
+            grid_str += 'DISCONNECTED'
+
+        return grid_str
 
 
 def file_to_string_collection(opened_file):
@@ -124,9 +138,7 @@ def main():
     with open(file_name) as opened_file:
         print_these = file_to_grids(opened_file)
         for grid in print_these:
-            for row in grid.matrix:
-                print row
-            print grid.classification
+            print(str(grid) + '\n')
 
 
 if __name__ == '__main__':
