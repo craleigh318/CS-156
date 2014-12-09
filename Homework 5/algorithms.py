@@ -120,3 +120,36 @@ class DecisionTree(object):
         new_children = self.__children + tuple(new_branch)
         new_tree = DecisionTree(self.__label, new_children)
         return new_tree
+
+
+class PerceptronLearner(object):
+    @staticmethod
+    def heaviside_step_function(n):
+        if n < 0:
+            return 0
+        else:
+            return 1
+
+    def __init__(self):
+        self.__learned_examples = []
+
+    def give_example(self, example):
+        """
+        Teaches this learner with a new example.
+
+        :param example: an Example object
+        """
+        self.__learned_examples.append(example)
+
+    def guess_output(self, input):
+        """
+        Has this learner guess this input from previously-taught examples.
+
+        :param input: the input to guess.
+        :return: the guess.
+        """
+        weighted_sum = 0
+        for example in self.__learned_examples:
+            addition = example.input * example.weight
+            weighted_sum += addition
+            # I will finish this later.

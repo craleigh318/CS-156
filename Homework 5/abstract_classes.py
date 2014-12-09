@@ -16,13 +16,20 @@ class Attribute(object):
 
 class Example(object):
     """
-    An example has a classification.
+    An example has an input and weight.
     """
 
     @property
-    def is_connected(self):
+    def input(self):
         """
-        :return: classification of this example
+        :return: input of this example
+        """
+        pass
+
+    @property
+    def weight(self):
+        """
+        :return: expected output of this example
         """
         pass
 

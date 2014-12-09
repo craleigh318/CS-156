@@ -99,6 +99,17 @@ class Grid(abstract_classes.Example):
     def is_connected(self):
         return self.__is_connected
 
+    @property
+    def input(self):
+        return self.matrix
+
+    @property
+    def weight(self):
+        if self.is_connected:
+            return 1
+        else:
+            return -1
+
     def __str__(self):
         grid_str = ''
 
