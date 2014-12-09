@@ -27,6 +27,7 @@ class Grid(abstract_classes.Example):
             new_matrix.append(new_list)
         # Separate classification
         new_classification = new_matrix.pop()[0]
+        new_classification = classification_to_is_connected(new_classification)
         new_grid = Grid(tuple(new_matrix), new_classification)
         return new_grid
 
@@ -104,12 +105,35 @@ class Grid(abstract_classes.Example):
             grid_str += ' '.join(row)
             grid_str += '\n'
 
-        if self.is_connected:
-            grid_str += 'CONNECTED'
-        else:
-            grid_str += 'DISCONNECTED'
+        grid_str += is_connected_to_classification(self.is_connected)
 
         return grid_str
+
+
+def classification_to_is_connected(classification):
+    """
+    Converts a connection classification to a boolean.
+
+    :param classification: 'CONNECTED' or 'DISCONNECTED'
+    :return: true if 'CONNECTED'
+    """
+    if classification == 'CONNECTED':
+        return True
+    else:
+        return False
+
+
+def is_connected_to_classification(is_connected):
+    """
+    Converts a boolean to a connection classification.
+
+    :param is_connected: a boolean
+    :return: 'CONNECTED' if true, 'DISCONNECTED' if false
+    """
+    if is_connected:
+        return 'CONNECTED'
+    else:
+        return 'DISCONNECTED'
 
 
 def file_to_string_collection(opened_file):
