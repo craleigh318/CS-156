@@ -39,7 +39,55 @@ class Grid(abstract_classes.Example):
             grid_values = ['X', 'O']
             return tuple(map(lambda bit: grid_values[bit], random_bit_row))
 
-        return Grid(tuple(random_row() for _ in xrange(Grid.get_matrix_length())))
+        random_matrix = tuple(random_row() for _ in xrange(Grid.get_matrix_length()))
+
+        # Label the random matrix
+        for x in xrange(Grid.get_matrix_length()):
+            for y in xrange(Grid.get_matrix_length()):
+                if random_matrix[x][y] == 'O':
+                    first_o_coords = (x, y)
+                    break
+
+        def adjacent_coords(coords):
+            x, y = coords
+            adjacents = []
+            lowest_legal_coord = 0
+            highest_legal_coord = Grid.get_matrix_length() - 1
+
+            if x > lowest_legal_coord:
+                adjacents.append((x - 1, y))
+            if x < highest_legal_coord:
+                adjacents.append((x + 1, y))
+
+            # Yes, duplication. But it's not worth it to get rid of. Trust me.
+            if y > lowest_legal_coord:
+                adjacents.append((x, y - 1))
+            if y < highest_legal_coord:
+                adjacents.append((x, y + 1))
+
+            return adjacents
+
+        if first_o_coords is not None:
+            adjacent_o_coordinates = [first_o_coords]
+            frontier_coords = [first_o_coords]
+            while len(frontier_coords) > 0:
+                new_frontier_coords = []
+                for component_coords in frontier_coords:
+                    for adj_coords in adjacent_coords(component_coords):
+                        if adj_coords not in adjacent_o_coordinates:
+                            x, y = adj_coords
+                            if random_matrix[x][y] == 'O':
+                                adjacent_o_coordinates.append(adj_coords)
+                                new_frontier_coords.append(adj_coords)
+                frontier_coords = new_frontier_coords
+
+            flattened_matrix = flatten(random_matrix)
+            o_count = len([grid_value for grid_value in flattened_matrix if grid_value == 'O'])
+            connected = o_count == len(adjacent_o_coordinates)
+        else:
+            connected = False
+
+        return Grid(random_matrix, connected)
 
     @property
     def matrix(self):
@@ -131,6 +179,10 @@ def train(training_file_name):
 def random_data_set(min_size=5, max_size=5000):
     random_size = random.randrange(min_size, max_size + 1)
     return tuple(Grid.random() for _ in xrange(random_size))
+
+
+def flatten(iterable):
+    return [item for subiterable in iterable for item in subiterable]
 
 
 def main():
