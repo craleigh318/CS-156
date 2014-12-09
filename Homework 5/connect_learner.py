@@ -114,7 +114,7 @@ def train(training_file_name):
     return return_string
 
 
-def random_training_set(min_size=5, max_size=5000):
+def random_data_set(min_size=5, max_size=5000):
     random_size = random.randrange(min_size, max_size + 1)
     return tuple(Grid.random() for _ in xrange(random_size))
 
