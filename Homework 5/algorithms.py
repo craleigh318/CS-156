@@ -133,6 +133,16 @@ class PerceptronLearner(object):
     def __init__(self):
         self.__learned_examples = []
 
+
+    @property
+    def weighted_sum(self):
+        weighted_sum = 0
+        for example in self.__learned_examples:
+            addition = example.input * example.weight
+            weighted_sum += addition
+        return weighted_sum
+
+
     def give_example(self, example):
         """
         Teaches this learner with a new example.
@@ -148,8 +158,6 @@ class PerceptronLearner(object):
         :param input: the input to guess.
         :return: the guess.
         """
-        weighted_sum = 0
-        for example in self.__learned_examples:
-            addition = example.input * example.weight
-            weighted_sum += addition
-            # I will finish this later.
+        difference = input - self.weighted_sum
+        guess = PerceptronLearner.heaviside_step_function(difference)
+        return guess
