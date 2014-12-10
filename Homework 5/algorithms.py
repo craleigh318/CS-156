@@ -179,6 +179,8 @@ class PerceptronLearner(object):
         guess = PerceptronLearner.heaviside_step_function(difference)
         return guess
 
+    # TODO the default value for convergence_threshold is probably incorrect. Will need to test it
+    # when the perceptron is finished to figure out what a good value is.
     @staticmethod
     def has_converged(previous_weights, updated_weights, convergence_threshold=0.2):
         sum_squared_differences = sum([(prev - cur)**2 for (prev, cur) in zip(previous_weights, updated_weights)])
