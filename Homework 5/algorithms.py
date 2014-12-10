@@ -194,7 +194,7 @@ class PerceptronLearner(object):
         current_weight_vector = previous_weight_vector
         while True:  # Because we need a do-while loop, but Python doesn't have one.
             # TODO update the weights of the perceptron
-            if GridPerceptronLearner.has_converged(previous_weight_vector, current_weight_vector):
+            if PerceptronLearner.has_converged(previous_weight_vector, current_weight_vector):
                 break
             previous_weight_vector = current_weight_vector
 
