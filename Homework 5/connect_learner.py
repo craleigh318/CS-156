@@ -75,7 +75,7 @@ class Evaluator(object):
         return tuple(Evaluator.random_grid() for _ in xrange(size))
 
     @staticmethod
-    def evaluate(data_set, training_set_ratio=0.9):
+    def evaluate(data_set, num_folds=10):
         """
         Tests the perceptron using the passed-in data set.
 
@@ -83,19 +83,32 @@ class Evaluator(object):
         :return: the accuracy of the perceptron.
         """
 
-        training_set_size = len(data_set) * training_set_ratio
-        training_set = data_set[0: training_set_size]
-        test_set = data_set[training_set_size: len(data_set)]
+        assert(len(data_set) <= num_folds)
 
-        perceptron = algorithms.PerceptronLearner()
-        # TODO train the perceptron here
-        correct_count = 0
-        for test_grid in test_set:
-            classification = None  # TODO assign this to the perceptron's classification
-            if classification == test_grid.is_connected:
-                correct_count += 1
+        def split_data():
+            data = []
+            index = 0
+            for num in xrange(num_folds):
+                data.append(data_set[index: num * num_folds])
+                index += num * num_folds
+            return data
 
-        return correct_count / len(training_set)
+        folds = split_data()
+        fold_training_accuracies = []
+        for test_set_fold in xrange(num_folds):
+            test_set = folds[test_set_fold]
+            training_set = folds[:test_set_fold] + folds[test_set_fold + 1:]
+
+            perceptron = algorithms.PerceptronLearner()
+            # TODO train the perceptron here
+            correct_count = 0
+            for test_grid in test_set:
+                classification = None  # TODO assign this to the perceptron's classification
+                if classification == test_grid.is_connected:
+                    correct_count += 1
+
+            fold_training_accuracies.append(correct_count / len(training_set))
+        return sum(fold_training_accuracies) / len(fold_training_accuracies)
 
 
 class GridSquare(object):
