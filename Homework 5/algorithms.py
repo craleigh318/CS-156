@@ -179,6 +179,25 @@ class PerceptronLearner(object):
         guess = PerceptronLearner.heaviside_step_function(difference)
         return guess
 
+    @staticmethod
+    def has_converged(previous_weights, updated_weights, convergence_threshold=0.2):
+        sum_squared_differences = sum([(prev - cur)**2 for (prev, cur) in zip(previous_weights, updated_weights)])
+        # This might cause this method to ignore when one weight is fluctuating a lot while the others aren't.
+        # Might have to reconsider.
+        average_squared_difference = sum_squared_differences / len(previous_weights)
+        return average_squared_difference <= convergence_threshold
+
+    def train(self, training_set):
+        length_input_vector = len(training_set[0])
+        dummy_value = 1
+        previous_weight_vector = [[dummy_value] * length_input_vector]
+        current_weight_vector = previous_weight_vector
+        while True:  # Because we need a do-while loop, but Python doesn't have one.
+            # TODO update the weights of the perceptron
+            if GridPerceptronLearner.has_converged(previous_weight_vector, current_weight_vector):
+                break
+            previous_weight_vector = current_weight_vector
+
 
 class GridPerceptronLearner(object):
     """
