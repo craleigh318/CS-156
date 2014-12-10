@@ -2,9 +2,100 @@ import sys
 import random
 
 import abstract_classes
+import algorithms
 
 
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
+
+
+class Evaluator(object):
+
+    @staticmethod
+    def random_grid():
+        def random_row():
+            random_bit_row = tuple(random.randrange(0, 2) for _ in xrange(Grid.get_matrix_length()))
+            grid_values = [GridSquare.unoccupied, GridSquare.occupied]
+            return tuple(map(lambda bit: grid_values[bit], random_bit_row))
+
+        def is_connected(matrix):
+            def find_first_o_coords(m):
+                for x in xrange(Grid.get_matrix_length()):
+                    for y in xrange(Grid.get_matrix_length()):
+                        if m[x][y] == GridSquare.occupied:
+                            return x, y
+                return None
+
+            def adjacent_coords(coords):
+                x, y = coords
+                adjacents = []
+                lowest_legal_coord = 0
+                highest_legal_coord = Grid.get_matrix_length() - 1
+
+                if x > lowest_legal_coord:
+                    adjacents.append((x - 1, y))
+                if x < highest_legal_coord:
+                    adjacents.append((x + 1, y))
+
+                # Yes, duplication. But it's not worth it to get rid of. Trust me.
+                if y > lowest_legal_coord:
+                    adjacents.append((x, y - 1))
+                if y < highest_legal_coord:
+                    adjacents.append((x, y + 1))
+
+                return adjacents
+
+            def occupied_connected_component(m):
+                first_occupied_coords = find_first_o_coords(m)
+                if first_occupied_coords is not None:
+                    component = [first_occupied_coords]
+                    frontier_coords_list = [first_occupied_coords]
+                    while len(frontier_coords_list) > 0:
+                        new_frontier_coords_list = []
+                        for pioneer_coords in frontier_coords_list:
+                            for pioneer_candidate in adjacent_coords(pioneer_coords):
+                                if pioneer_candidate not in component:
+                                    x, y = pioneer_candidate
+                                    if m[x][y] == GridSquare.occupied:
+                                        component.append(pioneer_candidate)
+                                        new_frontier_coords_list.append(pioneer_candidate)
+                        frontier_coords_list = new_frontier_coords_list
+                    return component
+                else:
+                    return []
+
+            flattened_matrix = flatten(matrix)
+            occupied_count = len([grid_value for grid_value in flattened_matrix if grid_value == GridSquare.occupied])
+            return occupied_count == len(occupied_connected_component(matrix))
+
+        random_matrix = tuple(random_row() for _ in xrange(Grid.get_matrix_length()))
+        return Grid(random_matrix, is_connected(random_matrix))
+
+    @staticmethod
+    def random_data_set(size):
+        return tuple(Evaluator.random_grid() for _ in xrange(size))
+
+    @staticmethod
+    def evaluate(data_set, training_set_ratio=0.9):
+        """
+        Tests the perceptron using the passed-in data set.
+
+        :param data_set: a collection of labeled Grids.
+        :return: the accuracy of the perceptron.
+        """
+
+        training_set_size = len(data_set) * training_set_ratio
+        training_set = data_set[0: training_set_size]
+        test_set = data_set[training_set_size: len(data_set)]
+
+        perceptron = algorithms.PerceptronLearner()
+        # TODO train the perceptron here
+        correct_count = 0
+        for test_grid in test_set:
+            classification = None  # TODO assign this to the perceptron's classification
+            if classification == test_grid.is_connected:
+                correct_count += 1
+
+        return correct_count / len(training_set)
 
 
 class GridSquare(object):
@@ -35,69 +126,6 @@ class Grid(abstract_classes.Example):
         new_classification = classification_to_is_connected(new_classification)
         new_grid = Grid(tuple(new_matrix), new_classification)
         return new_grid
-
-    @staticmethod
-    def random():
-        """Generates a random grid."""
-
-        def random_row():
-            random_bit_row = tuple(random.randrange(0, 2) for _ in xrange(Grid.get_matrix_length()))
-            grid_values = [GridSquare.unoccupied, GridSquare.occupied]
-            return tuple(map(lambda bit: grid_values[bit], random_bit_row))
-
-        random_matrix = tuple(random_row() for _ in xrange(Grid.get_matrix_length()))
-
-        # Label the random matrix
-
-        # Because 'break' doesn't break out of the outer loop. This is the cleanest way to do so.
-        def find_first_o_coords():
-            for x in xrange(Grid.get_matrix_length()):
-                for y in xrange(Grid.get_matrix_length()):
-                    if random_matrix[x][y] == GridSquare.occupied:
-                        return x, y
-        first_occupied_coords = find_first_o_coords()
-
-        def adjacent_coords(coords):
-            x, y = coords
-            adjacents = []
-            lowest_legal_coord = 0
-            highest_legal_coord = Grid.get_matrix_length() - 1
-
-            if x > lowest_legal_coord:
-                adjacents.append((x - 1, y))
-            if x < highest_legal_coord:
-                adjacents.append((x + 1, y))
-
-            # Yes, duplication. But it's not worth it to get rid of. Trust me.
-            if y > lowest_legal_coord:
-                adjacents.append((x, y - 1))
-            if y < highest_legal_coord:
-                adjacents.append((x, y + 1))
-
-            return adjacents
-
-        # WARNING: first_occupied_coords might not be initialized yet!
-        if first_occupied_coords is not None:
-            adjacent_occupied_coords_list = [first_occupied_coords]
-            frontier_coords_list = [first_occupied_coords]
-            while len(frontier_coords_list) > 0:
-                new_frontier_coords = []
-                for pioneer_coords in frontier_coords_list:
-                    for adjacent_coords in adjacent_coords(pioneer_coords):
-                        if adjacent_coords not in adjacent_occupied_coords_list:
-                            x, y = adjacent_coords
-                            if random_matrix[x][y] == GridSquare.occupied:
-                                adjacent_occupied_coords_list.append(adjacent_coords)
-                                new_frontier_coords.append(adjacent_coords)
-                frontier_coords_list = new_frontier_coords
-
-            flattened_matrix = flatten(random_matrix)
-            occupied_count = len([grid_value for grid_value in flattened_matrix if grid_value == GridSquare.occupied])
-            connected = occupied_count == len(adjacent_occupied_coords_list)
-        else:
-            connected = False
-
-        return Grid(random_matrix, connected)
 
     @property
     def matrix(self):
@@ -220,11 +248,6 @@ def train(training_file_name):
         for line in file_lines:
             return_string += line
     return return_string
-
-
-def random_data_set(min_size=5, max_size=5000):
-    random_size = random.randrange(min_size, max_size + 1)
-    return tuple(Grid.random() for _ in xrange(random_size))
 
 
 def flatten(iterable):
