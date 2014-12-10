@@ -3,178 +3,172 @@ import random
 
 import abstract_classes
 import algorithms
+import copy
 
 
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 
-class Evaluator(object):
+class RandomGrid(object):
+
+    def __init__(self, grid_points):
+        self.__grid_points = grid_points
+
+    def __copy__(self):
+        return RandomGrid(copy.deepcopy(self.__grid_points))
+
+    @staticmethod
+    def __completely_random():
+        return RandomGrid([RandomGrid.__random_row() for _ in xrange(Grid.get_matrix_length())])
+
+    @staticmethod
+    def __all(is_occupied):
+        return RandomGrid([[is_occupied] * Grid.get_matrix_length() for _ in xrange(Grid.get_matrix_length())])
+
     # TODO currently biased towards making very random disconnected grids, but not so random
     # connected ones; the occupied squares in a connected grid tend to be more clumped together
     # than is ideal, whereas the disconnected matrices tend to have squares all over.
     @staticmethod
-    def random_grid(probability_of_connected=0.5):
-        """
-
-        Generates a random grid, choosing to either make the grid connected or
-        disconnected with a certain probability.
-
-        :param probability_of_connected: the probability that the random grid will be connected.
-        :return: a random grid.
-        """
-
-        def adjacent_coords(coords):
-            x, y = coords
-            adjacents = []
-            lowest_legal_coord = 0
-            highest_legal_coord = Grid.get_matrix_length() - 1
-
-            if x > lowest_legal_coord:
-                adjacents.append((x - 1, y))
-            if x < highest_legal_coord:
-                adjacents.append((x + 1, y))
-
-            # Yes, duplication. But it's not worth it to get rid of. Trust me.
-            if y > lowest_legal_coord:
-                adjacents.append((x, y - 1))
-            if y < highest_legal_coord:
-                adjacents.append((x, y + 1))
-
-            return adjacents
-
+    def generate(probability_of_connected=0.5):
         choice_is_connected = random.random() <= probability_of_connected
         if choice_is_connected:
-            num_occupied = random.randrange(1, Grid.total_squares())
-            print(num_occupied)
-            random_x = random.randrange(0, Grid.get_matrix_length())
-            random_y = random.randrange(0, Grid.get_matrix_length())
-            first_random_occupied_coord = (random_x, random_y)
-
-            def random_occupied_component(coord_list, num_left_to_generate):
-                if num_left_to_generate == 0:
-                    return coord_list
-                else:
-                    random_component_coords = random.choice(coord_list)
-                    adjecents = adjacent_coords(random_component_coords)
-                    legal_adjacents = list(set(adjecents).difference(set(coord_list)))
-                    # This might make things horribly slow, since it might keep trying again over and over.
-                    try_again = len(legal_adjacents) == 0
-                    if try_again:
-                        return random_occupied_component(coord_list,
-                                                         num_left_to_generate)
-                    else:
-                        return random_occupied_component(coord_list + [random.choice(legal_adjacents)],
-                                                         num_left_to_generate - 1)
-
-            occupied_coords_component = random_occupied_component([first_random_occupied_coord], num_occupied - 1)
-            print(occupied_coords_component)
-            random_connected_matrix = []
-            for x in xrange(Grid.get_matrix_length()):
-                row = []
-                for y in xrange(Grid.get_matrix_length()):
-                    if (x, y) in occupied_coords_component:
-                        grid_value = GridSquare.occupied
-                    else:
-                        grid_value = GridSquare.unoccupied
-                    row.append(grid_value)
-                random_connected_matrix.append(row)
-            random_matrix = random_connected_matrix
+            return RandomGrid.__generate_connected()
         else:
-            def random_row():
-                random_bit_row = [random.randrange(0, 2) for _ in xrange(Grid.get_matrix_length())]
-                grid_values = [GridSquare.unoccupied, GridSquare.occupied]
-                return map(lambda bit: grid_values[bit], random_bit_row)
-
-            def is_connected(matrix):
-                def find_first_o_coords(m):
-                    for x in xrange(Grid.get_matrix_length()):
-                        for y in xrange(Grid.get_matrix_length()):
-                            if m[x][y] == GridSquare.occupied:
-                                return x, y
-                    return None
-
-                def occupied_connected_component(m):
-                    first_occupied_coords = find_first_o_coords(m)
-                    if first_occupied_coords is not None:
-                        component = [first_occupied_coords]
-                        frontier_coords_list = [first_occupied_coords]
-                        while len(frontier_coords_list) > 0:
-                            new_frontier_coords_list = []
-                            for pioneer_coords in frontier_coords_list:
-                                for pioneer_candidate in adjacent_coords(pioneer_coords):
-                                    if pioneer_candidate not in component:
-                                        x, y = pioneer_candidate
-                                        if m[x][y] == GridSquare.occupied:
-                                            component.append(pioneer_candidate)
-                                            new_frontier_coords_list.append(pioneer_candidate)
-                            frontier_coords_list = new_frontier_coords_list
-                        return component
-                    else:
-                        return []
-
-                flattened_matrix = flatten(matrix)
-                occupied_count = len(
-                    [grid_value for grid_value in flattened_matrix if grid_value == GridSquare.occupied])
-                return occupied_count == len(occupied_connected_component(matrix))
-
-            random_disonnected_matrix = [random_row() for _ in xrange(Grid.get_matrix_length())]
-            if is_connected(random_disonnected_matrix):
-                occupied_coords_list = []
-                for x in xrange(Grid.get_matrix_length()):
-                    for y in xrange(Grid.get_matrix_length()):
-                        if random_disonnected_matrix[x][y] == GridSquare.occupied:
-                            occupied_coords_list.append((x, y))
-
-                while is_connected(random_disonnected_matrix):
-                    random_occupied_coord = random.choice(occupied_coords_list)
-                    occupied_coords_list.remove(random_occupied_coord)
-                    x, y = random_occupied_coord
-                    random_disonnected_matrix[x][y] = GridSquare.unoccupied
-            random_matrix = tuple(tuple(row) for row in random_disonnected_matrix)
-            random_matrix = matrix_xo__to_boolean(random_matrix)
-
-        return Grid(random_matrix, choice_is_connected)
+            return RandomGrid.__generate_disconnected()
 
     @staticmethod
-    def random_data_set(size):
-        return tuple(Evaluator.random_grid() for _ in xrange(size))
+    def __generate_connected():
+        unoccupied_random_grid = RandomGrid.__all(is_occupied=False)
+        random_connected_grid = unoccupied_random_grid.__with_random_occupied_component()
+        return random_connected_grid.__to_grid(is_connected=True)
 
     @staticmethod
-    def evaluate(data_set, num_folds=10):
-        """
-        Evaluates the perceptron using the passed-in data set.
+    def __generate_disconnected():
+        random_grid = RandomGrid.__completely_random()
+        if random_grid.__is_connected():
+            occupied_points = [(x, y) for (x, y) in RandomGrid.__points() if random_grid.__is_occupied(x, y)]
+            while random_grid.__is_connected():
+                occupied_x, occupied_y = random.choice(occupied_points)
+                occupied_points.remove((occupied_x, occupied_y))
+                random_grid.__set_is_occupied(occupied_x, occupied_y, False)
+        return random_grid.__to_grid(is_connected=False)
 
-        :param data_set: a collection of labeled Grids.
-        :param num_folds: the number of folds to use during k-fold cross-validation.
-        :return: the accuracy of the perceptron.
-        """
+    @staticmethod
+    def __random_row():
+        random_bit_row = [random.randrange(0, 2) for _ in xrange(Grid.get_matrix_length())]
+        return [bit == 0 for bit in random_bit_row]
 
-        assert (len(data_set) <= num_folds)
+    def __random_occupied_point(self):
+        for x, y in RandomGrid.__points():
+            if self.__grid_points[x][y]:
+                return x, y
+        return None
 
-        def split_data():
-            data = []
-            index = 0
-            for num in xrange(num_folds):
-                data.append(data_set[index: num * num_folds])
-                index += num * num_folds
-            return data
+    def __is_occupied(self, x, y):
+        return self.__grid_points[x][y]
 
-        folds = split_data()
-        fold_training_accuracies = []
-        for test_set_fold in xrange(num_folds):
-            test_set = folds[test_set_fold]
-            training_set = folds[:test_set_fold] + folds[test_set_fold + 1:]
+    def __set_is_occupied(self, x, y, is_occupied):
+        self.__grid_points[x][y] = is_occupied
 
-            perceptron = algorithms.PerceptronLearner()
-            # TODO train the perceptron here
-            correct_count = 0
-            for test_grid in test_set:
-                classification = None  # TODO assign this to the perceptron's classification
-                if classification == test_grid.is_connected:
-                    correct_count += 1
-            fold_training_accuracies.append(correct_count / len(training_set))
+    def __is_connected(self):
+        total_occupied_count = len([(x, y) for (x, y) in RandomGrid.__points() if self.__is_occupied(x, y)])
+        connected_occupied_count = len(self.__occupied_connected_component())
+        return total_occupied_count == connected_occupied_count
 
-        return sum(fold_training_accuracies) / len(fold_training_accuracies)
+    def __occupied_connected_component(self):
+        occupied_point = self.__random_occupied_point()
+        if occupied_point is not None:
+            component = [occupied_point]
+            frontier_points = [occupied_point]
+            while len(frontier_points) > 0:
+                fresh_frontier_points = []
+                for pioneer_x, pioneer_y in frontier_points:
+                    for pioneer_candidate_x, pioneer_candidate_y in RandomGrid.__neighbors(pioneer_x, pioneer_y):
+                        if (pioneer_candidate_x, pioneer_candidate_y) not in component:
+                            if self.__is_occupied(pioneer_candidate_x, pioneer_candidate_y):
+                                fresh_pioneer = (pioneer_candidate_x, pioneer_candidate_y)
+                                component.append(fresh_pioneer)
+                                fresh_frontier_points.append(fresh_pioneer)
+                frontier_points = fresh_frontier_points
+            return component
+        else:
+            return []
+
+    @staticmethod
+    def __points():
+        for x in xrange(Grid.get_matrix_length()):
+            for y in xrange(Grid.get_matrix_length()):
+                yield x, y
+
+    @staticmethod
+    def __neighbors(x, y):
+        adjacents = []
+        lowest_legal_coord = 0
+        highest_legal_coord = Grid.get_matrix_length() - 1
+
+        if x > lowest_legal_coord:
+            adjacents.append((x - 1, y))
+        if x < highest_legal_coord:
+            adjacents.append((x + 1, y))
+
+        # Yes, duplication. But it's not worth it to get rid of. Trust me.
+        if y > lowest_legal_coord:
+            adjacents.append((x, y - 1))
+        if y < highest_legal_coord:
+            adjacents.append((x, y + 1))
+
+        return adjacents
+
+    @staticmethod
+    def __random_point():
+        random_x = random.randrange(0, Grid.get_matrix_length())
+        random_y = random.randrange(0, Grid.get_matrix_length())
+        return random_x, random_y
+
+    def __with_random_occupied_component(self):
+        copy_self = copy.copy(self)
+        num_occupied = random.randrange(1, Grid.total_squares())
+        start_x, start_y = RandomGrid.__random_point()
+        occupied_component = RandomGrid.__random_occupied_component([(start_x, start_y)], num_occupied - 1)
+        for x, y in RandomGrid.__points():
+            if (x, y) in occupied_component:
+                copy_self.__set_is_occupied(x, y, True)
+        return copy_self
+
+    @staticmethod
+    def __random_occupied_component(occupied_points, num_left_to_generate):
+        if num_left_to_generate == 0:
+            return occupied_points
+        else:
+            random_x, random_y = random.choice(occupied_points)
+            neighbors = RandomGrid.__neighbors(random_x, random_y)
+            legal_adjacents = list(set(neighbors).difference(set(occupied_points)))
+            # This might make things horribly slow, since it might keep trying again over and over.
+            try_again = len(legal_adjacents) == 0
+            if try_again:
+                return RandomGrid.__random_occupied_component(occupied_points,
+                                                              num_left_to_generate)
+            else:
+                return RandomGrid.__random_occupied_component(occupied_points + [random.choice(legal_adjacents)],
+                                                              num_left_to_generate - 1)
+
+    def __tupled(self):
+        return RandomGrid(tuple(tuple(row) for row in self.__grid_points))
+
+    def __to_grid(self, is_connected):
+        tupled_random_grid = self.__tupled()
+        return Grid(tupled_random_grid.__grid_points, is_connected)
+
+    @staticmethod
+    def __grid_with_occupied(occupied_points):
+        unoccupied_bool = False
+        occupied_bool = True
+        random_grid_points = [[unoccupied_bool] * Grid.get_matrix_length() for _ in xrange(Grid.get_matrix_length())]
+        for x, y in RandomGrid.__points():
+            if (x, y) in occupied_points:
+                random_grid_points[x][y] = occupied_bool
+        tupled_grid_points = RandomGrid.__tupled()
+        return Grid(tupled_grid_points, is_connected=True)
 
 
 class GridSquare(object):
@@ -183,12 +177,12 @@ class GridSquare(object):
 
 
 class Grid(abstract_classes.Example):
-    def __init__(self, matrix=None, classification=None):
+    def __init__(self, matrix=None, is_connected=None):
         if matrix:
             self.__matrix = matrix
         else:
             self.__matrix = ()
-        self.__is_connected = classification
+        self.__is_connected = is_connected
 
     @staticmethod
     def get_matrix_length():
@@ -393,8 +387,45 @@ def train(training_file_name):
     return return_string
 
 
-def flatten(iterable):
-    return [item for subiterable in iterable for item in subiterable]
+def random_data_set(size):
+    return tuple(RandomGrid.generate() for _ in xrange(size))
+
+
+def evaluate(data_set, num_folds=10):
+    """
+    Evaluates the perceptron using the passed-in data set.
+
+    :param data_set: a collection of labeled Grids.
+    :param num_folds: the number of folds to use during k-fold cross-validation.
+    :return: the accuracy of the perceptron.
+    """
+
+    assert (len(data_set) <= num_folds)
+
+    def split_data():
+        data = []
+        index = 0
+        for num in xrange(num_folds):
+            data.append(data_set[index: num * num_folds])
+            index += num * num_folds
+        return data
+
+    folds = split_data()
+    fold_training_accuracies = []
+    for test_set_fold in xrange(num_folds):
+        test_set = folds[test_set_fold]
+        training_set = folds[:test_set_fold] + folds[test_set_fold + 1:]
+
+        perceptron = algorithms.PerceptronLearner()
+        # TODO train the perceptron here
+        correct_count = 0
+        for test_grid in test_set:
+            classification = None  # TODO assign this to the perceptron's classification
+            if classification == test_grid.is_connected:
+                correct_count += 1
+        fold_training_accuracies.append(correct_count / len(training_set))
+
+    return sum(fold_training_accuracies) / len(fold_training_accuracies)
 
 
 def main():
