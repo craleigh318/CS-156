@@ -77,7 +77,7 @@ class Evaluator(object):
     @staticmethod
     def evaluate(data_set, num_folds=10):
         """
-        Tests the perceptron using the passed-in data set.
+        Evaluates the perceptron using the passed-in data set.
 
         :param data_set: a collection of labeled Grids.
         :param num_folds: the number of folds to use during k-fold cross-validation.
@@ -107,8 +107,8 @@ class Evaluator(object):
                 classification = None  # TODO assign this to the perceptron's classification
                 if classification == test_grid.is_connected:
                     correct_count += 1
-
             fold_training_accuracies.append(correct_count / len(training_set))
+
         return sum(fold_training_accuracies) / len(fold_training_accuracies)
 
 
