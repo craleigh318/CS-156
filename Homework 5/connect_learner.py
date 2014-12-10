@@ -43,11 +43,14 @@ class Grid(abstract_classes.Example):
         random_matrix = tuple(random_row() for _ in xrange(Grid.get_matrix_length()))
 
         # Label the random matrix
-        for x in xrange(Grid.get_matrix_length()):
-            for y in xrange(Grid.get_matrix_length()):
-                if random_matrix[x][y] == 'O':
-                    first_o_coords = (x, y)
-                    break
+
+        # Because 'break' doesn't break out of the outer loop. This is the cleanest way to do so.
+        def find_first_o_coords():
+            for x in xrange(Grid.get_matrix_length()):
+                for y in xrange(Grid.get_matrix_length()):
+                    if random_matrix[x][y] == 'O':
+                        return x, y
+        first_o_coords = find_first_o_coords()
 
         def adjacent_coords(coords):
             x, y = coords
