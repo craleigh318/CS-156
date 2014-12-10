@@ -1,5 +1,7 @@
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
+import connect_learner
+
 
 def plurality_value(examples):
     pass
@@ -141,6 +143,23 @@ class PerceptronLearner(object):
             weighted_sum += addition
         return weighted_sum
 
+    def dot_product(self, matrix):
+        """
+        Returns the dot product of a matrix with the matrix of a training example.
+        :param matrix: a matrix to multiply
+        :return: the dot product
+        """
+        product = 1
+        product_vector = []
+        for i in xrange(len(matrix[0])):
+            unit_product = 1
+            for row in matrix:
+                unit_product *= row[i]
+            product_vector.append(unit_product)
+        for unit in product_vector:
+            product *= unit
+        return product
+
     def give_example(self, example):
         """
         Teaches this learner with a new example.
@@ -166,6 +185,43 @@ class GridPerceptronLearner(object):
     A decorator of the regular PerceptronLearner, for use with Grid objects.
     """
 
+    @staticmethod
+    def boolean_to_weight(boolean):
+        """
+        Weighs this grid tile, assigning it an integer.
+
+        :param boolean: the grid tile, a boolean value
+        :return: the weight, for learning
+        """
+        return {
+            True: 1,
+            False: -1
+        }.get(boolean)
+
+    @staticmethod
+    def weigh_matrix(matrix):
+        """
+        Copies this matrix, replacing tiles with their weights.
+
+        :param matrix: the matrix to weigh
+        :return: a new matrix with integer values
+        """
+        weighted_matrix = []
+        for row in matrix:
+            weighted_row = []
+            for tile in row:
+                weight = GridPerceptronLearner.boolean_to_weight(tile)
+                weighted_row.append(weight)
+            weighted_matrix.append(weighted_row)
+        return weighted_matrix
+
+    @staticmethod
+    def weight_to_boolean(weight):
+        if weight < 0:
+            return False
+        else:
+            return True
+
     def __init__(self):
         self.__learner = PerceptronLearner()
 
@@ -179,7 +235,9 @@ class GridPerceptronLearner(object):
 
         :param example: an Example object
         """
-        return self.__learner.give_example(example)
+        weighted_matrix = GridPerceptronLearner.weigh_matrix(example.matrix)
+        weighted_example = connect_learner.Grid(weighted_matrix, example.is_connected)
+        return self.__learner.give_example(weighted_example)
 
     def guess_output(self, input_matrix):
         """

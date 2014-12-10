@@ -398,13 +398,15 @@ def flatten(iterable):
 
 
 def main():
-    learner = algorithms.PerceptronLearner()
-    print 'Weight:' + str(learner.weighted_sum) + '\n'
+    learner = algorithms.GridPerceptronLearner()
     file_name = sys.argv[1]
     with open(file_name) as opened_file:
         print_these = file_to_grids(opened_file)
         for grid in print_these:
             print(str(grid) + '\n')
+            print '\n'
+            learner.give_example(grid)
+        #print 'Weight:' + str(learner.weighted_sum) + '\n'
 
 
 if __name__ == '__main__':
