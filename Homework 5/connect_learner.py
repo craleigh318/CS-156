@@ -80,6 +80,7 @@ class Evaluator(object):
         Tests the perceptron using the passed-in data set.
 
         :param data_set: a collection of labeled Grids.
+        :param num_folds: the number of folds to use during k-fold cross-validation.
         :return: the accuracy of the perceptron.
         """
 
