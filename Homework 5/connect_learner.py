@@ -184,6 +184,17 @@ class Grid(abstract_classes.Example):
             self.__matrix = ()
         self.__is_connected = is_connected
 
+    def num_occupied_in_row(self, row_number):
+        assert(row_number < Grid.get_matrix_length())
+
+        return len([grid_value for grid_value in self.__matrix[row_number] if grid_value])
+
+    def num_occupied_in_column(self, column_number):
+        assert(column_number < Grid.get_matrix_length())
+
+        column = [self.__matrix[x][column_number] for x in xrange(Grid.get_matrix_length())]
+        return len([grid_value for grid_value in column if grid_value])
+
     @staticmethod
     def get_matrix_length():
         return 5
@@ -391,6 +402,41 @@ def random_data_set(size):
     return tuple(RandomGrid.generate() for _ in xrange(size))
 
 
+def transform_grid_bits(grid):
+    def boolean_to_integer(boolean):
+        if boolean:
+            return 1
+        else:
+            return 0
+    flattened_grid = [is_occupied for row in grid for is_occupied in row]
+    return [boolean_to_integer(is_occupied) for is_occupied in flattened_grid], grid.is_connected
+
+
+def transform_grid_counts(grid):
+    column_counts = [grid.num_occupied_in_column(col_num) for col_num in xrange(Grid.get_matrix_length())]
+    row_counts = [grid.num_occupied_in_row(row_num) for row_num in xrange(Grid.get_matrix_length())]
+    return column_counts + row_counts, grid.is_connected
+
+
+def transform_data_set(data_set, transformation_function):
+    """
+    Transform the data set into a form that can more easily be used to train a perceptron learner.
+
+    Counts the occurrences of occupied squares in all rows and all columns of the matrix, and returns a list of the
+    form:
+
+    [column_counts | row_counts]
+
+    :param data_set: the data set to transform.
+    :return: the transformed data set, represented as a tuple of (input_vector, is_connected).
+    """
+    transformed_data_set = [transformation_function(grid) for grid in data_set]
+    input_vectors = [t[0] for t in transformed_data_set]
+    is_connected_list = [t[1] for t in transformed_data_set]
+
+    return input_vectors, is_connected_list
+
+
 def evaluate(data_set, num_folds=10):
     """
     Evaluates the perceptron using the passed-in data set.
@@ -402,11 +448,13 @@ def evaluate(data_set, num_folds=10):
 
     assert (len(data_set) <= num_folds)
 
+    tranformed_data_set, is_connected_list = transform_data_set(data_set, lambda grid: transform_grid_counts(grid))
+
     def split_data():
         data = []
         index = 0
         for num in xrange(num_folds):
-            data.append(data_set[index: num * num_folds])
+            data.append(tranformed_data_set[index: num * num_folds])
             index += num * num_folds
         return data
 
@@ -418,10 +466,13 @@ def evaluate(data_set, num_folds=10):
 
         perceptron = algorithms.PerceptronLearner()
         # TODO train the perceptron here
+        test_set_index_start = test_set_fold * num_folds
         correct_count = 0
-        for test_grid in test_set:
+        for test_set_num in xrange(len(test_set)):
+            test_input_vector = test_set[test_set_num]
+            is_connected = is_connected_list[test_set_index_start + test_set_num]
             classification = None  # TODO assign this to the perceptron's classification
-            if classification == test_grid.is_connected:
+            if classification == is_connected:
                 correct_count += 1
         fold_training_accuracies.append(correct_count / len(training_set))
 
