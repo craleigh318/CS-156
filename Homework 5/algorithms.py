@@ -133,7 +133,6 @@ class PerceptronLearner(object):
     def __init__(self):
         self.__learned_examples = []
 
-
     @property
     def weighted_sum(self):
         weighted_sum = 0
@@ -141,7 +140,6 @@ class PerceptronLearner(object):
             addition = example.input * example.weight
             weighted_sum += addition
         return weighted_sum
-
 
     def give_example(self, example):
         """
@@ -151,13 +149,43 @@ class PerceptronLearner(object):
         """
         self.__learned_examples.append(example)
 
-    def guess_output(self, input):
+    def guess_output(self, input_matrix):
         """
         Has this learner guess this input from previously-taught examples.
 
-        :param input: the input to guess.
+        :param input_matrix: the input to guess.
         :return: the guess.
         """
-        difference = input - self.weighted_sum
+        difference = input_matrix - self.weighted_sum
         guess = PerceptronLearner.heaviside_step_function(difference)
         return guess
+
+
+class GridPerceptronLearner(object):
+    """
+    A decorator of the regular PerceptronLearner, for use with Grid objects.
+    """
+
+    def __init__(self):
+        self.__learner = PerceptronLearner()
+
+    @property
+    def weighted_sum(self):
+        return self.__learner.weighted_sum
+
+    def give_example(self, example):
+        """
+        Teaches this learner with a new example.
+
+        :param example: an Example object
+        """
+        return self.__learner.give_example(example)
+
+    def guess_output(self, input_matrix):
+        """
+        Has this learner guess this input from previously-taught examples.
+
+        :param input_matrix: the input to guess.
+        :return: the guess.
+        """
+        return self.__learner.guess_output(input_matrix)

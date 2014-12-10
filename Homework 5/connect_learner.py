@@ -398,6 +398,8 @@ def flatten(iterable):
 
 
 def main():
+    learner = algorithms.PerceptronLearner()
+    print 'Weight:' + str(learner.weighted_sum) + '\n'
     file_name = sys.argv[1]
     with open(file_name) as opened_file:
         print_these = file_to_grids(opened_file)
