@@ -9,7 +9,6 @@ __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 
 class Evaluator(object):
-
     # TODO currently biased towards making very random disconnected grids, but not so random
     # connected ones; the occupied squares in a connected grid tend to be more clumped together
     # than is ideal, whereas the disconnected matrices tend to have squares all over.
@@ -114,7 +113,8 @@ class Evaluator(object):
                         return []
 
                 flattened_matrix = flatten(matrix)
-                occupied_count = len([grid_value for grid_value in flattened_matrix if grid_value == GridSquare.occupied])
+                occupied_count = len(
+                    [grid_value for grid_value in flattened_matrix if grid_value == GridSquare.occupied])
                 return occupied_count == len(occupied_connected_component(matrix))
 
             random_disonnected_matrix = [random_row() for _ in xrange(Grid.get_matrix_length())]
@@ -131,6 +131,7 @@ class Evaluator(object):
                     x, y = random_occupied_coord
                     random_disonnected_matrix[x][y] = GridSquare.unoccupied
             random_matrix = tuple(tuple(row) for row in random_disonnected_matrix)
+            random_matrix = matrix_xo__to_boolean(random_matrix)
 
         return Grid(random_matrix, choice_is_connected)
 
@@ -148,7 +149,7 @@ class Evaluator(object):
         :return: the accuracy of the perceptron.
         """
 
-        assert(len(data_set) <= num_folds)
+        assert (len(data_set) <= num_folds)
 
         def split_data():
             data = []
@@ -195,7 +196,7 @@ class Grid(abstract_classes.Example):
 
     @staticmethod
     def total_squares():
-        return Grid.get_matrix_length()**2
+        return Grid.get_matrix_length() ** 2
 
     @staticmethod
     def from_string_collection(collection):
@@ -206,6 +207,7 @@ class Grid(abstract_classes.Example):
         # Separate classification
         new_classification = new_matrix.pop()[0]
         new_classification = classification_to_is_connected(new_classification)
+        new_matrix = matrix_xo__to_boolean(new_matrix)
         new_grid = Grid(tuple(new_matrix), new_classification)
         return new_grid
 
@@ -230,8 +232,9 @@ class Grid(abstract_classes.Example):
 
     def __str__(self):
         grid_str = ''
+        xo_matrix = matrix_boolean_to_xo(self.matrix)
 
-        for row in self.matrix:
+        for row in xo_matrix:
             grid_str += ' '.join(row)
             grid_str += '\n'
 
@@ -247,12 +250,10 @@ def classification_to_is_connected(classification):
     :param classification: 'CONNECTED' or 'DISCONNECTED'
     :return: true if 'CONNECTED'
     """
-    if classification == 'CONNECTED':
-        return True
-    elif classification == 'DISCONNECTED':
-        return False
-    else:
-        return None
+    return {
+        'CONNECTED': True,
+        'DISCONNECTED': False
+    }.get(classification)
 
 
 def is_connected_to_classification(is_connected):
@@ -262,10 +263,70 @@ def is_connected_to_classification(is_connected):
     :param is_connected: a boolean
     :return: 'CONNECTED' if true, 'DISCONNECTED' if false
     """
-    if is_connected:
-        return 'CONNECTED'
-    else:
-        return 'DISCONNECTED'
+    return {
+        True: 'CONNECTED',
+        False: 'DISCONNECTED'
+    }.get(is_connected)
+
+
+def matrix_xo__to_boolean(matrix):
+    """
+    Converts a matrix with xo__to_boolean.
+
+    :param matrix: the matrix
+    :return: the converted matrix
+    """
+    boolean_matrix = []
+    for row in matrix:
+        boolean_row = []
+        for xo in row:
+            boolean = xo__to_boolean(xo)
+            boolean_row.append(boolean)
+        boolean_matrix.append(boolean_row)
+    return boolean_matrix
+
+
+def xo__to_boolean(xo):
+    """
+    Converts the character of a grid to a boolean.
+
+    :param xo: the character
+    :return: a boolean
+    """
+    return {
+        'X': False,
+        'O': True
+    }.get(xo)
+
+
+def matrix_boolean_to_xo(matrix):
+    """
+    Converts a matrix with boolean_to_xo.
+
+    :param matrix: the matrix
+    :return: the converted matrix
+    """
+    xo_matrix = []
+    for row in matrix:
+        xo_row = []
+        for boolean in row:
+            xo = boolean_to_xo(boolean)
+            xo_row.append(xo)
+        xo_matrix.append(xo_row)
+    return xo_matrix
+
+
+def boolean_to_xo(boolean):
+    """
+    Converts the boolean of a grid to a character.
+
+    :param boolean: the boolean
+    :return: a character
+    """
+    return {
+        False: 'X',
+        True: 'O'
+    }.get(boolean)
 
 
 def file_to_string_collection(opened_file):
