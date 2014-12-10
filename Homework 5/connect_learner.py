@@ -10,65 +10,129 @@ __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 class Evaluator(object):
 
+    # TODO currently biased towards making very random disconnected grids, but not so random
+    # connected ones; the occupied squares in a connected grid tend to be more clumped together
+    # than is ideal, whereas the disconnected matrices tend to have squares all over.
     @staticmethod
-    def random_grid():
-        def random_row():
-            random_bit_row = tuple(random.randrange(0, 2) for _ in xrange(Grid.get_matrix_length()))
-            grid_values = [GridSquare.unoccupied, GridSquare.occupied]
-            return tuple(map(lambda bit: grid_values[bit], random_bit_row))
+    def random_grid(probability_of_connected=0.5):
+        """
 
-        def is_connected(matrix):
-            def find_first_o_coords(m):
+        Generates a random grid, choosing to either make the grid connected or
+        disconnected with a certain probability.
+
+        :param probability_of_connected: the probability that the random grid will be connected.
+        :return: a random grid.
+        """
+
+        def adjacent_coords(coords):
+            x, y = coords
+            adjacents = []
+            lowest_legal_coord = 0
+            highest_legal_coord = Grid.get_matrix_length() - 1
+
+            if x > lowest_legal_coord:
+                adjacents.append((x - 1, y))
+            if x < highest_legal_coord:
+                adjacents.append((x + 1, y))
+
+            # Yes, duplication. But it's not worth it to get rid of. Trust me.
+            if y > lowest_legal_coord:
+                adjacents.append((x, y - 1))
+            if y < highest_legal_coord:
+                adjacents.append((x, y + 1))
+
+            return adjacents
+
+        choice_is_connected = random.random() <= probability_of_connected
+        if choice_is_connected:
+            num_occupied = random.randrange(1, Grid.total_squares())
+            print(num_occupied)
+            random_x = random.randrange(0, Grid.get_matrix_length())
+            random_y = random.randrange(0, Grid.get_matrix_length())
+            first_random_occupied_coord = (random_x, random_y)
+
+            def random_occupied_component(coord_list, num_left_to_generate):
+                if num_left_to_generate == 0:
+                    return coord_list
+                else:
+                    random_component_coords = random.choice(coord_list)
+                    adjecents = adjacent_coords(random_component_coords)
+                    legal_adjacents = list(set(adjecents).difference(set(coord_list)))
+                    # This might make things horribly slow, since it might keep trying again over and over.
+                    try_again = len(legal_adjacents) == 0
+                    if try_again:
+                        return random_occupied_component(coord_list,
+                                                         num_left_to_generate)
+                    else:
+                        return random_occupied_component(coord_list + [random.choice(legal_adjacents)],
+                                                         num_left_to_generate - 1)
+
+            occupied_coords_component = random_occupied_component([first_random_occupied_coord], num_occupied - 1)
+            print(occupied_coords_component)
+            random_connected_matrix = []
+            for x in xrange(Grid.get_matrix_length()):
+                row = []
+                for y in xrange(Grid.get_matrix_length()):
+                    if (x, y) in occupied_coords_component:
+                        grid_value = GridSquare.occupied
+                    else:
+                        grid_value = GridSquare.unoccupied
+                    row.append(grid_value)
+                random_connected_matrix.append(row)
+            random_matrix = random_connected_matrix
+        else:
+            def random_row():
+                random_bit_row = [random.randrange(0, 2) for _ in xrange(Grid.get_matrix_length())]
+                grid_values = [GridSquare.unoccupied, GridSquare.occupied]
+                return map(lambda bit: grid_values[bit], random_bit_row)
+
+            def is_connected(matrix):
+                def find_first_o_coords(m):
+                    for x in xrange(Grid.get_matrix_length()):
+                        for y in xrange(Grid.get_matrix_length()):
+                            if m[x][y] == GridSquare.occupied:
+                                return x, y
+                    return None
+
+                def occupied_connected_component(m):
+                    first_occupied_coords = find_first_o_coords(m)
+                    if first_occupied_coords is not None:
+                        component = [first_occupied_coords]
+                        frontier_coords_list = [first_occupied_coords]
+                        while len(frontier_coords_list) > 0:
+                            new_frontier_coords_list = []
+                            for pioneer_coords in frontier_coords_list:
+                                for pioneer_candidate in adjacent_coords(pioneer_coords):
+                                    if pioneer_candidate not in component:
+                                        x, y = pioneer_candidate
+                                        if m[x][y] == GridSquare.occupied:
+                                            component.append(pioneer_candidate)
+                                            new_frontier_coords_list.append(pioneer_candidate)
+                            frontier_coords_list = new_frontier_coords_list
+                        return component
+                    else:
+                        return []
+
+                flattened_matrix = flatten(matrix)
+                occupied_count = len([grid_value for grid_value in flattened_matrix if grid_value == GridSquare.occupied])
+                return occupied_count == len(occupied_connected_component(matrix))
+
+            random_disonnected_matrix = [random_row() for _ in xrange(Grid.get_matrix_length())]
+            if is_connected(random_disonnected_matrix):
+                occupied_coords_list = []
                 for x in xrange(Grid.get_matrix_length()):
                     for y in xrange(Grid.get_matrix_length()):
-                        if m[x][y] == GridSquare.occupied:
-                            return x, y
-                return None
+                        if random_disonnected_matrix[x][y] == GridSquare.occupied:
+                            occupied_coords_list.append((x, y))
 
-            def adjacent_coords(coords):
-                x, y = coords
-                adjacents = []
-                lowest_legal_coord = 0
-                highest_legal_coord = Grid.get_matrix_length() - 1
+                while is_connected(random_disonnected_matrix):
+                    random_occupied_coord = random.choice(occupied_coords_list)
+                    occupied_coords_list.remove(random_occupied_coord)
+                    x, y = random_occupied_coord
+                    random_disonnected_matrix[x][y] = GridSquare.unoccupied
+            random_matrix = tuple(tuple(row) for row in random_disonnected_matrix)
 
-                if x > lowest_legal_coord:
-                    adjacents.append((x - 1, y))
-                if x < highest_legal_coord:
-                    adjacents.append((x + 1, y))
-
-                # Yes, duplication. But it's not worth it to get rid of. Trust me.
-                if y > lowest_legal_coord:
-                    adjacents.append((x, y - 1))
-                if y < highest_legal_coord:
-                    adjacents.append((x, y + 1))
-
-                return adjacents
-
-            def occupied_connected_component(m):
-                first_occupied_coords = find_first_o_coords(m)
-                if first_occupied_coords is not None:
-                    component = [first_occupied_coords]
-                    frontier_coords_list = [first_occupied_coords]
-                    while len(frontier_coords_list) > 0:
-                        new_frontier_coords_list = []
-                        for pioneer_coords in frontier_coords_list:
-                            for pioneer_candidate in adjacent_coords(pioneer_coords):
-                                if pioneer_candidate not in component:
-                                    x, y = pioneer_candidate
-                                    if m[x][y] == GridSquare.occupied:
-                                        component.append(pioneer_candidate)
-                                        new_frontier_coords_list.append(pioneer_candidate)
-                        frontier_coords_list = new_frontier_coords_list
-                    return component
-                else:
-                    return []
-
-            flattened_matrix = flatten(matrix)
-            occupied_count = len([grid_value for grid_value in flattened_matrix if grid_value == GridSquare.occupied])
-            return occupied_count == len(occupied_connected_component(matrix))
-
-        random_matrix = tuple(random_row() for _ in xrange(Grid.get_matrix_length()))
-        return Grid(random_matrix, is_connected(random_matrix))
+        return Grid(random_matrix, choice_is_connected)
 
     @staticmethod
     def random_data_set(size):
@@ -128,6 +192,10 @@ class Grid(abstract_classes.Example):
     @staticmethod
     def get_matrix_length():
         return 5
+
+    @staticmethod
+    def total_squares():
+        return Grid.get_matrix_length()**2
 
     @staticmethod
     def from_string_collection(collection):
