@@ -389,6 +389,12 @@ def file_to_grids(opened_file):
     return grid_list
 
 
+def write_grids_to_file(grid_list, file_path):
+    with open(file_path, 'w') as grid_file:
+        for grid in grid_list:
+            grid_file.write(str(grid) + '\n\n')
+
+
 def train(training_file_name):
     return_string = ''
     with open(training_file_name) as training_file:
@@ -480,15 +486,23 @@ def evaluate(data_set, num_folds=10):
 
 
 def main():
-    learner = algorithms.GridPerceptronLearner()
-    file_name = sys.argv[1]
-    with open(file_name) as opened_file:
-        print_these = file_to_grids(opened_file)
-        for grid in print_these:
-            print(str(grid) + '\n')
-            print '\n'
-            learner.give_example(grid)
-        #print 'Weight:' + str(learner.weighted_sum) + '\n'
+    if sys.argv[1] == 'gen':
+        if len(sys.argv) == 4:
+            random_data_set_size, data_set_file = int(sys.argv[2]), sys.argv[3]
+            random_grids = random_data_set(random_data_set_size)
+            write_grids_to_file(random_grids, data_set_file)
+        else:
+            print('Usage: connect_learner.py gen [data set size] [data set file path]')
+    else:
+        learner = algorithms.GridPerceptronLearner()
+        file_name = sys.argv[1]
+        with open(file_name) as opened_file:
+            print_these = file_to_grids(opened_file)
+            for grid in print_these:
+                print(str(grid) + '\n')
+                print '\n'
+                learner.give_example(grid)
+            #print 'Weight:' + str(learner.weighted_sum) + '\n'
 
 
 if __name__ == '__main__':
