@@ -7,6 +7,11 @@ import abstract_classes
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 
+class GridSquare(object):
+    occupied = 'O'
+    unoccupied = 'X'
+
+
 class Grid(abstract_classes.Example):
     def __init__(self, matrix=None, classification=None):
         if matrix:
@@ -37,7 +42,7 @@ class Grid(abstract_classes.Example):
 
         def random_row():
             random_bit_row = tuple(random.randrange(0, 2) for _ in xrange(Grid.get_matrix_length()))
-            grid_values = ['X', 'O']
+            grid_values = [GridSquare.unoccupied, GridSquare.occupied]
             return tuple(map(lambda bit: grid_values[bit], random_bit_row))
 
         random_matrix = tuple(random_row() for _ in xrange(Grid.get_matrix_length()))
@@ -48,9 +53,9 @@ class Grid(abstract_classes.Example):
         def find_first_o_coords():
             for x in xrange(Grid.get_matrix_length()):
                 for y in xrange(Grid.get_matrix_length()):
-                    if random_matrix[x][y] == 'O':
+                    if random_matrix[x][y] == GridSquare.occupied:
                         return x, y
-        first_o_coords = find_first_o_coords()
+        first_occupied_coords = find_first_o_coords()
 
         def adjacent_coords(coords):
             x, y = coords
@@ -71,24 +76,24 @@ class Grid(abstract_classes.Example):
 
             return adjacents
 
-        # WARNING: first_o_coords might not be initialized yet!
-        if first_o_coords is not None:
-            adjacent_o_coordinates = [first_o_coords]
-            frontier_coords = [first_o_coords]
-            while len(frontier_coords) > 0:
+        # WARNING: first_occupied_coords might not be initialized yet!
+        if first_occupied_coords is not None:
+            adjacent_occupied_coords_list = [first_occupied_coords]
+            frontier_coords_list = [first_occupied_coords]
+            while len(frontier_coords_list) > 0:
                 new_frontier_coords = []
-                for component_coords in frontier_coords:
-                    for adj_coords in adjacent_coords(component_coords):
-                        if adj_coords not in adjacent_o_coordinates:
-                            x, y = adj_coords
-                            if random_matrix[x][y] == 'O':
-                                adjacent_o_coordinates.append(adj_coords)
-                                new_frontier_coords.append(adj_coords)
-                frontier_coords = new_frontier_coords
+                for pioneer_coords in frontier_coords_list:
+                    for adjacent_coords in adjacent_coords(pioneer_coords):
+                        if adjacent_coords not in adjacent_occupied_coords_list:
+                            x, y = adjacent_coords
+                            if random_matrix[x][y] == GridSquare.occupied:
+                                adjacent_occupied_coords_list.append(adjacent_coords)
+                                new_frontier_coords.append(adjacent_coords)
+                frontier_coords_list = new_frontier_coords
 
             flattened_matrix = flatten(random_matrix)
-            o_count = len([grid_value for grid_value in flattened_matrix if grid_value == 'O'])
-            connected = o_count == len(adjacent_o_coordinates)
+            occupied_count = len([grid_value for grid_value in flattened_matrix if grid_value == GridSquare.occupied])
+            connected = occupied_count == len(adjacent_occupied_coords_list)
         else:
             connected = False
 
