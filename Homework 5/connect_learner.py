@@ -466,23 +466,6 @@ def is_connected_to_classification(is_connected):
     }.get(is_connected)
 
 
-def matrix_xo__to_boolean(matrix):
-    """
-    Converts a matrix with xo__to_boolean.
-
-    :param matrix: the matrix
-    :return: the converted matrix
-    """
-    boolean_matrix = []
-    for row in matrix:
-        boolean_row = []
-        for xo in row:
-            boolean = xo__to_boolean(xo)
-            boolean_row.append(boolean)
-        boolean_matrix.append(boolean_row)
-    return boolean_matrix
-
-
 def xo__to_boolean(xo):
     """
     Converts the character of a grid to a boolean.
@@ -526,75 +509,10 @@ def boolean_to_xo(boolean):
     }.get(boolean)
 
 
-def file_to_string_collection(opened_file):
-    string_list = []
-    file_lines = opened_file.readlines()
-    for line in file_lines:
-        string_list.append(line)
-    return string_list
-
-
-def pop_grid(collection):
-    """
-    Pops the first six elements of the specified collection.
-
-    :param collection: the collection to pop
-    :return: a Grid object
-    """
-    # Exit if not enough lines for grid.
-    if len(collection) <= Grid.DIMENSION_SIZE:
-        return None
-    new_grid = Grid.from_file_lines(collection)
-    return new_grid
-
-
-def append_to_grid_list(grid_list, lines_for_next_grid):
-    """
-    Appends the next grid to the list, if possible.
-
-    :param grid_list: the grid list
-    :param lines_for_next_grid: the lines for a new grid
-    """
-    next_grid = pop_grid(lines_for_next_grid)
-    if next_grid is not None:
-        grid_list.append(next_grid)
-
-
-def file_to_grids(filename):
-    """
-    Reads in Grid objects from a file.
-
-    :param filename: the filename of the file containing grids.
-    :return: a list of Grids read from the file denoted by 'filename'.
-    """
-    with open(filename) as grid_file:
-        grid_list = []
-        file_lines = grid_file.readlines()
-        # Loop to parse all grids in file.
-        lines_for_next_grid = []
-        for line in file_lines:
-            if line == '\n':
-                append_to_grid_list(grid_list, lines_for_next_grid)
-                lines_for_next_grid = []
-            else:
-                lines_for_next_grid.append(line)
-        append_to_grid_list(grid_list, lines_for_next_grid)
-        return grid_list
-
-
 def write_grids_to_file(grid_list, file_path):
     with open(file_path, 'w') as grid_file:
         for grid in grid_list:
             grid_file.write(str(grid) + '\n\n')
-
-
-def train(training_file_name):
-    return_string = ''
-    with open(training_file_name) as training_file:
-        file_lines = training_file.readlines()
-        for line in file_lines:
-            return_string += line
-    return return_string
 
 
 def random_data_set(size):
@@ -657,7 +575,7 @@ def main():
         _, training_file_name, test_file_name = sys.argv
         training_grid_list = ExampleFileParser.read_examples(training_file_name)
         test_grid = ExampleFileParser.read_grid(test_file_name)
-        training_set = transform_data_set(training_grid_list, lambda g: transform_grid_bits(g))
+        training_set = transform_data_set(training_grid_list, lambda g: transform_grid_counts(g))
         classifier = Perceptron.learn(training_set)
         input_vector_to_classify = transform_grid_counts(test_grid)
         is_connected = classifier(input_vector_to_classify)
