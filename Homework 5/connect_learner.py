@@ -268,7 +268,7 @@ class Math(object):
 
 
 class Perceptron(object):
-    LEARNING_RATE = 1.0
+    LEARNING_RATE = 1.5
 
     @staticmethod
     def hypothesis(weight_vector, input_vector):
@@ -285,12 +285,9 @@ class Perceptron(object):
     # TODO the default value for convergence_threshold is probably incorrect. Will need to test it
     # when the perceptron is finished to figure out what a good value is.
     @staticmethod
-    def __has_converged(previous_weights, updated_weights, convergence_threshold=0.2):
+    def __has_converged(previous_weights, updated_weights, convergence_threshold=1.0e-6):
         sum_squared_differences = sum([(prev - cur)**2 for (prev, cur) in zip(previous_weights, updated_weights)])
-        # This might cause this method to ignore when one weight is fluctuating a lot while the others aren't.
-        # Might have to reconsider.
-        average_squared_difference = sum_squared_differences / len(previous_weights)
-        return average_squared_difference <= convergence_threshold
+        return sum_squared_differences <= convergence_threshold
 
     @staticmethod
     def __add_dummy_inputs(training_set):
@@ -300,7 +297,8 @@ class Perceptron(object):
         sum of products of the components of the two vectors.
         """
         return [(Perceptron.__add_dummy_input(input_vector), is_connected)
-                for input_vector, is_connected in training_set]
+                for training_tuple in training_set
+                for input_vector, is_connected in training_tuple]
 
     @staticmethod
     def __add_dummy_input(input_vector):
@@ -309,8 +307,7 @@ class Perceptron(object):
 
     @staticmethod
     def __starting_weight_vector(length_input_vector):
-        dummy_value = 1
-        return [dummy_value] * length_input_vector
+        return [1 for _ in xrange(length_input_vector)]
 
     @staticmethod
     def __classify(learned_weights, grid_bit_vector):
@@ -320,6 +317,7 @@ class Perceptron(object):
 
     @staticmethod
     def learn(training_set):
+        count = 0
         training_with_dummies = Perceptron.__add_dummy_inputs(training_set)
         length_input_vector = len(training_with_dummies[0][0])
         previous_weight_vector = Perceptron.__starting_weight_vector(length_input_vector)
@@ -330,7 +328,10 @@ class Perceptron(object):
                                                                      input_vector=input_vector,
                                                                      classification_bit=real_classification)
             if Perceptron.__has_converged(previous_weight_vector, current_weight_vector):
+            #if count > 100:
                 break
+            #else:
+                #count += 1
             previous_weight_vector = current_weight_vector
         return lambda vec: Perceptron.__classify(current_weight_vector, vec) == Grid.CONNECTED_BIT
 
@@ -339,10 +340,12 @@ class Evaluator(object):
     @staticmethod
     def __k_folds(transformed_data_set, num_folds):
         folds = []
-        index = 0
-        for num in xrange(num_folds):
-            folds.append(transformed_data_set[index: num * num_folds])
-            index += num * num_folds
+        data_points_per_fold = len(transformed_data_set) / num_folds
+        for fold_index in xrange(num_folds):
+            from_index = data_points_per_fold * fold_index
+            to_index = from_index + data_points_per_fold
+            fold = transformed_data_set[from_index: to_index]
+            folds.append(fold)
         return folds
 
     @staticmethod
@@ -383,7 +386,7 @@ class Evaluator(object):
             training_accuracy = correct_count / len(test_set)
             fold_training_accuracies.append(training_accuracy)
 
-        return sum(fold_training_accuracies) / len(fold_training_accuracies)
+        return sum(fold_training_accuracies) / float(len(fold_training_accuracies))
 
 
 class ExampleFileParser(object):
@@ -571,6 +574,10 @@ def main():
             write_grids_to_file(random_grids, data_set_file)
         else:
             print('Usage: connect_learner.py gen [data set size] [data set file path]')
+    elif sys.argv[1] == 'eval':
+            random_data_set_size = random.randrange(10, 100)
+            data_set = random_data_set(random_data_set_size)
+            print('LEARNING ACCURACY: ' + str(Evaluator.evaluate(data_set)))
     else:
         _, training_file_name, test_file_name = sys.argv
         training_grid_list = ExampleFileParser.read_examples(training_file_name)
