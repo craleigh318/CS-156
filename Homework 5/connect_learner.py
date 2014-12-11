@@ -44,10 +44,10 @@ class RandomExample(object):
     def __generate_disconnected():
         random_grid = RandomExample.__completely_random()
         if random_grid.__is_connected():
-            occupied_points = [(x, y) for (x, y) in RandomExample.__points() if random_grid.__is_occupied(x, y)]
+            occupied_component_points = random_grid.__occupied_connected_component()
             while random_grid.__is_connected():
-                occupied_x, occupied_y = random.choice(occupied_points)
-                occupied_points.remove((occupied_x, occupied_y))
+                occupied_x, occupied_y = random.choice(occupied_component_points)
+                occupied_component_points.remove((occupied_x, occupied_y))
                 random_grid.__set_is_occupied(occupied_x, occupied_y, False)
         return random_grid.__to_grid(is_connected=False)
 
@@ -71,7 +71,7 @@ class RandomExample(object):
     def __is_connected(self):
         total_occupied_count = len([(x, y) for (x, y) in RandomExample.__points() if self.__is_occupied(x, y)])
         connected_occupied_count = len(self.__occupied_connected_component())
-        return total_occupied_count == connected_occupied_count
+        return total_occupied_count == connected_occupied_count and total_occupied_count != 0
 
     def __occupied_connected_component(self):
         occupied_point = self.__random_occupied_point()
@@ -236,9 +236,10 @@ class Grid(object):
         grid_str = ''
         xo_rows = rows_boolean_to_xo(self.rows)
 
-        for row in xo_rows:
-            grid_str += ' '.join(row)
-            grid_str += '\n'
+        row_str_list = [' '.join(row) for row in xo_rows]
+        grid_str += row_str_list[0]
+        for row_str in row_str_list[1:]:
+            grid_str += '\n' + row_str
 
         return grid_str
 
@@ -268,7 +269,7 @@ class Math(object):
 
 
 class Perceptron(object):
-    LEARNING_RATE = 1.5
+    LEARNING_RATE = 1.0
 
     @staticmethod
     def hypothesis(weight_vector, input_vector):
@@ -282,8 +283,6 @@ class Perceptron(object):
             (actual_vs_hypothesis * hypothesis_value * (1 - hypothesis_value))
         return [w + constant_expression * x for w, x in zip(weight_vector, input_vector)]
 
-    # TODO the default value for convergence_threshold is probably incorrect. Will need to test it
-    # when the perceptron is finished to figure out what a good value is.
     @staticmethod
     def __has_converged(previous_weights, updated_weights, convergence_threshold=1.0e-6):
         sum_squared_differences = sum([(prev - cur)**2 for (prev, cur) in zip(previous_weights, updated_weights)])
@@ -297,8 +296,7 @@ class Perceptron(object):
         sum of products of the components of the two vectors.
         """
         return [(Perceptron.__add_dummy_input(input_vector), is_connected)
-                for training_tuple in training_set
-                for input_vector, is_connected in training_tuple]
+                for input_vector, is_connected in training_set]
 
     @staticmethod
     def __add_dummy_input(input_vector):
@@ -317,7 +315,7 @@ class Perceptron(object):
 
     @staticmethod
     def learn(training_set):
-        count = 0
+        #count = 0
         training_with_dummies = Perceptron.__add_dummy_inputs(training_set)
         length_input_vector = len(training_with_dummies[0][0])
         previous_weight_vector = Perceptron.__starting_weight_vector(length_input_vector)
@@ -328,7 +326,8 @@ class Perceptron(object):
                                                                      input_vector=input_vector,
                                                                      classification_bit=real_classification)
             if Perceptron.__has_converged(previous_weight_vector, current_weight_vector):
-            #if count > 100:
+            #print(count)
+            #if count >= 100:
                 break
             #else:
                 #count += 1
