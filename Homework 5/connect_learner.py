@@ -7,21 +7,21 @@ import copy
 __author__ = 'Christopher Raleigh and Anthony Ferrero'
 
 
-class RandomGrid(object):
+class RandomExample(object):
 
     def __init__(self, grid_points):
         self.__grid_points = grid_points
 
     def __copy__(self):
-        return RandomGrid(copy.deepcopy(self.__grid_points))
+        return RandomExample(copy.deepcopy(self.__grid_points))
 
     @staticmethod
     def __completely_random():
-        return RandomGrid([RandomGrid.__random_row() for _ in xrange(Grid.get_matrix_length())])
+        return RandomExample([RandomExample.__random_row() for _ in xrange(Grid.DIMENSION_SIZE)])
 
     @staticmethod
     def __all(is_occupied):
-        return RandomGrid([[is_occupied] * Grid.get_matrix_length() for _ in xrange(Grid.get_matrix_length())])
+        return RandomExample([[is_occupied] * Grid.DIMENSION_SIZE for _ in xrange(Grid.DIMENSION_SIZE)])
 
     # TODO currently biased towards making very random disconnected grids, but not so random
     # connected ones; the occupied squares in a connected grid tend to be more clumped together
@@ -30,21 +30,21 @@ class RandomGrid(object):
     def generate(probability_of_connected=0.5):
         choice_is_connected = random.random() <= probability_of_connected
         if choice_is_connected:
-            return RandomGrid.__generate_connected()
+            return RandomExample.__generate_connected()
         else:
-            return RandomGrid.__generate_disconnected()
+            return RandomExample.__generate_disconnected()
 
     @staticmethod
     def __generate_connected():
-        unoccupied_random_grid = RandomGrid.__all(is_occupied=False)
+        unoccupied_random_grid = RandomExample.__all(is_occupied=False)
         random_connected_grid = unoccupied_random_grid.__with_random_occupied_component()
         return random_connected_grid.__to_grid(is_connected=True)
 
     @staticmethod
     def __generate_disconnected():
-        random_grid = RandomGrid.__completely_random()
+        random_grid = RandomExample.__completely_random()
         if random_grid.__is_connected():
-            occupied_points = [(x, y) for (x, y) in RandomGrid.__points() if random_grid.__is_occupied(x, y)]
+            occupied_points = [(x, y) for (x, y) in RandomExample.__points() if random_grid.__is_occupied(x, y)]
             while random_grid.__is_connected():
                 occupied_x, occupied_y = random.choice(occupied_points)
                 occupied_points.remove((occupied_x, occupied_y))
@@ -53,11 +53,11 @@ class RandomGrid(object):
 
     @staticmethod
     def __random_row():
-        random_bit_row = [random.randrange(0, 2) for _ in xrange(Grid.get_matrix_length())]
+        random_bit_row = [random.randrange(0, 2) for _ in xrange(Grid.DIMENSION_SIZE)]
         return [bit == 0 for bit in random_bit_row]
 
     def __random_occupied_point(self):
-        for x, y in RandomGrid.__points():
+        for x, y in RandomExample.__points():
             if self.__grid_points[x][y]:
                 return x, y
         return None
@@ -69,7 +69,7 @@ class RandomGrid(object):
         self.__grid_points[x][y] = is_occupied
 
     def __is_connected(self):
-        total_occupied_count = len([(x, y) for (x, y) in RandomGrid.__points() if self.__is_occupied(x, y)])
+        total_occupied_count = len([(x, y) for (x, y) in RandomExample.__points() if self.__is_occupied(x, y)])
         connected_occupied_count = len(self.__occupied_connected_component())
         return total_occupied_count == connected_occupied_count
 
@@ -81,7 +81,7 @@ class RandomGrid(object):
             while len(frontier_points) > 0:
                 fresh_frontier_points = []
                 for pioneer_x, pioneer_y in frontier_points:
-                    for pioneer_candidate_x, pioneer_candidate_y in RandomGrid.__neighbors(pioneer_x, pioneer_y):
+                    for pioneer_candidate_x, pioneer_candidate_y in RandomExample.__neighbors(pioneer_x, pioneer_y):
                         if (pioneer_candidate_x, pioneer_candidate_y) not in component:
                             if self.__is_occupied(pioneer_candidate_x, pioneer_candidate_y):
                                 fresh_pioneer = (pioneer_candidate_x, pioneer_candidate_y)
@@ -94,15 +94,15 @@ class RandomGrid(object):
 
     @staticmethod
     def __points():
-        for x in xrange(Grid.get_matrix_length()):
-            for y in xrange(Grid.get_matrix_length()):
+        for x in xrange(Grid.DIMENSION_SIZE):
+            for y in xrange(Grid.DIMENSION_SIZE):
                 yield x, y
 
     @staticmethod
     def __neighbors(x, y):
         adjacents = []
         lowest_legal_coord = 0
-        highest_legal_coord = Grid.get_matrix_length() - 1
+        highest_legal_coord = Grid.DIMENSION_SIZE - 1
 
         if x > lowest_legal_coord:
             adjacents.append((x - 1, y))
@@ -119,16 +119,16 @@ class RandomGrid(object):
 
     @staticmethod
     def __random_point():
-        random_x = random.randrange(0, Grid.get_matrix_length())
-        random_y = random.randrange(0, Grid.get_matrix_length())
+        random_x = random.randrange(0, Grid.DIMENSION_SIZE)
+        random_y = random.randrange(0, Grid.DIMENSION_SIZE)
         return random_x, random_y
 
     def __with_random_occupied_component(self):
         copy_self = copy.copy(self)
         num_occupied = random.randrange(1, Grid.total_squares())
-        start_x, start_y = RandomGrid.__random_point()
-        occupied_component = RandomGrid.__random_occupied_component([(start_x, start_y)], num_occupied - 1)
-        for x, y in RandomGrid.__points():
+        start_x, start_y = RandomExample.__random_point()
+        occupied_component = RandomExample.__random_occupied_component([(start_x, start_y)], num_occupied - 1)
+        for x, y in RandomExample.__points():
             if (x, y) in occupied_component:
                 copy_self.__set_is_occupied(x, y, True)
         return copy_self
@@ -139,112 +139,106 @@ class RandomGrid(object):
             return occupied_points
         else:
             random_x, random_y = random.choice(occupied_points)
-            neighbors = RandomGrid.__neighbors(random_x, random_y)
+            neighbors = RandomExample.__neighbors(random_x, random_y)
             legal_adjacents = list(set(neighbors).difference(set(occupied_points)))
             # This might make things horribly slow, since it might keep trying again over and over.
             try_again = len(legal_adjacents) == 0
             if try_again:
-                return RandomGrid.__random_occupied_component(occupied_points,
-                                                              num_left_to_generate)
+                return RandomExample.__random_occupied_component(occupied_points,
+                                                                 num_left_to_generate)
             else:
-                return RandomGrid.__random_occupied_component(occupied_points + [random.choice(legal_adjacents)],
-                                                              num_left_to_generate - 1)
+                return RandomExample.__random_occupied_component(occupied_points + [random.choice(legal_adjacents)],
+                                                                 num_left_to_generate - 1)
 
     def __tupled(self):
-        return RandomGrid(tuple(tuple(row) for row in self.__grid_points))
+        return RandomExample(tuple(tuple(row) for row in self.__grid_points))
 
     def __to_grid(self, is_connected):
         tupled_random_grid = self.__tupled()
-        return Grid(tupled_random_grid.__grid_points, is_connected)
+        return Example(Grid(tupled_random_grid.__grid_points), is_connected)
 
     @staticmethod
     def __grid_with_occupied(occupied_points):
         unoccupied_bool = False
         occupied_bool = True
-        random_grid_points = [[unoccupied_bool] * Grid.get_matrix_length() for _ in xrange(Grid.get_matrix_length())]
-        for x, y in RandomGrid.__points():
+        random_grid_points = [[unoccupied_bool] * Grid.DIMENSION_SIZE for _ in xrange(Grid.DIMENSION_SIZE)]
+        for x, y in RandomExample.__points():
             if (x, y) in occupied_points:
                 random_grid_points[x][y] = occupied_bool
-        tupled_grid_points = RandomGrid.__tupled()
-        return Grid(tupled_grid_points, is_connected=True)
+        tupled_grid_points = RandomExample.__tupled()
+        return Example(Grid(tupled_grid_points), is_connected=True)
+
+
+class Classification(object):
+    CONNECTED = 'CONNECTED'
+    DISCONNECTED = 'DISCONNECTED'
 
 
 class GridSquare(object):
-    occupied = 'O'
-    unoccupied = 'X'
+    OCCUPIED = 'O'
+    UNOCCUPIED = 'X'
+
+
+class Example(object):
+    def __init__(self, grid, classification):
+        self.__grid = grid
+        self.__classification = classification
+
+    @property
+    def is_connected(self):
+        return self.__classification
+
+    @property
+    def grid(self):
+        return self.__grid
+
+    def __str__(self):
+        grid_str = str(self.grid)
+        classification_str = is_connected_to_classification(self.__classification)
+        return grid_str + '\n' + classification_str
 
 
 class Grid(object):
     CONNECTED_BIT = 1
     DISCONNECTED_BIT = 0
 
-    def __init__(self, matrix=None, is_connected=None):
-        if matrix:
-            self.__matrix = matrix
+    DIMENSION_SIZE = 5
+
+    def __init__(self, rows=None):
+        if rows:
+            self.__rows = rows
         else:
-            self.__matrix = ()
-        self.__is_connected = is_connected
+            self.__rows = ()
 
     def num_occupied_in_row(self, row_number):
-        assert(row_number < Grid.get_matrix_length())
+        assert(row_number < Grid.DIMENSION_SIZE)
 
-        return len([grid_value for grid_value in self.__matrix[row_number] if grid_value])
+        return len([grid_value for grid_value in self.__rows[row_number] if grid_value])
 
     def num_occupied_in_column(self, column_number):
-        assert(column_number < Grid.get_matrix_length())
+        assert(column_number < Grid.DIMENSION_SIZE)
 
-        column = [self.__matrix[x][column_number] for x in xrange(Grid.get_matrix_length())]
+        column = [self.__rows[x][column_number] for x in xrange(Grid.DIMENSION_SIZE)]
         return len([grid_value for grid_value in column if grid_value])
 
-    @staticmethod
-    def get_matrix_length():
-        return 5
+    def with_classification(self, classification):
+        return Example(Grid(copy.deepcopy(self.__rows)), classification)
 
     @staticmethod
     def total_squares():
-        return Grid.get_matrix_length() ** 2
-
-    @staticmethod
-    def from_file_lines(file_lines):
-        new_matrix = []
-        for s in file_lines:
-            new_list = s.split()
-            new_matrix.append(new_list)
-        # Separate classification
-        new_classification = new_matrix.pop()[0]
-        new_classification = classification_to_is_connected(new_classification)
-        new_matrix = matrix_xo__to_boolean(new_matrix)
-        new_grid = Grid(tuple(new_matrix), new_classification)
-        return new_grid
+        return Grid.DIMENSION_SIZE**2
 
     @property
-    def matrix(self):
-        return self.__matrix
-
-    @property
-    def is_connected(self):
-        return self.__is_connected
-
-    @property
-    def input(self):
-        return self.matrix
-
-    @property
-    def weight(self):
-        if self.is_connected:
-            return 1
-        else:
-            return -1
+    def rows(self):
+        return self.__rows
 
     def __str__(self):
         grid_str = ''
-        xo_matrix = matrix_boolean_to_xo(self.matrix)
+        xo_rows = rows_boolean_to_xo(self.rows)
 
-        for row in xo_matrix:
+        for row in xo_rows:
             grid_str += ' '.join(row)
             grid_str += '\n'
-
-        grid_str += is_connected_to_classification(self.is_connected)
 
         return grid_str
 
@@ -264,6 +258,13 @@ class Math(object):
             return 0
         else:
             return 1
+
+    @staticmethod
+    def boolean_to_integer(boolean):
+        if boolean:
+            return 1
+        else:
+            return 0
 
 
 class Perceptron(object):
@@ -385,17 +386,71 @@ class Evaluator(object):
         return sum(fold_training_accuracies) / len(fold_training_accuracies)
 
 
-def classification_to_is_connected(classification):
-    """
-    Converts a connection classification to a boolean.
+class ExampleFileParser(object):
+    @staticmethod
+    def parse_grid_value(grid_value):
+        return {
+            GridSquare.OCCUPIED: True,
+            GridSquare.UNOCCUPIED: False
+        }.get(grid_value)
 
-    :param classification: 'CONNECTED' or 'DISCONNECTED'
-    :return: true if 'CONNECTED'
-    """
-    return {
-        'CONNECTED': True,
-        'DISCONNECTED': False
-    }.get(classification)
+    @staticmethod
+    def parse_grid_row(grid_row_string):
+        return [ExampleFileParser.parse_grid_value(s) for s in grid_row_string]
+
+    @staticmethod
+    def parse_classification(classification_string):
+        """
+        Converts a connection classification to a boolean.
+
+        :param classification_string: 'CONNECTED' or 'DISCONNECTED'
+        :return: true if 'CONNECTED'
+        """
+        return {
+            'CONNECTED': True,
+            'DISCONNECTED': False
+        }.get(classification_string)
+
+    @staticmethod
+    def parse_input_vector(grid_string_list):
+        grid_string_list_no_newlines = [s.rstrip() for s in grid_string_list]
+        grid_bits = [ExampleFileParser.parse_grid_value(value)
+                     for grid_string in grid_string_list_no_newlines
+                     for value in grid_string]
+
+        return grid_bits
+
+    @staticmethod
+    def parse_grid(file_lines):
+        grid_rows = [ExampleFileParser.parse_grid_row(grid_row_string) for grid_row_string in file_lines]
+        return Grid(grid_rows)
+
+    @staticmethod
+    def parse_example(file_example_lines):
+        grid_lines = file_example_lines[:-1]
+        grid = ExampleFileParser.parse_grid(grid_lines)
+
+        classification_string = file_example_lines[-1]
+        classification = ExampleFileParser.parse_classification(classification_string)
+
+        return grid.with_classification(classification)
+
+    @staticmethod
+    def read_examples(filename):
+        with open(filename) as example_file:
+            file_lines = example_file.readlines()
+            if '\n' in file_lines:
+                example_str_list = split_list_by(file_lines, '\n')
+            else:
+                example_str_list = file_lines
+            examples = [ExampleFileParser.parse_example(str_example) for str_example in example_str_list]
+            return examples
+
+    @staticmethod
+    def read_grid(filename):
+        with open(filename) as grid_file:
+            grid_string_list = grid_file.readlines()
+            return ExampleFileParser.parse_grid(grid_string_list)
 
 
 def is_connected_to_classification(is_connected):
@@ -441,7 +496,7 @@ def xo__to_boolean(xo):
     }.get(xo)
 
 
-def matrix_boolean_to_xo(matrix):
+def rows_boolean_to_xo(matrix):
     """
     Converts a matrix with boolean_to_xo.
 
@@ -487,7 +542,7 @@ def pop_grid(collection):
     :return: a Grid object
     """
     # Exit if not enough lines for grid.
-    if len(collection) <= Grid.get_matrix_length():
+    if len(collection) <= Grid.DIMENSION_SIZE:
         return None
     new_grid = Grid.from_file_lines(collection)
     return new_grid
@@ -543,26 +598,27 @@ def train(training_file_name):
 
 
 def random_data_set(size):
-    return tuple(RandomGrid.generate() for _ in xrange(size))
+    return tuple(RandomExample.generate() for _ in xrange(size))
 
 
 def transform_grid_bits(grid):
-    def boolean_to_integer(boolean):
-        if boolean:
-            return 1
-        else:
-            return 0
-    flattened_grid = [is_occupied for row in grid.matrix for is_occupied in row]
-    return [boolean_to_integer(is_occupied) for is_occupied in flattened_grid], grid.is_connected
+    flattened_grid = [is_occupied for row in grid.rows for is_occupied in row]
+    return [Math.boolean_to_integer(is_occupied) for is_occupied in flattened_grid]
 
 
 def transform_grid_counts(grid):
-    column_counts = [grid.num_occupied_in_column(col_num) for col_num in xrange(Grid.get_matrix_length())]
-    row_counts = [grid.num_occupied_in_row(row_num) for row_num in xrange(Grid.get_matrix_length())]
-    return column_counts + row_counts, grid.is_connected
+    column_counts = [grid.num_occupied_in_column(col_num) for col_num in xrange(Grid.DIMENSION_SIZE)]
+    row_counts = [grid.num_occupied_in_row(row_num) for row_num in xrange(Grid.DIMENSION_SIZE)]
+    return column_counts + row_counts
 
 
-def transform_data_set(data_set, transformation_function):
+def transform_example(example, grid_transformer):
+    transformed_grid = grid_transformer(example.grid)
+    classification_bit = Math.boolean_to_integer(example.is_connected)
+    return transformed_grid, classification_bit
+
+
+def transform_data_set(data_set, grid_transformer):
     """
     Transform the data set into a form that can more easily be used to train a perceptron learner.
 
@@ -574,24 +630,7 @@ def transform_data_set(data_set, transformation_function):
     :param data_set: the data set to transform.
     :return: the transformed data set, represented as a tuple of (input_vector, is_connected).
     """
-    return [transformation_function(grid) for grid in data_set]
-
-
-def parse_grid_value(grid_value):
-    if grid_value == GridSquare.occupied:
-        return Grid.CONNECTED_BIT
-    elif grid_value == GridSquare.unoccupied:
-        return Grid.DISCONNECTED_BIT
-    else:
-        raise ValueError('Invalid grid value: ' + grid_value)
-
-
-def parse_input_vector(grid_string_list):
-    grid_string_list_no_newlines = [s.rstrip() for s in grid_string_list]
-    grid_bits = [parse_grid_value(value)
-                 for grid_string in grid_string_list_no_newlines
-                 for value in grid_string]
-    return grid_bits
+    return [transform_example(example, grid_transformer) for example in data_set]
 
 
 def split_list_by(li, split_value):
@@ -606,17 +645,6 @@ def split_list_by(li, split_value):
     return split_list
 
 
-def read_grids_to_input_vectors(filename):
-    with open(filename) as grid_file:
-        file_lines = grid_file.readlines()
-        if '\n' in file_lines:
-            grid_string_list = split_list_by(file_lines, '\n')
-        else:
-            grid_string_list = file_lines
-        input_vectors = [bit for grid_string in grid_string_list for bit in parse_input_vector(grid_string)]
-        return input_vectors
-
-
 def main():
     if sys.argv[1] == 'gen':
         if len(sys.argv) == 4:
@@ -627,11 +655,11 @@ def main():
             print('Usage: connect_learner.py gen [data set size] [data set file path]')
     else:
         _, training_file_name, test_file_name = sys.argv
-        training_grid_list = file_to_grids(training_file_name)
-
+        training_grid_list = ExampleFileParser.read_examples(training_file_name)
+        test_grid = ExampleFileParser.read_grid(test_file_name)
         training_set = transform_data_set(training_grid_list, lambda g: transform_grid_bits(g))
         classifier = Perceptron.learn(training_set)
-        input_vector_to_classify = read_grids_to_input_vectors(test_file_name)
+        input_vector_to_classify = transform_grid_counts(test_grid)
         is_connected = classifier(input_vector_to_classify)
 
         if is_connected:
