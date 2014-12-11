@@ -1,8 +1,6 @@
 import sys
 import random
-
-import abstract_classes
-import algorithms
+import math
 import copy
 
 
@@ -176,7 +174,10 @@ class GridSquare(object):
     unoccupied = 'X'
 
 
-class Grid(abstract_classes.Example):
+class Grid(object):
+    CONNECTED_BIT = 1
+    DISCONNECTED_BIT = 0
+
     def __init__(self, matrix=None, is_connected=None):
         if matrix:
             self.__matrix = matrix
@@ -204,9 +205,9 @@ class Grid(abstract_classes.Example):
         return Grid.get_matrix_length() ** 2
 
     @staticmethod
-    def from_string_collection(collection):
+    def from_file_lines(file_lines):
         new_matrix = []
-        for s in collection:
+        for s in file_lines:
             new_list = s.split()
             new_matrix.append(new_list)
         # Separate classification
@@ -246,6 +247,142 @@ class Grid(abstract_classes.Example):
         grid_str += is_connected_to_classification(self.is_connected)
 
         return grid_str
+
+
+class Math(object):
+    @staticmethod
+    def dot_product(vector_1, vector_2):
+        return sum([c1 * c2 for c1, c2 in zip(vector_1, vector_2)])
+
+    @staticmethod
+    def logistic_function(exp):
+        return 1 / (1 + math.pow(math.e, -exp))
+
+    @staticmethod
+    def step_function(num, threshold=0.5):
+        if num <= threshold:
+            return 0
+        else:
+            return 1
+
+
+class Perceptron(object):
+    LEARNING_RATE = 1.0
+
+    @staticmethod
+    def hypothesis(weight_vector, input_vector):
+        return Math.logistic_function(Math.dot_product(weight_vector, input_vector))
+
+    @staticmethod
+    def __updated_weights(weight_vector, input_vector, classification_bit):
+        hypothesis_value = Perceptron.hypothesis(weight_vector, input_vector)
+        actual_vs_hypothesis = classification_bit - hypothesis_value
+        constant_expression = Perceptron.LEARNING_RATE * \
+            (actual_vs_hypothesis * hypothesis_value * (1 - hypothesis_value))
+        return [w + constant_expression * x for w, x in zip(weight_vector, input_vector)]
+
+    # TODO the default value for convergence_threshold is probably incorrect. Will need to test it
+    # when the perceptron is finished to figure out what a good value is.
+    @staticmethod
+    def __has_converged(previous_weights, updated_weights, convergence_threshold=0.2):
+        sum_squared_differences = sum([(prev - cur)**2 for (prev, cur) in zip(previous_weights, updated_weights)])
+        # This might cause this method to ignore when one weight is fluctuating a lot while the others aren't.
+        # Might have to reconsider.
+        average_squared_difference = sum_squared_differences / len(previous_weights)
+        return average_squared_difference <= convergence_threshold
+
+    @staticmethod
+    def __add_dummy_inputs(training_set):
+        """
+        Adds a dummy value of 1 to every input vector in the training set so we can simply
+        take the dot product of the weight vector and the input vector to calculate the
+        sum of products of the components of the two vectors.
+        """
+        return [(Perceptron.__add_dummy_input(input_vector), is_connected)
+                for input_vector, is_connected in training_set]
+
+    @staticmethod
+    def __add_dummy_input(input_vector):
+        dummy_value = 1
+        return [dummy_value] + input_vector
+
+    @staticmethod
+    def __starting_weight_vector(length_input_vector):
+        dummy_value = 1
+        return [dummy_value] * length_input_vector
+
+    @staticmethod
+    def __classify(learned_weights, grid_bit_vector):
+        input_vector_with_dummy = Perceptron.__add_dummy_input(grid_bit_vector)
+        hypothesis_value = Perceptron.hypothesis(learned_weights, input_vector_with_dummy)
+        return Math.step_function(hypothesis_value)
+
+    @staticmethod
+    def learn(training_set):
+        training_with_dummies = Perceptron.__add_dummy_inputs(training_set)
+        length_input_vector = len(training_with_dummies[0][0])
+        previous_weight_vector = Perceptron.__starting_weight_vector(length_input_vector)
+        current_weight_vector = previous_weight_vector
+        while True:  # Because we need a do-while loop, but Python doesn't have one.
+            for input_vector, real_classification in training_with_dummies:
+                current_weight_vector = Perceptron.__updated_weights(weight_vector=current_weight_vector,
+                                                                     input_vector=input_vector,
+                                                                     classification_bit=real_classification)
+            if Perceptron.__has_converged(previous_weight_vector, current_weight_vector):
+                break
+            previous_weight_vector = current_weight_vector
+        return lambda vec: Perceptron.__classify(current_weight_vector, vec) == Grid.CONNECTED_BIT
+
+
+class Evaluator(object):
+    @staticmethod
+    def __k_folds(transformed_data_set, num_folds):
+        folds = []
+        index = 0
+        for num in xrange(num_folds):
+            folds.append(transformed_data_set[index: num * num_folds])
+            index += num * num_folds
+        return folds
+
+    @staticmethod
+    def __test_and_training_sets(folds, fold_num):
+        test_set = folds[fold_num]
+        training_set = folds[:fold_num] + folds[fold_num + 1:]
+        return test_set, training_set
+
+    @staticmethod
+    def __correct_classification_count(classifier, test_set):
+        correct_count = 0
+        for input_vector, classification_bit in test_set:
+            is_connected = classification_bit == Grid.CONNECTED_BIT
+            perceptron_classification = classifier(input_vector)
+            if perceptron_classification == is_connected:
+                correct_count += 1
+        return correct_count
+
+    @staticmethod
+    def evaluate(data_set, num_folds=10):
+        """
+        Evaluates the perceptron using the passed-in data set.
+
+        :param data_set: a collection of labeled Grids.
+        :param num_folds: the number of folds to use during k-fold cross-validation.
+        :return: the accuracy of the perceptron.
+        """
+
+        assert (len(data_set) >= num_folds)
+
+        transformed_data_set = transform_data_set(data_set, lambda grid: transform_grid_counts(grid))
+        folds = Evaluator.__k_folds(transformed_data_set, num_folds)
+        fold_training_accuracies = []
+        for test_set_fold_num in xrange(num_folds):
+            test_set, training_set = Evaluator.__test_and_training_sets(folds, test_set_fold_num)
+            classifier = Perceptron.learn(training_set)
+            correct_count = Evaluator.__correct_classification_count(classifier, test_set)
+            training_accuracy = correct_count / len(test_set)
+            fold_training_accuracies.append(training_accuracy)
+
+        return sum(fold_training_accuracies) / len(fold_training_accuracies)
 
 
 def classification_to_is_connected(classification):
@@ -352,7 +489,7 @@ def pop_grid(collection):
     # Exit if not enough lines for grid.
     if len(collection) <= Grid.get_matrix_length():
         return None
-    new_grid = Grid.from_string_collection(collection)
+    new_grid = Grid.from_file_lines(collection)
     return new_grid
 
 
@@ -368,25 +505,26 @@ def append_to_grid_list(grid_list, lines_for_next_grid):
         grid_list.append(next_grid)
 
 
-def file_to_grids(opened_file):
+def file_to_grids(filename):
     """
-    Creates Grid objects from an opened file.
+    Reads in Grid objects from a file.
 
-    :param opened_file: the opened file
-    :return: a list of Grids
+    :param filename: the filename of the file containing grids.
+    :return: a list of Grids read from the file denoted by 'filename'.
     """
-    grid_list = []
-    file_lines = opened_file.readlines()
-    # Loop to parse all grids in file.
-    lines_for_next_grid = []
-    for line in file_lines:
-        if line == '\n':
-            append_to_grid_list(grid_list, lines_for_next_grid)
-            lines_for_next_grid = []
-        else:
-            lines_for_next_grid.append(line)
-    append_to_grid_list(grid_list, lines_for_next_grid)
-    return grid_list
+    with open(filename) as grid_file:
+        grid_list = []
+        file_lines = grid_file.readlines()
+        # Loop to parse all grids in file.
+        lines_for_next_grid = []
+        for line in file_lines:
+            if line == '\n':
+                append_to_grid_list(grid_list, lines_for_next_grid)
+                lines_for_next_grid = []
+            else:
+                lines_for_next_grid.append(line)
+        append_to_grid_list(grid_list, lines_for_next_grid)
+        return grid_list
 
 
 def write_grids_to_file(grid_list, file_path):
@@ -414,7 +552,7 @@ def transform_grid_bits(grid):
             return 1
         else:
             return 0
-    flattened_grid = [is_occupied for row in grid for is_occupied in row]
+    flattened_grid = [is_occupied for row in grid.matrix for is_occupied in row]
     return [boolean_to_integer(is_occupied) for is_occupied in flattened_grid], grid.is_connected
 
 
@@ -436,53 +574,47 @@ def transform_data_set(data_set, transformation_function):
     :param data_set: the data set to transform.
     :return: the transformed data set, represented as a tuple of (input_vector, is_connected).
     """
-    transformed_data_set = [transformation_function(grid) for grid in data_set]
-    input_vectors = [t[0] for t in transformed_data_set]
-    is_connected_list = [t[1] for t in transformed_data_set]
-
-    return input_vectors, is_connected_list
+    return [transformation_function(grid) for grid in data_set]
 
 
-def evaluate(data_set, num_folds=10):
-    """
-    Evaluates the perceptron using the passed-in data set.
+def parse_grid_value(grid_value):
+    if grid_value == GridSquare.occupied:
+        return Grid.CONNECTED_BIT
+    elif grid_value == GridSquare.unoccupied:
+        return Grid.DISCONNECTED_BIT
+    else:
+        raise ValueError('Invalid grid value: ' + grid_value)
 
-    :param data_set: a collection of labeled Grids.
-    :param num_folds: the number of folds to use during k-fold cross-validation.
-    :return: the accuracy of the perceptron.
-    """
 
-    assert (len(data_set) <= num_folds)
+def parse_input_vector(grid_string_list):
+    grid_string_list_no_newlines = [s.rstrip() for s in grid_string_list]
+    grid_bits = [parse_grid_value(value)
+                 for grid_string in grid_string_list_no_newlines
+                 for value in grid_string]
+    return grid_bits
 
-    tranformed_data_set, is_connected_list = transform_data_set(data_set, lambda grid: transform_grid_counts(grid))
 
-    def split_data():
-        data = []
-        index = 0
-        for num in xrange(num_folds):
-            data.append(tranformed_data_set[index: num * num_folds])
-            index += num * num_folds
-        return data
+def split_list_by(li, split_value):
+    split_list = []
+    split_piece = []
+    for element in li:
+        if element == split_value:
+            split_list.append(split_piece)
+            split_piece = []
+        else:
+            split_piece.append(element)
+    return split_list
 
-    folds = split_data()
-    fold_training_accuracies = []
-    for test_set_fold in xrange(num_folds):
-        test_set = folds[test_set_fold]
-        training_set = folds[:test_set_fold] + folds[test_set_fold + 1:]
 
-        perceptron = algorithms.PerceptronLearner()
-        # TODO train the perceptron here
-        test_set_index_start = test_set_fold * num_folds
-        correct_count = 0
-        for test_set_num in xrange(len(test_set)):
-            test_input_vector = test_set[test_set_num]
-            is_connected = is_connected_list[test_set_index_start + test_set_num]
-            classification = None  # TODO assign this to the perceptron's classification
-            if classification == is_connected:
-                correct_count += 1
-        fold_training_accuracies.append(correct_count / len(training_set))
-
-    return sum(fold_training_accuracies) / len(fold_training_accuracies)
+def read_grids_to_input_vectors(filename):
+    with open(filename) as grid_file:
+        file_lines = grid_file.readlines()
+        if '\n' in file_lines:
+            grid_string_list = split_list_by(file_lines, '\n')
+        else:
+            grid_string_list = file_lines
+        input_vectors = [bit for grid_string in grid_string_list for bit in parse_input_vector(grid_string)]
+        return input_vectors
 
 
 def main():
@@ -494,15 +626,18 @@ def main():
         else:
             print('Usage: connect_learner.py gen [data set size] [data set file path]')
     else:
-        learner = algorithms.GridPerceptronLearner()
-        file_name = sys.argv[1]
-        with open(file_name) as opened_file:
-            print_these = file_to_grids(opened_file)
-            for grid in print_these:
-                print(str(grid) + '\n')
-                print '\n'
-                learner.give_example(grid)
-            #print 'Weight:' + str(learner.weighted_sum) + '\n'
+        _, training_file_name, test_file_name = sys.argv
+        training_grid_list = file_to_grids(training_file_name)
+
+        training_set = transform_data_set(training_grid_list, lambda g: transform_grid_bits(g))
+        classifier = Perceptron.learn(training_set)
+        input_vector_to_classify = read_grids_to_input_vectors(test_file_name)
+        is_connected = classifier(input_vector_to_classify)
+
+        if is_connected:
+            print('CONNECTED')
+        else:
+            print('DISCONNECTED')
 
 
 if __name__ == '__main__':
