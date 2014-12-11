@@ -315,7 +315,7 @@ class Perceptron(object):
 
     @staticmethod
     def learn(training_set):
-        #count = 0
+        count = 0
         training_with_dummies = Perceptron.__add_dummy_inputs(training_set)
         length_input_vector = len(training_with_dummies[0][0])
         previous_weight_vector = Perceptron.__starting_weight_vector(length_input_vector)
@@ -325,12 +325,12 @@ class Perceptron(object):
                 current_weight_vector = Perceptron.__updated_weights(weight_vector=current_weight_vector,
                                                                      input_vector=input_vector,
                                                                      classification_bit=real_classification)
-            if Perceptron.__has_converged(previous_weight_vector, current_weight_vector):
+            #if Perceptron.__has_converged(previous_weight_vector, current_weight_vector):
             #print(count)
-            #if count >= 100:
+            if count >= 100:
                 break
-            #else:
-                #count += 1
+            else:
+                count += 1
             previous_weight_vector = current_weight_vector
         return lambda vec: Perceptron.__classify(current_weight_vector, vec) == Grid.CONNECTED_BIT
 
@@ -432,7 +432,7 @@ class ExampleFileParser(object):
         grid_lines = file_example_lines[:-1]
         grid = ExampleFileParser.parse_grid(grid_lines)
 
-        classification_string = file_example_lines[-1]
+        classification_string = file_example_lines[-1].rstrip()
         classification = ExampleFileParser.parse_classification(classification_string)
 
         return grid.with_classification(classification)
